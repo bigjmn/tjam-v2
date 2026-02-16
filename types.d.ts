@@ -1,0 +1,1 @@
+type TextVariant = "regular"|"strong"|"header"|"header2"|"soft"|"title"|"italic"|"light"|"medium"|"uber"

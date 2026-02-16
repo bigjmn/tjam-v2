@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Board } from './Board';
 import { TileComponent } from './Tile';
 import { GameOverModal } from './GameOverModal';
 import { useGameLogic } from './useGameLogic';
+import { GRID_CELL_SIZE, GRID_GAP, HOME_ROW } from './types';
+
+const CELL_WITH_GAP = GRID_CELL_SIZE + GRID_GAP;
 
 export function Game() {
   const {
@@ -16,9 +19,11 @@ export function Game() {
     startNewGame,
     moveTile,
     commitTurn,
+    greenPreviewPositions,
   } = useGameLogic();
 
   const [boardPosition, setBoardPosition] = useState({ x: 0, y: 0 });
+  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     startNewGame();
@@ -29,6 +34,33 @@ export function Game() {
     setBoardPosition({ x, y });
   };
 
+  // Calculate which square is being hovered based on drag position
+  const hoveredSquare = useMemo(() => {
+    if (!dragPosition) return null;
+
+    const col = Math.round((dragPosition.x - boardPosition.x - 4) / CELL_WITH_GAP);
+    const row = Math.round((dragPosition.y - boardPosition.y - 4) / CELL_WITH_GAP);
+
+    // Only highlight valid board squares (rows 2-4, playing area only)
+    if (col >= 0 && col <= 2 && row >= 2 && row <= 4) {
+      return { col, row };
+    }
+    return null;
+  }, [dragPosition, boardPosition]);
+
+  // Set of occupied squares for quick lookup
+  const occupiedSquares = useMemo(() => {
+    return new Set(tiles.map(t => `${t.x}${t.y}`));
+  }, [tiles]);
+
+  const handleDragMove = useCallback((tileId: string, screenX: number, screenY: number) => {
+    setDragPosition({ x: screenX, y: screenY });
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDragPosition(null);
+  }, []);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.header}>
@@ -37,17 +69,28 @@ export function Game() {
       </View>
 
       <View style={styles.gameArea}>
-        <Board onLayout={handleBoardLayout} />
+        <Board
+          onLayout={handleBoardLayout}
+          hoveredSquare={hoveredSquare}
+          occupiedSquares={occupiedSquares}
+        />
 
-        {tiles.map(tile => (
-          <TileComponent
-            key={tile.id}
-            tile={tile}
-            boardX={boardPosition.x}
-            boardY={boardPosition.y}
-            onMove={moveTile}
-          />
-        ))}
+        {tiles.map(tile => {
+          const posKey = `${tile.x}${tile.y}`;
+          const isGreenPreview = greenPreviewPositions.has(posKey);
+          return (
+            <TileComponent
+              key={tile.id}
+              tile={tile}
+              boardX={boardPosition.x}
+              boardY={boardPosition.y}
+              onMove={moveTile}
+              onDragMove={handleDragMove}
+              onDragEnd={handleDragEnd}
+              isGreenPreview={isGreenPreview}
+            />
+          );
+        })}
       </View>
 
       <Pressable

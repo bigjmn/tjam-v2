@@ -1,6 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Tile, SquareId, HOME_ROW, MAX_BOARD_TILES, GRID_ROWS } from './types';
+import { Tile, SquareId, HOME_ROW, MAX_BOARD_TILES, BOARD_START_ROW } from './types';
 import { getRandomWord, getValidWordPositions } from './wordUtils';
+
+export type DragPosition = { x: number; y: number } | null;
 
 let tileIdCounter = 0;
 
@@ -52,8 +54,8 @@ export function useGameLogic() {
       );
       if (isOccupied) return currentTiles;
 
-      // Validate position is within bounds
-      if (newX < 0 || newX > 2 || newY < 0 || newY > 4) return currentTiles;
+      // Validate position is within bounds (exclude row 1 - spacing row)
+      if (newX < 0 || newX > 2 || newY < 0 || newY > 4 || newY === 1) return currentTiles;
 
       return currentTiles.map(t =>
         t.id === tileId
@@ -66,8 +68,8 @@ export function useGameLogic() {
   // Count tiles in different regions
   const tileStats = useMemo(() => {
     const homeRowTiles = tiles.filter(t => t.y === HOME_ROW);
-    const boardTiles = tiles.filter(t => t.y > HOME_ROW);
-    const newTilesOnBoard = tiles.filter(t => t.isNew && t.y > HOME_ROW);
+    const boardTiles = tiles.filter(t => t.y >= BOARD_START_ROW);
+    const newTilesOnBoard = tiles.filter(t => t.isNew && t.y >= BOARD_START_ROW);
     const newTilesInHome = tiles.filter(t => t.isNew && t.y === HOME_ROW);
 
     return {
@@ -79,53 +81,90 @@ export function useGameLogic() {
     };
   }, [tiles]);
 
-  // Can commit: exactly 2 new tiles on board (rows 1-4), exactly 1 new tile in home row
+  // Can commit: exactly 2 new tiles on board (rows 2-4), exactly 1 new tile in home row
   const canCommit = useMemo(() => {
     return tileStats.newTilesOnBoard.length === 2 && tileStats.newTilesInHome.length === 1;
   }, [tileStats]);
 
+  // Compute which OLD tiles would turn green based on current tile positions (real-time preview)
+  const greenPreviewPositions = useMemo(() => {
+    // Only check board tiles (rows 2-4)
+    const boardTiles = tiles.filter(t => t.y >= BOARD_START_ROW);
+    if (boardTiles.length < 3) return new Set<string>();
+
+    // Get all positions that form valid words
+    const validPositions = getValidWordPositions(boardTiles);
+
+    // Filter to only OLD tiles (isNew === false)
+    const greenOldTilePositions = new Set<string>();
+    Array.from(validPositions).forEach(posKey => {
+      const tile = tiles.find(t => `${t.x}${t.y}` === posKey);
+      if (tile && !tile.isNew) {
+        greenOldTilePositions.add(posKey);
+      }
+    });
+
+    return greenOldTilePositions;
+  }, [tiles]);
+
   const commitTurn = useCallback(() => {
     if (!canCommit) return;
 
+    // First, mark tiles that should exit with animation
     setTiles(currentTiles => {
-      // Remove green tiles from previous turns (they formed words)
-      let updatedTiles = currentTiles.filter(t => !t.isGreen || t.isNew);
+      // Get current valid word positions for old tiles
+      const boardTiles = currentTiles.filter(t => t.y >= BOARD_START_ROW);
+      const validPositions = getValidWordPositions(boardTiles);
 
-      // Mark all tiles as committed (not new)
-      updatedTiles = updatedTiles.map(t => ({ ...t, isNew: false, canMove: false }));
-
-      // Check for valid words and mark green
-      const validPositions = getValidWordPositions(updatedTiles);
-      let wordsFormed = 0;
-
-      updatedTiles = updatedTiles.map(t => {
+      // Mark home row tiles and old tiles in valid words as exiting
+      return currentTiles.map(t => {
         const posKey = `${t.x}${t.y}`;
-        if (validPositions.has(posKey)) {
-          return { ...t, isGreen: true };
+        const isOldTileInValidWord = !t.isNew && validPositions.has(posKey);
+        const shouldExit = t.y === HOME_ROW || isOldTileInValidWord;
+        if (shouldExit) {
+          return { ...t, isExiting: true, canMove: false };
         }
         return t;
       });
-
-      // Count unique words formed (rough: count green tiles / 3)
-      wordsFormed = Math.floor(validPositions.size / 3);
-
-      // Update score
-      setTurnScore(wordsFormed);
-      setTotalScore(prev => prev + wordsFormed);
-
-      // Check for game over before dealing new tiles
-      const boardTilesCount = updatedTiles.filter(t => t.y > HOME_ROW).length;
-      if (boardTilesCount >= MAX_BOARD_TILES) {
-        setGameOver(true);
-        return updatedTiles;
-      }
-
-      // Deal new tiles
-      const newTiles = dealNewTiles();
-      setCurrentWord(newTiles.map(t => t.letter).join(''));
-
-      return [...updatedTiles, ...newTiles];
     });
+
+    // After exit animation, process the actual commit
+    setTimeout(() => {
+      setTiles(currentTiles => {
+        // Step 1: Remove exiting tiles (home row + old tiles in valid words)
+        let updatedTiles = currentTiles.filter(t => !t.isExiting);
+
+        // Step 2: Mark all remaining tiles as old, no tiles are green after commit
+        // (green tiles were removed, new tiles become old)
+        updatedTiles = updatedTiles.map(t => ({
+          ...t,
+          isNew: false,
+          canMove: false,
+          isGreen: false,
+        }));
+
+        // Count words formed based on tiles that were removed (exiting tiles that were old)
+        const exitingOldTiles = currentTiles.filter(t => t.isExiting && !t.isNew);
+        const wordsFormed = Math.floor(exitingOldTiles.length / 3);
+
+        // Update score
+        setTurnScore(wordsFormed);
+        setTotalScore(prev => prev + wordsFormed);
+
+        // Check for game over before dealing new tiles
+        const boardTilesCount = updatedTiles.length;
+        if (boardTilesCount >= MAX_BOARD_TILES) {
+          setGameOver(true);
+          return updatedTiles;
+        }
+
+        // Deal new tiles
+        const newTiles = dealNewTiles();
+        setCurrentWord(newTiles.map(t => t.letter).join(''));
+
+        return [...updatedTiles, ...newTiles];
+      });
+    }, 250); // Wait for exit animation to complete
   }, [canCommit]);
 
   return {
@@ -139,5 +178,6 @@ export function useGameLogic() {
     moveTile,
     commitTurn,
     tileStats,
+    greenPreviewPositions,
   };
 }

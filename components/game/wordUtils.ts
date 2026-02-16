@@ -26,8 +26,8 @@ export function checkAllLines(tiles: Tile[]): LineCheck[] {
     return tiles.find(t => t.x === x && t.y === y);
   };
 
-  // Check rows 1-4 (not home row)
-  for (let row = HOME_ROW + 1; row < GRID_ROWS; row++) {
+  // Check rows 2-4 (playing area only, skip home row 0 and spacing row 1)
+  for (let row = 2; row < GRID_ROWS; row++) {
     const rowTiles: Array<{ tile: Tile; x: number; y: number }> = [];
     for (let col = 0; col < GRID_COLS; col++) {
       const tile = getTileAt(col, row);
@@ -49,8 +49,8 @@ export function checkAllLines(tiles: Tile[]): LineCheck[] {
   // Check columns
   for (let col = 0; col < GRID_COLS; col++) {
     const colTiles: Array<{ tile: Tile; x: number; y: number }> = [];
-    // Only check rows 1-4 for columns (excluding home row)
-    for (let row = HOME_ROW + 1; row < GRID_ROWS; row++) {
+    // Only check rows 2-4 for columns (playing area only)
+    for (let row = 2; row < GRID_ROWS; row++) {
       const tile = getTileAt(col, row);
       if (tile) {
         colTiles.push({ tile, x: col, y: row });

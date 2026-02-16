@@ -7,6 +7,7 @@ export interface Tile {
   canMove: boolean; // whether tile can be dragged
   isGreen: boolean; // part of a valid word
   isNew: boolean; // placed this turn
+  isExiting?: boolean; // animating out (will be removed)
 }
 
 export type SquareId = string; // format: "xy" e.g. "01" for col 0, row 1
@@ -17,3 +18,4 @@ export const GRID_ROWS = 5;
 export const HOME_ROW = 0;
 export const MAX_BOARD_TILES = 11;
 export const GRID_GAP = 3;
+export const BOARD_START_ROW = 2; // Playing area starts at row 2

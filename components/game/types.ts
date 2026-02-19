@@ -1,13 +1,13 @@
 export interface Tile {
-  id: string;
-  letter: string;
-  x: number; // column (0-2)
-  y: number; // row (0-4, 0 is home row)
-  sitOn: SquareId | null; // which square it's placed on
-  canMove: boolean; // whether tile can be dragged
-  isGreen: boolean; // part of a valid word
-  isNew: boolean; // placed this turn
-  isHomeRowExiting?: boolean; // home row slide out animation
+	id: string;
+	letter: string;
+	x: number; // column (0-2)
+	y: number; // row (0-4, 0 is home row)
+	sitOn: SquareId | null; // which square it's placed on
+	canMove: boolean; // whether tile can be dragged
+	isGreen: boolean; // part of a valid word
+	isNew: boolean; // placed this turn
+	isHomeRowExiting?: boolean; // home row slide out animation
 }
 
 export type SquareId = string; // format: "xy" e.g. "01" for col 0, row 1

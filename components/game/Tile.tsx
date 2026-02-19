@@ -6,7 +6,9 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
+  withDelay,
   runOnJS,
+  Easing,
 } from 'react-native-reanimated';
 import { Tile as TileType, GRID_CELL_SIZE, GRID_GAP, HOME_ROW } from './types';
 
@@ -21,6 +23,8 @@ interface TileProps {
 }
 
 const CELL_WITH_GAP = GRID_CELL_SIZE + GRID_GAP;
+const SLIDE_DURATION = 320;
+const STAGGER = 60; // ms delay per column index
 
 export function TileComponent({
   tile,
@@ -31,101 +35,88 @@ export function TileComponent({
   onDragEnd,
   isGreenPreview = false,
 }: TileProps) {
-  // Calculate target position based on tile coordinates
   const getTargetX = (col: number) => boardX + 4 + col * CELL_WITH_GAP;
   const getTargetY = (row: number) => boardY + 4 + row * CELL_WITH_GAP;
 
-  // Use shared values for position - these animate smoothly
   const positionX = useSharedValue(getTargetX(tile.x));
   const positionY = useSharedValue(getTargetY(tile.y));
-
-  // Offset from current position during drag
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
-
   const scale = useSharedValue(1);
   const zIndex = useSharedValue(1);
   const opacity = useSharedValue(1);
 
-  // Track if this is a new home row tile for slide-in animation
   const isNewHomeRow = tile.isNew && tile.y === HOME_ROW;
 
-  // Initialize position and handle slide-in for new home row tiles
+  // On mount: new home row tiles slide in from the right, staggered by column
+  // Leftmost (x=0) arrives first — smallest delay
   useEffect(() => {
     const targetX = getTargetX(tile.x);
     const targetY = getTargetY(tile.y);
 
     if (isNewHomeRow) {
-      // Start off-screen to the right, then animate in
-      positionX.value = targetX + 300;
+      const delay = tile.x * STAGGER;
+      positionX.value = targetX + 350;
       positionY.value = targetY;
-      positionX.value = withTiming(targetX, { duration: 300 });
+      opacity.value = 0;
+      positionX.value = withDelay(
+        delay,
+        withTiming(targetX, { duration: SLIDE_DURATION, easing: Easing.out(Easing.cubic) })
+      );
+      opacity.value = withDelay(delay, withTiming(1, { duration: 80 }));
     } else {
-      // For non-new tiles, just set position directly on mount
       positionX.value = targetX;
       positionY.value = targetY;
     }
   }, []);
 
-  // Animate to new position when tile coordinates change (after initial mount)
+  // Animate to new position when coordinates change after initial mount
   useEffect(() => {
     const targetX = getTargetX(tile.x);
     const targetY = getTargetY(tile.y);
 
-    // Only animate if not currently being dragged and position actually changed
     if (offsetX.value === 0 && offsetY.value === 0) {
       positionX.value = withSpring(targetX, { damping: 20, stiffness: 300 });
       positionY.value = withSpring(targetY, { damping: 20, stiffness: 300 });
     }
   }, [tile.x, tile.y, boardX, boardY]);
 
-  // Animate exiting tiles sliding out to the left
+  // Home row exit: slide out to the left, staggered by column (leftmost exits first)
   useEffect(() => {
-    if (tile.isExiting) {
-      positionX.value = withTiming(positionX.value - 300, { duration: 200 });
-      opacity.value = withTiming(0, { duration: 200 });
+    if (tile.isHomeRowExiting) {
+      const delay = tile.x * STAGGER;
+      positionX.value = withDelay(
+        delay,
+        withTiming(positionX.value - 380, { duration: SLIDE_DURATION, easing: Easing.in(Easing.cubic) })
+      );
+      opacity.value = withDelay(
+        delay,
+        withTiming(0, { duration: SLIDE_DURATION - 40 })
+      );
     }
-  }, [tile.isExiting]);
+  }, [tile.isHomeRowExiting]);
 
   const handleDrop = (currentX: number, currentY: number) => {
-    // Calculate which grid cell we're closest to based on current visual position
     const newCol = Math.round((currentX - boardX - 4) / CELL_WITH_GAP);
     const newRow = Math.round((currentY - boardY - 4) / CELL_WITH_GAP);
-
-    // Clamp to valid grid positions
     const clampedCol = Math.max(0, Math.min(2, newCol));
     const clampedRow = Math.max(0, Math.min(4, newRow));
-
     onMove(tile.id, clampedCol, clampedRow);
-
-    // Animate to the target position (whether move was accepted or rejected)
-    // If move was rejected, tile.x/y won't change, so we animate back to current position
-    // If move was accepted, the useEffect will handle the animation
-    const targetX = getTargetX(clampedCol);
-    const targetY = getTargetY(clampedRow);
-
-    // Check if this would be a valid position (not row 1)
     if (clampedRow === 1) {
-      // Invalid - animate back to original position
       positionX.value = withSpring(getTargetX(tile.x), { damping: 20, stiffness: 300 });
       positionY.value = withSpring(getTargetY(tile.y), { damping: 20, stiffness: 300 });
     } else {
-      // Animate to target (will either match new position or be corrected by useEffect)
-      positionX.value = withSpring(targetX, { damping: 20, stiffness: 300 });
-      positionY.value = withSpring(targetY, { damping: 20, stiffness: 300 });
+      positionX.value = withSpring(getTargetX(clampedCol), { damping: 20, stiffness: 300 });
+      positionY.value = withSpring(getTargetY(clampedRow), { damping: 20, stiffness: 300 });
     }
   };
 
   const handleDragMoveJS = (screenX: number, screenY: number) => {
-    if (onDragMove) {
-      onDragMove(tile.id, screenX, screenY);
-    }
+    if (onDragMove) onDragMove(tile.id, screenX, screenY);
   };
 
   const handleDragEndJS = () => {
-    if (onDragEnd) {
-      onDragEnd();
-    }
+    if (onDragEnd) onDragEnd();
   };
 
   const panGesture = Gesture.Pan()
@@ -137,7 +128,6 @@ export function TileComponent({
     .onUpdate((event) => {
       offsetX.value = event.translationX;
       offsetY.value = event.translationY;
-
       const screenX = positionX.value + event.translationX + GRID_CELL_SIZE / 2;
       const screenY = positionY.value + event.translationY + GRID_CELL_SIZE / 2;
       runOnJS(handleDragMoveJS)(screenX, screenY);
@@ -145,59 +135,39 @@ export function TileComponent({
     .onEnd((event) => {
       scale.value = withSpring(1, { damping: 15, stiffness: 150 });
       zIndex.value = 1;
-
-      // Calculate current visual position
       const currentX = positionX.value + event.translationX;
       const currentY = positionY.value + event.translationY;
-
-      // Update position to current visual location (will animate from here)
       positionX.value = currentX;
       positionY.value = currentY;
-
-      // Reset offsets
       offsetX.value = 0;
       offsetY.value = 0;
-
       runOnJS(handleDrop)(currentX, currentY);
       runOnJS(handleDragEndJS)();
     });
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: offsetX.value },
-        { translateY: offsetY.value },
-        { scale: scale.value },
-      ],
-      zIndex: zIndex.value,
-      left: positionX.value,
-      top: positionY.value,
-      opacity: opacity.value,
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: offsetX.value },
+      { translateY: offsetY.value },
+      { scale: scale.value },
+    ],
+    zIndex: zIndex.value,
+    left: positionX.value,
+    top: positionY.value,
+    opacity: opacity.value,
+  }));
 
   const getTileColor = () => {
-    // New tiles (this turn) - tan/brown color
     if (tile.isNew && tile.canMove) return '#c9a86c';
-
-    // Old tiles that are part of a valid word (green preview or already marked green)
     if (isGreenPreview || tile.isGreen) return '#6aaa64';
-
-    // Old tiles that aren't part of a valid word - gray
     if (!tile.isNew) return '#787c7e';
-
-    // Fallback
     return '#787c7e';
   };
 
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View
-        style={[
-          styles.tile,
-          { backgroundColor: getTileColor() },
-          animatedStyle,
-        ]}
+        style={[styles.tile, { backgroundColor: getTileColor() }, animatedStyle]}
       >
         <Text style={styles.letter}>{tile.letter}</Text>
       </Animated.View>

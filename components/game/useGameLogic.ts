@@ -48,13 +48,11 @@ export function useGameLogic() {
       const tile = currentTiles.find(t => t.id === tileId);
       if (!tile || !tile.canMove) return currentTiles;
 
-      // Check if target position is already occupied
       const isOccupied = currentTiles.some(
         t => t.id !== tileId && t.x === newX && t.y === newY
       );
       if (isOccupied) return currentTiles;
 
-      // Validate position is within bounds (exclude row 1 - spacing row)
       if (newX < 0 || newX > 2 || newY < 0 || newY > 4 || newY === 1) return currentTiles;
 
       return currentTiles.map(t =>
@@ -65,7 +63,6 @@ export function useGameLogic() {
     });
   }, []);
 
-  // Count tiles in different regions
   const tileStats = useMemo(() => {
     const homeRowTiles = tiles.filter(t => t.y === HOME_ROW);
     const boardTiles = tiles.filter(t => t.y >= BOARD_START_ROW);
@@ -81,21 +78,16 @@ export function useGameLogic() {
     };
   }, [tiles]);
 
-  // Can commit: exactly 2 new tiles on board (rows 2-4), exactly 1 new tile in home row
   const canCommit = useMemo(() => {
     return tileStats.newTilesOnBoard.length === 2 && tileStats.newTilesInHome.length === 1;
   }, [tileStats]);
 
-  // Compute which OLD tiles would turn green based on current tile positions (real-time preview)
   const greenPreviewPositions = useMemo(() => {
-    // Only check board tiles (rows 2-4)
     const boardTiles = tiles.filter(t => t.y >= BOARD_START_ROW);
     if (boardTiles.length < 3) return new Set<string>();
 
-    // Get all positions that form valid words
     const validPositions = getValidWordPositions(boardTiles);
 
-    // Filter to only OLD tiles (isNew === false)
     const greenOldTilePositions = new Set<string>();
     Array.from(validPositions).forEach(posKey => {
       const tile = tiles.find(t => `${t.x}${t.y}` === posKey);
@@ -110,62 +102,50 @@ export function useGameLogic() {
   const commitTurn = useCallback(() => {
     if (!canCommit) return;
 
-    // First, mark tiles that should exit with animation
-    setTiles(currentTiles => {
-      // Get current valid word positions for old tiles
-      const boardTiles = currentTiles.filter(t => t.y >= BOARD_START_ROW);
-      const validPositions = getValidWordPositions(boardTiles);
+    // Stagger per tile (3 tiles, 60ms apart) + slide duration
+    const STAGGER = 60;
+    const SLIDE_DURATION = 320;
+    const EXIT_TOTAL = SLIDE_DURATION + 2 * STAGGER + 50; // buffer after last tile exits
 
-      // Mark home row tiles and old tiles in valid words as exiting
-      return currentTiles.map(t => {
-        const posKey = `${t.x}${t.y}`;
-        const isOldTileInValidWord = !t.isNew && validPositions.has(posKey);
-        const shouldExit = t.y === HOME_ROW || isOldTileInValidWord;
-        if (shouldExit) {
-          return { ...t, isExiting: true, canMove: false };
-        }
-        return t;
-      });
+    // Calculate score from current valid words
+    const boardTiles = tiles.filter(t => t.y >= BOARD_START_ROW);
+    const validPositions = getValidWordPositions(boardTiles);
+    const exitingOldTiles = tiles.filter(t => {
+      const posKey = `${t.x}${t.y}`;
+      return !t.isNew && validPositions.has(posKey);
     });
+    const wordsFormed = Math.floor(exitingOldTiles.length / 3);
 
-    // After exit animation, process the actual commit
+    // Lock all tiles and mark home row as exiting
+    setTiles(currentTiles =>
+      currentTiles.map(t => ({
+        ...t,
+        canMove: false,
+        isHomeRowExiting: t.y === HOME_ROW ? true : undefined,
+      }))
+    );
+
+    // After slide-out completes, swap in new tiles
     setTimeout(() => {
       setTiles(currentTiles => {
-        // Step 1: Remove exiting tiles (home row + old tiles in valid words)
-        let updatedTiles = currentTiles.filter(t => !t.isExiting);
+        const updatedTiles = currentTiles
+          .filter(t => !t.isHomeRowExiting)
+          .map(t => ({ ...t, isNew: false, isGreen: false }));
 
-        // Step 2: Mark all remaining tiles as old, no tiles are green after commit
-        // (green tiles were removed, new tiles become old)
-        updatedTiles = updatedTiles.map(t => ({
-          ...t,
-          isNew: false,
-          canMove: false,
-          isGreen: false,
-        }));
-
-        // Count words formed based on tiles that were removed (exiting tiles that were old)
-        const exitingOldTiles = currentTiles.filter(t => t.isExiting && !t.isNew);
-        const wordsFormed = Math.floor(exitingOldTiles.length / 3);
-
-        // Update score
         setTurnScore(wordsFormed);
         setTotalScore(prev => prev + wordsFormed);
 
-        // Check for game over before dealing new tiles
-        const boardTilesCount = updatedTiles.length;
-        if (boardTilesCount >= MAX_BOARD_TILES) {
+        if (updatedTiles.length >= MAX_BOARD_TILES) {
           setGameOver(true);
           return updatedTiles;
         }
 
-        // Deal new tiles
         const newTiles = dealNewTiles();
         setCurrentWord(newTiles.map(t => t.letter).join(''));
-
         return [...updatedTiles, ...newTiles];
       });
-    }, 250); // Wait for exit animation to complete
-  }, [canCommit]);
+    }, EXIT_TOTAL);
+  }, [canCommit, tiles]);
 
   return {
     tiles,

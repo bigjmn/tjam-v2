@@ -7,7 +7,7 @@ export interface Tile {
   canMove: boolean; // whether tile can be dragged
   isGreen: boolean; // part of a valid word
   isNew: boolean; // placed this turn
-  isExiting?: boolean; // animating out (will be removed)
+  isHomeRowExiting?: boolean; // home row slide out animation
 }
 
 export type SquareId = string; // format: "xy" e.g. "01" for col 0, row 1

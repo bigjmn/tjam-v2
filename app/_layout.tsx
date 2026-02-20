@@ -3,12 +3,14 @@ import { useTheme } from "../hooks/useTheme";
 import ThemedView from "../components/ui/ThemedView";
 import { ThemeProvider } from "../providers/ThemeProvider";
 import { Stack } from "expo-router";
+import { UserProvider } from "../providers/UserProvider";
 import "react-native-reanimated";
 
 const RootLayout = () => {
 	const { colors } = useTheme();
 	return (
 		<ThemeProvider>
+			<UserProvider>
 			<StatusBar />
 			<ThemedView style={{ flex: 1 }}>
 				<Stack
@@ -28,6 +30,7 @@ const RootLayout = () => {
 					<Stack.Screen name="index" options={{ title: "Home" }} />
 				</Stack>
 			</ThemedView>
+			</UserProvider>
 		</ThemeProvider>
 	);
 };

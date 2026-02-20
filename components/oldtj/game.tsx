@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
 	useSharedValue,
@@ -10,6 +10,8 @@ import Animated, {
 	runOnJS,
 	Easing,
 } from "react-native-reanimated";
+import SquareLayer from "./SquareLayer";
+import { useGame } from "./useGame";
 
 // interface TileProps {
 //     id: string;
@@ -202,6 +204,43 @@ function Tile({
 	);
 }
 
+export default function Game(){
+
+	const { tiles, inMotion, validRows, validBoard, takenSpots, givePos, claimMovement, wordNum, frozenHome, nextTurn } = useGame()
+
+	  return (
+    <View style={styles.outerContainer}>
+
+      <View style={styles.gameWrapper}>
+        <View style={styles.mainBoard}>
+          <View style={styles.layerWrapper}>
+            <SquareLayer />
+          </View>
+          <View style={styles.layerWrapper}>
+            {tiles && tiles.map(tile => (
+              <Tile key={tile.id}
+                id={tile.id}
+                partValid={validRows}
+                letter={tile.letter}
+                startx={tile.x}
+                starty={tile.y}
+                givePos={givePos}
+                claimMovement={claimMovement}
+                inMotion={inMotion}
+                takenSpots={takenSpots}
+                canMove={tile.canMove && tile.id !=frozenHome} />
+            ))}
+          </View>
+        </View>
+        <View style={styles.scoreAndButton}>
+          <Pressable disabled={!validBoard || !!inMotion} style={[styles.buttonStyle, {opacity : (!validBoard || !!inMotion) ? .3 : 1} ]} onPress={nextTurn} hitSlop={10}><Text style={[styles.buttonText]}>Commit Move</Text></Pressable>
+          <View style={styles.scoreHolder}><Text style={styles.scoreText}>Points: {wordNum}</Text></View>
+        </View>
+      </View>
+    </View>
+  )
+}
+
 const toPosition = ({ x, y }: { x: number; y: number }) => {
 	"worklet";
 
@@ -237,6 +276,14 @@ const allSquares = () => {
 };
 
 const styles = StyleSheet.create({
+	outerContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    display: "flex",
+    flexDirection:"column",
+    justifyContent: "center",
+    alignItems: "center"
+  },
 	container: {
 		flex: 1,
 		backgroundColor: "#fff",

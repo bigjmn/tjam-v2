@@ -15,11 +15,11 @@ interface TileProps {
 	letter: string;
 	startx: number;
 	starty: number;
-	givePos: (id: string, dest: string) => {};
+	givePos: (id: string, dest: string) => void;
 	takenSpots: string[];
 	canMove: boolean;
 	partValid: string[];
-	claimMovement: (id: string) => {};
+	claimMovement: (id: string) => void;
 	inMotion: string | null;
 }
 
@@ -88,7 +88,7 @@ type Achievement =
 
 interface TurnInfo {
 	turnNo: number;
-	wordsMade: string[][];
+	wordsMade: string[];
 	lettersCleared: string[];
 	boardState: string;
 }

@@ -1,0 +1,43 @@
+import { StyleSheet, Text, View } from 'react-native'
+
+const makeSquares = () => {
+  let squarelist = []
+  for (let i=0; i < 3; i++){
+    for (let j=0; j < 5; j++){
+      if (j==1){
+        continue
+      }
+      let newsquare = {
+        id: i.toString()+j.toString(),
+        leftPos: 90*i,
+        topPos: 90*j
+      }
+      squarelist.push(newsquare)
+
+    }
+  }
+  return squarelist
+}
+export default function SquareLayer(){
+  const squarelist = makeSquares()
+
+
+
+  return(
+    <View style={styles.outerContainer}>
+      {squarelist.map(square => (
+        <View key={square.id} style={{position:'absolute',top:square.topPos,left:square.leftPos,height:90,width:90,borderWidth:3,borderColor:'white', borderRadius:12, backgroundColor:"#e4e4e4"}}></View>
+      ))}
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+    outerContainer: {
+      position:'relative',
+      flex: 1
+    },
+    boardSquare: {
+      position:'absolute'
+    }
+  })

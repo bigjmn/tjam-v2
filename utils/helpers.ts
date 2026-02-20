@@ -142,3 +142,18 @@ export const allSquares = () => {
 export const boardSquares = () => {
 	return allSquares().filter((t) => t[1] !== "0");
 };
+
+export const isBare = (bstr:string) => {
+	return (bstr.split('').filter(l => l !== '*').length <= 3)
+}
+
+export const bareBilly = (turns:TurnInfo[]) => {
+	let count = 0 
+	for (const turn of turns){
+		count = isBare(turn.boardState) ? count + 1 : 0
+		if (count >= 5){
+			return true
+		}
+	}
+	return false 
+}

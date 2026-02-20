@@ -153,6 +153,11 @@ export const useGame = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
 	};
 
+	const startGame = () => {
+		setWordList(shuffle(wordlist))
+		setWordNum(0)
+	}
+
 	const givePos = (id: string, pos: string) => {
 		setTiles(
 			tiles.map((tile) =>
@@ -187,5 +192,6 @@ export const useGame = () => {
 		nextTurn,
 		wordNum,
 		frozenHome,
+		startGame
 	};
 };

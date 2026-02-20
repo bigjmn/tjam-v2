@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
@@ -216,10 +216,15 @@ export default function Game() {
 		wordNum,
 		frozenHome,
 		nextTurn,
+		startGame
 	} = useGame();
 
+	useEffect(() => {
+		startGame()
+	}, [])
+
 	return (
-		<View style={styles.outerContainer}>
+		<GestureHandlerRootView style={styles.outerContainer}>
 			<View style={styles.gameWrapper}>
 				<View style={styles.mainBoard}>
 					<View style={styles.layerWrapper}>
@@ -263,7 +268,7 @@ export default function Game() {
 					</View>
 				</View>
 			</View>
-		</View>
+		</GestureHandlerRootView>
 	);
 }
 
@@ -309,6 +314,7 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		justifyContent: "center",
 		alignItems: "center",
+		padding: 12
 	},
 	container: {
 		flex: 1,
@@ -321,7 +327,7 @@ const styles = StyleSheet.create({
 
 		display: "flex",
 		flexDirection: "column",
-		justifyContent: "space-between",
+		justifyContent: "center",
 		alignItems: "center",
 	},
 	mainBoard: {
@@ -341,7 +347,7 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		justifyContent: "flex-end",
 		alignItems: "center",
-		zIndex: -1,
+		zIndex: 2,
 	},
 	scoreHolder: {
 		height: 40,

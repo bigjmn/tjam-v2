@@ -92,3 +92,8 @@ interface TurnInfo {
 	lettersCleared: string[];
 	boardState: string;
 }
+
+interface Rank {
+    name: string; 
+    starsToFill: number;
+}

@@ -23,30 +23,41 @@ export const useAchievements = () => {
 		(na) => !playerStats.achievementsWon.includes(na.key),
 	)[0];
 
-    const getStreaks = (newscore:number) => {
-        if (playerStats.gameHist.length < 2){
-            return []
-        }
-        const pastThree:number[] = [...playerStats.gameHist.map((gr) => gr.abandoned ? 0 : gr.score), newscore]
-        const newStreakAchs = streakingAchievements.filter(stk => (stk.streakScore <= Math.min(...pastThree) && !playerStats.achievementsWon.includes(stk.key))).map(stk => stk.key)
-        return newStreakAchs
-    }
-
-
+	const getStreaks = (newscore: number) => {
+		if (playerStats.gameHist.length < 2) {
+			return [];
+		}
+		const pastThree: number[] = [
+			...playerStats.gameHist.map((gr) => (gr.abandoned ? 0 : gr.score)),
+			newscore,
+		];
+		const newStreakAchs = streakingAchievements
+			.filter(
+				(stk) =>
+					stk.streakScore <= Math.min(...pastThree) &&
+					!playerStats.achievementsWon.includes(stk.key),
+			)
+			.map((stk) => stk.key);
+		return newStreakAchs;
+	};
 
 	const gameAchievements = (turns: TurnInfo[]) => {
-        if (!scoringGoal){
-            throw Error("no scoring goal!")
-        }
-        const gameScore = turns.length
-		const scoreAchievements: string[] = scoringAchievements.filter(sa => sa.scoreThreshhold >= scoringGoal.scoreThreshhold && sa.scoreThreshhold <= gameScore).map(sa => sa.key);
-        const newStreaks = getStreaks(gameScore)
-        const allAchievements = [...scoreAchievements, ...newStreaks]
+		if (!scoringGoal) {
+			throw Error("no scoring goal!");
+		}
+		const gameScore = turns.length;
+		const scoreAchievements: string[] = scoringAchievements
+			.filter(
+				(sa) =>
+					sa.scoreThreshhold >= scoringGoal.scoreThreshhold &&
+					sa.scoreThreshhold <= gameScore,
+			)
+			.map((sa) => sa.key);
+		const newStreaks = getStreaks(gameScore);
+		const allAchievements = [...scoreAchievements, ...newStreaks];
 		const wordGroups = turns.map((t) => t.wordsMade);
-		const allWordsMade = turns
-			.map((t) => t.wordsMade)
-			.flat()
-			
+		const allWordsMade = turns.map((t) => t.wordsMade).flat();
+
 		const allLettersCleared = turns.map((t) => t.lettersCleared).flat();
 
 		const maxCountGame = groupFreq(wordGroups);
@@ -81,24 +92,26 @@ export const useAchievements = () => {
 			if (["A", "E", "I", "O", "U"].every((l) => turnlets.includes(l))) {
 				allAchievements.push("vowelcrusher");
 			}
-			
-            
 		}
-        if (alphaList.every((l) => allLettersCleared.includes(l))) {
-				allAchievements.push("allmyletters");
-			}
-        if (bareBilly(turns)){
-                allAchievements.push('bareboard')
-            }
+		if (alphaList.every((l) => allLettersCleared.includes(l))) {
+			allAchievements.push("allmyletters");
+		}
+		if (bareBilly(turns)) {
+			allAchievements.push("bareboard");
+		}
 
+		// filer out achievements already scored, and novelty achievements besides the next goal
+		const newAchievements = allAchievements.filter(
+			(ac) =>
+				!playerStats.achievementsWon.includes(ac) &&
+				(ac === noveltyGoal.key ||
+					!noveltyAchievements.find((x) => x.key === ac)),
+		);
 
-        // filer out achievements already scored, and novelty achievements besides the next goal 
-        const newAchievements = allAchievements.filter(ac => !playerStats.achievementsWon.includes(ac) && (ac === noveltyGoal.key || !noveltyAchievements.find(x => x.key === ac)))
-
-        return newAchievements
+		return newAchievements;
 	};
 
-    return { gameAchievements }
+	return { gameAchievements };
 };
 
 const eCount = (letterlist: string[]) => {

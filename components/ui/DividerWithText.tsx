@@ -18,7 +18,7 @@ const DividerWithText = ({
 		return (
 			<ThemedView style={[styles.container, style]}>
 				<ThemedView style={styles.line} />
-				<ThemedText variant="dateText">{text}</ThemedText>
+				<ThemedText variant="italic">{text}</ThemedText>
 				<ThemedView style={styles.line} />
 			</ThemedView>
 		);

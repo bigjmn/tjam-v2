@@ -204,41 +204,67 @@ function Tile({
 	);
 }
 
-export default function Game(){
+export default function Game() {
+	const {
+		tiles,
+		inMotion,
+		validRows,
+		validBoard,
+		takenSpots,
+		givePos,
+		claimMovement,
+		wordNum,
+		frozenHome,
+		nextTurn,
+	} = useGame();
 
-	const { tiles, inMotion, validRows, validBoard, takenSpots, givePos, claimMovement, wordNum, frozenHome, nextTurn } = useGame()
-
-	  return (
-    <View style={styles.outerContainer}>
-
-      <View style={styles.gameWrapper}>
-        <View style={styles.mainBoard}>
-          <View style={styles.layerWrapper}>
-            <SquareLayer />
-          </View>
-          <View style={styles.layerWrapper}>
-            {tiles && tiles.map(tile => (
-              <Tile key={tile.id}
-                id={tile.id}
-                partValid={validRows}
-                letter={tile.letter}
-                startx={tile.x}
-                starty={tile.y}
-                givePos={givePos}
-                claimMovement={claimMovement}
-                inMotion={inMotion}
-                takenSpots={takenSpots}
-                canMove={tile.canMove && tile.id !=frozenHome} />
-            ))}
-          </View>
-        </View>
-        <View style={styles.scoreAndButton}>
-          <Pressable disabled={!validBoard || !!inMotion} style={[styles.buttonStyle, {opacity : (!validBoard || !!inMotion) ? .3 : 1} ]} onPress={nextTurn} hitSlop={10}><Text style={[styles.buttonText]}>Commit Move</Text></Pressable>
-          <View style={styles.scoreHolder}><Text style={styles.scoreText}>Points: {wordNum}</Text></View>
-        </View>
-      </View>
-    </View>
-  )
+	return (
+		<View style={styles.outerContainer}>
+			<View style={styles.gameWrapper}>
+				<View style={styles.mainBoard}>
+					<View style={styles.layerWrapper}>
+						<SquareLayer />
+					</View>
+					<View style={styles.layerWrapper}>
+						{tiles &&
+							tiles.map((tile) => (
+								<Tile
+									key={tile.id}
+									id={tile.id}
+									partValid={validRows}
+									letter={tile.letter}
+									startx={tile.x}
+									starty={tile.y}
+									givePos={givePos}
+									claimMovement={claimMovement}
+									inMotion={inMotion}
+									takenSpots={takenSpots}
+									canMove={
+										tile.canMove && tile.id != frozenHome
+									}
+								/>
+							))}
+					</View>
+				</View>
+				<View style={styles.scoreAndButton}>
+					<Pressable
+						disabled={!validBoard || !!inMotion}
+						style={[
+							styles.buttonStyle,
+							{ opacity: !validBoard || !!inMotion ? 0.3 : 1 },
+						]}
+						onPress={nextTurn}
+						hitSlop={10}
+					>
+						<Text style={[styles.buttonText]}>Commit Move</Text>
+					</Pressable>
+					<View style={styles.scoreHolder}>
+						<Text style={styles.scoreText}>Points: {wordNum}</Text>
+					</View>
+				</View>
+			</View>
+		</View>
+	);
 }
 
 const toPosition = ({ x, y }: { x: number; y: number }) => {
@@ -277,13 +303,13 @@ const allSquares = () => {
 
 const styles = StyleSheet.create({
 	outerContainer: {
-    flex: 1,
-    backgroundColor: "#fff",
-    display: "flex",
-    flexDirection:"column",
-    justifyContent: "center",
-    alignItems: "center"
-  },
+		flex: 1,
+		backgroundColor: "#fff",
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "center",
+		alignItems: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "#fff",

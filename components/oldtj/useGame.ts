@@ -7,7 +7,7 @@ export const useGame = () => {
 	const [inMotion, setInMotion] = useState<string | null>(null);
 	const [takenSpots, setTakenSpots] = useState<string[]>([]);
 
-	const [wordNum, setWordNum] = useState<number | null>(null)
+	const [wordNum, setWordNum] = useState<number | null>(null);
 	//squares in rows/cols containing words
 	const [validRows, setValidRows] = useState<string[]>([]);
 	//if two tiles have been placed.
@@ -17,7 +17,7 @@ export const useGame = () => {
 	//tile in motion, so others can't move
 
 	const [validWords, setValidWords] = useState<string[]>([]);
-	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([])
+	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
 
 	const checkSquareArr = (arr: string[]) => {
 		let rowword = "";
@@ -93,7 +93,7 @@ export const useGame = () => {
 		setTakenSpots(squarestaken);
 	};
 
-	const getBoardstate = (tileList:Tile[]) => {
+	const getBoardstate = (tileList: Tile[]) => {
 		return boardSquares()
 			.map((bs) => {
 				const tLoc = tileList.find((x) => x.sitOn === bs);
@@ -103,46 +103,68 @@ export const useGame = () => {
 	};
 
 	const getNextBoard = () => {
-		if (wordNum === null){
-			return
+		if (wordNum === null) {
+			return;
 		}
-		const word = wordList[wordNum]
-		const wordParts = word.split('')
-		const newTiles:Tile[] = wordParts.map((w, i) => (
-			{
-				id: 'w'+wordNum.toString()+'l'+i.toString(),
-				letter: w,
-				x: i,
-				y: 0,
-				sitOn: i.toString()+'0',
-				canMove:true
-			}
-		))
+		const word = wordList[wordNum];
+		const wordParts = word.split("");
+		const newTiles: Tile[] = wordParts.map((w, i) => ({
+			id: "w" + wordNum.toString() + "l" + i.toString(),
+			letter: w,
+			x: i,
+			y: 0,
+			sitOn: i.toString() + "0",
+			canMove: true,
+		}));
 
-		const clearedLets = tiles.filter(tile => tile.sitOn[1] != '0' && !tile.canMove && validRows.includes(tile.sitOn)).map(tile => tile.letter)
+		const clearedLets = tiles
+			.filter(
+				(tile) =>
+					tile.sitOn[1] != "0" &&
+					!tile.canMove &&
+					validRows.includes(tile.sitOn),
+			)
+			.map((tile) => tile.letter);
 
 		//filter out old tiles in words and remaining in home row
-  //and make moveable tiles unmovable, then add new tiles
-  		const newboard = [...tiles.filter(tile => tile.sitOn[1] != '0' && (tile.canMove || !validRows.includes(tile.sitOn))).map(tile => ({...tile, canMove:false})), ...newTiles]
-		const stringBoard = getBoardstate(newboard)
-		const turnInfo:TurnInfo = {turnNo: wordNum, wordsMade: validWords, lettersCleared: clearedLets, boardState: stringBoard}
+		//and make moveable tiles unmovable, then add new tiles
+		const newboard = [
+			...tiles
+				.filter(
+					(tile) =>
+						tile.sitOn[1] != "0" &&
+						(tile.canMove || !validRows.includes(tile.sitOn)),
+				)
+				.map((tile) => ({ ...tile, canMove: false })),
+			...newTiles,
+		];
+		const stringBoard = getBoardstate(newboard);
+		const turnInfo: TurnInfo = {
+			turnNo: wordNum,
+			wordsMade: validWords,
+			lettersCleared: clearedLets,
+			boardState: stringBoard,
+		};
 
-		setGameTurns(gt => [...gt, turnInfo])
-		setTiles(newboard)
-
-	}
+		setGameTurns((gt) => [...gt, turnInfo]);
+		setTiles(newboard);
+	};
 	const nextTurn = () => {
-		setWordNum(w => w === null ? 0 : w+1)
-	}
+		setWordNum((w) => (w === null ? 0 : w + 1));
+	};
 
-	const givePos = (id:string, pos:string) => {
-    setTiles(tiles.map(tile => tile.id === id ? ({...tile, sitOn:pos}) : tile))
-    setInMotion(null)
-  }
+	const givePos = (id: string, pos: string) => {
+		setTiles(
+			tiles.map((tile) =>
+				tile.id === id ? { ...tile, sitOn: pos } : tile,
+			),
+		);
+		setInMotion(null);
+	};
 
-  const claimMovement = (id:string) => {
-    setInMotion(id)
-  }
+	const claimMovement = (id: string) => {
+		setInMotion(id);
+	};
 
 	useEffect(() => {
 		markTaken();
@@ -151,8 +173,8 @@ export const useGame = () => {
 	}, [tiles]);
 
 	useEffect(() => {
-		getNextBoard()
-	}, [wordNum])
+		getNextBoard();
+	}, [wordNum]);
 
 	return {
 		tiles,
@@ -164,6 +186,6 @@ export const useGame = () => {
 		claimMovement,
 		nextTurn,
 		wordNum,
-		frozenHome,		
-	}
+		frozenHome,
+	};
 };

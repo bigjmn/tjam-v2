@@ -216,12 +216,12 @@ export default function Game() {
 		wordNum,
 		frozenHome,
 		nextTurn,
-		startGame
+		startGame,
 	} = useGame();
 
 	useEffect(() => {
-		startGame()
-	}, [])
+		startGame();
+	}, []);
 
 	return (
 		<GestureHandlerRootView style={styles.outerContainer}>

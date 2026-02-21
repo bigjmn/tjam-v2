@@ -37,6 +37,7 @@ interface UserContextProps {
 	logout: () => Promise<void>;
 	authChecked: boolean;
 	playerStats: PlayerStats | null;
+	updatePlayerStats: (updates: Partial<PlayerStats>) => Promise<void>;
 }
 export const UserContext = createContext<UserContextProps | null>(null);
 
@@ -182,6 +183,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			setPlayerStats(playerOb);
 		}
 	}
+
+	async function updatePlayerStats(updates: Partial<PlayerStats>) {
+		if (!playerStats) return;
+
+		const updatedStats = { ...playerStats, ...updates };
+		setPlayerStats(updatedStats);
+
+		// Save to AsyncStorage
+		await AsyncStorage.setItem("playerv2", JSON.stringify(updatedStats));
+
+		// Save to Firestore if user is logged in
+		if (user) {
+			const userDocRef = doc(firestore, "users", user.uid).withConverter(
+				playerStatConverter
+			);
+			await setDoc(userDocRef, updatedStats, { merge: true });
+		}
+	}
 	useEffect(() => {
 		getUserInfo();
 	}, []);
@@ -210,6 +229,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				logout,
 				authChecked,
 				playerStats,
+				updatePlayerStats,
 			}}
 		>
 			{children}

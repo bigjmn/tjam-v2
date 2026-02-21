@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import wordlist from "../../assets/wordlist";
 import { shuffle, boardSquares } from "../../utils/helpers";
+import { useAchievements } from "../../hooks/useAchievements";
+import { useRouter } from "expo-router";
 export const useGame = () => {
 	const [tiles, setTiles] = useState<Tile[]>([]);
 	const [wordList, setWordList] = useState(shuffle(wordlist));
@@ -18,6 +20,14 @@ export const useGame = () => {
 
 	const [validWords, setValidWords] = useState<string[]>([]);
 	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
+
+	const router = useRouter()
+
+	const achieve = useAchievements()
+
+	
+
+
 
 	const checkSquareArr = (arr: string[]) => {
 		let rowword = "";
@@ -148,10 +158,25 @@ export const useGame = () => {
 
 		setGameTurns((gt) => [...gt, turnInfo]);
 		setTiles(newboard);
+
+		if (newboard.length >= 11){
+			handleGameEnd()
+		}
 	};
 	const nextTurn = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
 	};
+
+	const handleGameEnd = () => {
+		const newAchievements = achieve!.gameAchievements(gameTurns)
+		router.push({
+			pathname: "/(dashboard)/results",
+			params: {
+				achievedJson: JSON.stringify({achieved: newAchievements}),
+				gameTurnsJson: JSON.stringify(gameTurns)
+			}
+		})
+	}
 
 	const startGame = () => {
 		setWordList(shuffle(wordlist))
@@ -192,6 +217,7 @@ export const useGame = () => {
 		nextTurn,
 		wordNum,
 		frozenHome,
-		startGame
+		startGame,
+		gameTurns,
 	};
 };

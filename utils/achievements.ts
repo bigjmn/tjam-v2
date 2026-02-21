@@ -202,13 +202,7 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		type: "novelty",
 		reward: 3,
 	},
-	{
-		key: "immortaldrupes",
-		name: "The Immortal 'Drupes",
-		explainer: "Make the same word four ways in one turn",
-		type: "novelty",
-		reward: 10,
-	},
+	
 	{
 		key: "qclear",
 		name: "Q Slayer",
@@ -296,7 +290,7 @@ export const allAchievements: Achievement[] = [
 	...legendaryAchievements,
 	...secretAchievements,
 ];
-const ranksList: Rank[] = [
+export const ranksList: Rank[] = [
 	{name: "Newbie", starsToFill: 3},
 	{name: "Rookie", starsToFill: 3},
 	{name: "Showing Promise", starsToFill: 3},

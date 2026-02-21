@@ -5,6 +5,8 @@ import {
 	noveltyAchievements,
 	secretAchievements,
 	legendaryAchievements,
+    allAchievements,
+    ranksList
 } from "../utils/achievements";
 import { groupFreq, bareBilly } from "../utils/helpers";
 
@@ -16,12 +18,6 @@ export const useAchievements = () => {
 	const scoringGoal = scoringAchievements
 		.sort((a, b) => a.scoreThreshhold - b.scoreThreshhold)
 		.find((s) => s.scoreThreshhold > playerStats.topScore);
-	const streakingGoal = streakingAchievements
-		.sort((a, b) => a.streakScore - b.streakScore)
-		.find((s) => !playerStats.achievementsWon.includes(s.key));
-	const noveltyGoal = noveltyAchievements.filter(
-		(na) => !playerStats.achievementsWon.includes(na.key),
-	)[0];
 
 	const getStreaks = (newscore: number) => {
 		if (playerStats.gameHist.length < 2) {
@@ -100,18 +96,165 @@ export const useAchievements = () => {
 			allAchievements.push("bareboard");
 		}
 
-		// filer out achievements already scored, and novelty achievements besides the next goal
+		// Get the current novelty goal
+		const currentNoveltyGoal = noveltyAchievements.filter(
+			(na) => !playerStats.achievementsWon.includes(na.key),
+		)[0];
+
+		// Filter out achievements already scored, and novelty achievements besides the next goal
 		const newAchievements = allAchievements.filter(
 			(ac) =>
 				!playerStats.achievementsWon.includes(ac) &&
-				(ac === noveltyGoal.key ||
+				(ac === currentNoveltyGoal?.key ||
 					!noveltyAchievements.find((x) => x.key === ac)),
 		);
 
 		return newAchievements;
 	};
 
-	return { gameAchievements };
+    const scoreAndRank = () => {
+        const sum = allAchievements.reduce((accumulator, currentValue) => {
+        return playerStats.achievementsWon.includes(currentValue.key) ? accumulator + currentValue.reward : accumulator;
+}, 0);
+    let tempVal = sum;
+    for (let i = 0; i < ranksList.length; i++){
+        const rank = ranksList[i];
+        if (rank.starsToFill > tempVal){
+            return {playerRank: rank, starsEarned: tempVal}
+        }
+        tempVal -= rank.starsToFill;
+    }
+    // If we've gone through all ranks, return the last rank
+    return {playerRank: ranksList[ranksList.length - 1], starsEarned: tempVal}
+    }
+
+	/**
+	 * Get the next uncompleted achievements for the Next Goals section
+	 * Can optionally pass in a new top score and current achievements to calculate what's next
+	 */
+	const getNextAchievements = (newTopScore?: number, currentAchievements?: string[]) => {
+		const topScore = newTopScore ?? playerStats.topScore;
+		const wonAchievements = currentAchievements ?? playerStats.achievementsWon;
+
+		// Find next scoring goal based on top score
+		const nextScoringGoal = scoringAchievements
+			.sort((a, b) => a.scoreThreshhold - b.scoreThreshhold)
+			.find((s) => s.scoreThreshhold > topScore);
+
+		// Find next streaking goal that hasn't been won
+		const nextStreakingGoal = streakingAchievements
+			.sort((a, b) => a.streakScore - b.streakScore)
+			.find((s) => !wonAchievements.includes(s.key));
+
+		// Find next novelty goal that hasn't been won
+		const nextNoveltyGoal = noveltyAchievements.filter(
+			(na) => !wonAchievements.includes(na.key),
+		)[0];
+
+		if (!nextScoringGoal || !nextStreakingGoal || !nextNoveltyGoal) {
+			return null;
+		}
+
+		return {
+			scoring: nextScoringGoal,
+			streaking: nextStreakingGoal,
+			novelty: nextNoveltyGoal,
+		};
+	};
+
+	/**
+	 * Categorize earned achievement keys into Next Goals, Legendary, and Secret
+	 */
+	const categorizeAchievements = (keys: string[]): {
+		nextGoals: string[];
+		legendary: string[];
+		secret: string[];
+	} => {
+		const nextGoals: string[] = [];
+		const legendary: string[] = [];
+		const secret: string[] = [];
+
+		for (const key of keys) {
+			const achievement = allAchievements.find((a) => a.key === key);
+			if (!achievement) continue;
+
+			if (achievement.type === "legendary") {
+				legendary.push(key);
+			} else if (achievement.type === "secret") {
+				secret.push(key);
+			} else if (
+				achievement.type === "scoring" ||
+				achievement.type === "streaking" ||
+				achievement.type === "novelty"
+			) {
+				nextGoals.push(key);
+			}
+		}
+
+		return { nextGoals, legendary, secret };
+	};
+
+	/**
+	 * Calculate rank changes as stars accumulate
+	 * Returns array of { starIndex, newRank } objects indicating when rank-ups occur
+	 */
+	const calculateRankChanges = (
+		earnedKeys: string[],
+	): Array<{ starIndex: number; newRank: Rank; rankIndex: number }> => {
+		const rankChanges: Array<{ starIndex: number; newRank: Rank; rankIndex: number }> = [];
+
+		// Calculate current stars and rank
+		let currentStars = allAchievements.reduce((sum, achievement) => {
+			return playerStats.achievementsWon.includes(achievement.key)
+				? sum + achievement.reward
+				: sum;
+		}, 0);
+
+		// Find current rank and stars within that rank
+		let currentRankIndex = 0;
+		let starsInCurrentRank = currentStars;
+		for (let i = 0; i < ranksList.length; i++) {
+			if (starsInCurrentRank < ranksList[i].starsToFill) {
+				currentRankIndex = i;
+				break;
+			}
+			starsInCurrentRank -= ranksList[i].starsToFill;
+		}
+
+		// Simulate adding stars from earned achievements
+		let starCounter = 0;
+		let tempStarsInRank = starsInCurrentRank;
+		let tempRankIndex = currentRankIndex;
+
+		for (const key of earnedKeys) {
+			const achievement = allAchievements.find((a) => a.key === key);
+			if (!achievement) continue;
+
+			for (let i = 0; i < achievement.reward; i++) {
+				starCounter++;
+				tempStarsInRank++;
+
+				// Check if we've filled the current rank
+				if (tempStarsInRank >= ranksList[tempRankIndex].starsToFill) {
+					tempRankIndex++;
+					tempStarsInRank = 0;
+
+					// Record the rank-up
+					if (tempRankIndex < ranksList.length) {
+						rankChanges.push({
+							starIndex: starCounter,
+							newRank: ranksList[tempRankIndex],
+							rankIndex: tempRankIndex,
+						});
+					}
+				}
+			}
+		}
+
+		return rankChanges;
+	};
+
+	return { gameAchievements, getNextAchievements, categorizeAchievements, calculateRankChanges, scoreAndRank };
 };
 
 const eCount = (letterlist: string[]) => {

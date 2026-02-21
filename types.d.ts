@@ -94,6 +94,33 @@ interface TurnInfo {
 }
 
 interface Rank {
-    name: string; 
+    name: string;
     starsToFill: number;
 }
+
+// Achievement Animation Types
+type AnimationPhase =
+	| 'idle'
+	| 'next-goals-enter'
+	| 'next-goals-animating'
+	| 'next-goals-exit'
+	| 'legendary-enter'
+	| 'legendary-animating'
+	| 'legendary-exit'
+	| 'secret-enter'
+	| 'secret-animating'
+	| 'secret-exit'
+	| 'rank-up-modal'
+	| 'complete';
+
+type FillStarEvent = { type: 'fillStar'; rankIndex: number };
+type SlideTileEvent = {
+	type: 'slideTile';
+	direction: 'out' | 'in';
+	category: 'scoring' | 'streaking' | 'novelty';
+	newAchievement?: Achievement
+};
+type RevealSecretEvent = { type: 'revealSecret'; achievementKey: string };
+type ShowRankUpEvent = { type: 'showRankUp'; newRank: Rank; rankIndex: number };
+
+type AchievementAnimationEvent = FillStarEvent | SlideTileEvent | RevealSecretEvent | ShowRankUpEvent;

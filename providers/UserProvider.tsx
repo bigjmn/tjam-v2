@@ -28,14 +28,7 @@ import {
 interface UserContextProps {
 	user: User | null;
 	signInWithGoogle: () => Promise<void>;
-	login: (email: string, password: string) => Promise<void>;
-	register: (
-		email: string,
-		password: string,
-		confirmPassword: string,
-		username: string,
-		name: string,
-	) => Promise<void>;
+
 	logout: () => Promise<void>;
 	authChecked: boolean;
 	playerStats: PlayerStats | null;
@@ -48,24 +41,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [authChecked, setAuthChecked] = useState<boolean>(false);
 	const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
 
-	async function login(email: string, password: string) {
-		try {
-			const userCredential = await signInWithEmailAndPassword(
-				auth,
-				email,
-				password,
-			);
-			if (!userCredential || !userCredential.user) {
-				throw Error("unable to sign in!");
-			}
-		} catch (error) {
-			if (error instanceof Error) {
-				throw Error(error.message);
-			} else {
-				console.error("somethig weird ...", error);
-			}
-		}
-	}
+
 	const signInWithGoogle = async () => {
 		try {
 			if (playerStats === null) {
@@ -80,19 +56,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			}
 			const googleUser = await linkWithCredential(user, googleCred);
 			const googleUserData = googleUser.user;
-			// see if they are logging back in or signing up
-			const udocRef = doc(
-				firestore,
-				"users",
-				user.uid,
-			).withConverter(playerStatConverter);
+			const uid = googleUserData.uid;
+			const udocRef = doc(firestore, "users", uid).withConverter(playerStatConverter);
 			const uDoc = await getDoc(udocRef);
 			if (!uDoc.exists()) {
-				const todayDisplay = moment(new Date()).format(
-					"dddd, MMM DD, YYYY",
-				);
+				
 				const userEmail = googleUserData.email!;
-				let newUsername = userEmail.split("@")[0];
+				let newUsername = googleUserData.displayName || userEmail.split("@")[0];
 				const uNameDocRef = doc(firestore, "usernames", newUsername);
 				const uNameDoc = await getDoc(uNameDocRef);
 				if (uNameDoc.exists()) {
@@ -107,66 +77,31 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 					userid: googleUserData.uid,
 				});
 			} else {
-				setPlayerStats(uDoc.data());
+				const pstats = uDoc.data();
+				setPlayerStats(pstats)
+				const userEmail = googleUserData.email!;
+				let newUsername = googleUserData.displayName || userEmail.split("@")[0];
+				const uNameDocRef = doc(firestore, "usernames", newUsername);
+				const uNameDoc = await getDoc(uNameDocRef);
+				if (uNameDoc.exists()) {
+					newUsername += usernameNumberTail();
+				}
+				await setDoc(udocRef, {
+					...pstats,
+					
+					email: userEmail,
+					username: newUsername,
+				});
+				await setDoc(doc(firestore, "usernames", newUsername), {
+					userid: googleUserData.uid,
+				});
 			}
 		} catch (err) {
 			console.log(err);
 		}
 	};
 
-	async function register(
-		email: string,
-		password: string,
-		confirmPassword: string,
-		username: string,
-		name: string,
-	) {
-		const unameRef = doc(firestore, "usernames", username);
 
-		try {
-			if (password !== confirmPassword) {
-				throw Error("passwords do not match!");
-			}
-			const unameDoc = await getDoc(unameRef);
-			if (unameDoc.exists()) {
-				throw Error("Username taken!");
-			}
-
-			const userCredential = await createUserWithEmailAndPassword(
-				auth,
-				email,
-				password,
-			);
-			if (!userCredential || !userCredential.user) {
-				throw Error("could not create user!");
-			}
-			await updateProfile(userCredential.user, { displayName: username });
-			const userDocRef = doc(firestore, "users", userCredential.user.uid);
-			const todayDisplay = moment(new Date()).format(
-				"dddd, MMM DD, YYYY",
-			);
-			await setDoc(userDocRef, {
-				email,
-				username,
-				name,
-				todayAnswer: "",
-				votesCast: 0,
-				rating: 1200,
-				joinDate: todayDisplay,
-				gold: 0,
-				silver: 0,
-				bronze: 0,
-				answerRate: 0,
-			});
-			await setDoc(unameRef, { userid: userCredential.user.uid });
-		} catch (error) {
-			if (error instanceof Error) {
-				throw Error(error.message);
-			} else {
-				console.error("somethig weird ...", error);
-			}
-		}
-	}
 	async function logout() {
 		await signOut(auth);
 	}
@@ -211,18 +146,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	useEffect(() => {
-		makeOrGetDoc()
-		
-	}, [user])
+  if (!user || !playerStats) return;
+  makeOrGetDoc();
+}, [user, playerStats]);
 	const anonSignIn = async () => {
-			try {
-				const uanon = await signInAnonymously(auth)
-				
-			return uanon.user
-			} catch (e){
-				console.log(e)
-			}
-		}
+  try {
+    if (auth.currentUser) return auth.currentUser;
+    const uanon = await signInAnonymously(auth);
+    return uanon.user;
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
+};
 
 	async function updatePlayerStats(updates: Partial<PlayerStats>) {
 		if (!playerStats) return;
@@ -247,20 +183,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		getUserInfo()
-		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			console.log('auth changed!')
-			if (user) {
-				console.log(user)
-				setUser(user);
-			} else {
-				anonSignIn().then((t) => {
-					if (t){
-						setUser(t)
-					}
-				})
-			}
-			setAuthChecked(true);
-		});
+		const unsubscribe = onAuthStateChanged(auth, async (u) => {
+  if (u) {
+    setUser(u);
+  } else {
+    const anon = await anonSignIn();
+    if (anon) setUser(anon);
+  }
+  setAuthChecked(true);
+});
 		return () => {
 			unsubscribe();
 		};
@@ -271,8 +202,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			value={{
 				user,
 				signInWithGoogle,
-				login,
-				register,
+				
 				logout,
 				authChecked,
 				playerStats,

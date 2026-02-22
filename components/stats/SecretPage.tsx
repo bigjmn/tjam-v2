@@ -40,6 +40,7 @@ export const SecretPage: React.FC = () => {
                 key={achievement.key}
                 achievement={achievement}
                 isPlaceholder={!isEarned}
+                isWon={isEarned}
                 style={styles.tile}
               />
             );

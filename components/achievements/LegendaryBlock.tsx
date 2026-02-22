@@ -84,7 +84,11 @@ export const LegendaryBlock = forwardRef<LegendaryBlockHandle, LegendaryBlockPro
 				</ThemedText>
 
 				{earnedLegendary.map((achievement) => (
-					<AchievementTile key={achievement.key} achievement={achievement} />
+					<AchievementTile
+						key={achievement.key}
+						achievement={achievement}
+						isWon={earnedKeys.includes(achievement.key)}
+					/>
 				))}
 			</Animated.View>
 		);

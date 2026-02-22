@@ -98,6 +98,19 @@ interface Rank {
     starsToFill: number;
 }
 
+interface BoardRank {
+	rankNo: number,
+	score: number,
+	username: string,
+	id: string
+}
+interface AllTimeBoardRank extends BoardRank {
+	type: "all-time"
+}
+interface WeeklyBoardRank extends BoardRank {
+	type: "weekly"
+}
+
 // Achievement Animation Types
 type AnimationPhase =
 	| 'idle'

@@ -32,9 +32,9 @@ export const NextGoalsPage: React.FC = () => {
           showsVerticalScrollIndicator={true}
           contentContainerStyle={styles.scrollContent}
         >
-          {scoring && <AchievementTile achievement={scoring} style={styles.tile} />}
-          {streaking && <AchievementTile achievement={streaking} style={styles.tile} />}
-          {novelty && <AchievementTile achievement={novelty} style={styles.tile} />}
+          {scoring && <AchievementTile achievement={scoring} isWon={false} style={styles.tile} />}
+          {streaking && <AchievementTile achievement={streaking} isWon={false} style={styles.tile} />}
+          {novelty && <AchievementTile achievement={novelty} isWon={false} style={styles.tile} />}
         </ScrollView>
       </ThemedView>
     </ThemedView>

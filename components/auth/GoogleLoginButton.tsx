@@ -1,5 +1,5 @@
 import React from "react";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { GoogleSignin, GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import { GoogleAuthProvider } from "firebase/auth";
 GoogleSignin.configure({
 	webClientId: process.env.EXPO_PUBLIC_WEB_ID,

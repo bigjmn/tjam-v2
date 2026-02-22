@@ -1,9 +1,11 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
 	withTiming,
+	withSequence,
+	withDelay,
 	Easing,
 	runOnJS,
 } from 'react-native-reanimated';
@@ -27,15 +29,26 @@ export interface NextGoalsBlockHandle {
 
 export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockProps>(
 	({ scoringAchievement, streakingAchievement, noveltyAchievement }, ref) => {
-		const [scoring, setScoring] = React.useState(scoringAchievement);
-		const [streaking, setStreaking] = React.useState(streakingAchievement);
-		const [novelty, setNovelty] = React.useState(noveltyAchievement);
+		const [scoring, setScoring] = useState(scoringAchievement);
+		const [streaking, setStreaking] = useState(streakingAchievement);
+		const [novelty, setNovelty] = useState(noveltyAchievement);
+
+		const [scoringWon, setScoringWon] = useState(false);
+		const [streakingWon, setStreakingWon] = useState(false);
+		const [noveltyWon, setNoveltyWon] = useState(false);
 
 		const scoringTranslateX = useSharedValue(0);
 		const streakingTranslateX = useSharedValue(0);
 		const noveltyTranslateX = useSharedValue(0);
 		const blockTranslateY = useSharedValue(SCREEN_WIDTH); // Start below screen
 		const blockTranslateX = useSharedValue(0);
+
+		const scoringPulseScale = useSharedValue(1);
+		const scoringPulseOpacity = useSharedValue(1);
+		const streakingPulseScale = useSharedValue(1);
+		const streakingPulseOpacity = useSharedValue(1);
+		const noveltyPulseScale = useSharedValue(1);
+		const noveltyPulseOpacity = useSharedValue(1);
 
 		const slideOut = async (category: 'scoring' | 'streaking' | 'novelty'): Promise<void> => {
 			return new Promise((resolve) => {
@@ -46,15 +59,54 @@ export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockPro
 						? streakingTranslateX
 						: noveltyTranslateX;
 
-				translateX.value = withTiming(
-					-SCREEN_WIDTH,
-					{
-						duration: 500,
-						easing: Easing.bezier(0.4, 0.0, 0.2, 1),
-					},
-					() => {
-						runOnJS(resolve)();
-					}
+				const pulseScale =
+					category === 'scoring'
+						? scoringPulseScale
+						: category === 'streaking'
+						? streakingPulseScale
+						: noveltyPulseScale;
+
+				const pulseOpacity =
+					category === 'scoring'
+						? scoringPulseOpacity
+						: category === 'streaking'
+						? streakingPulseOpacity
+						: noveltyPulseOpacity;
+
+				// Mark as won before animation
+				const setWon =
+					category === 'scoring'
+						? setScoringWon
+						: category === 'streaking'
+						? setStreakingWon
+						: setNoveltyWon;
+
+				runOnJS(setWon)(true);
+
+				// Step 1: Pulse animation (300ms)
+				pulseScale.value = withSequence(
+					withTiming(1.05, { duration: 150 }),
+					withTiming(1, { duration: 150 })
+				);
+
+				pulseOpacity.value = withSequence(
+					withTiming(0.8, { duration: 150 }),
+					withTiming(1, { duration: 150 })
+				);
+
+				// Step 2: Pause (200ms) then slide out (500ms)
+				translateX.value = withDelay(
+					500, // Wait for pulse (300ms) + pause (200ms)
+					withTiming(
+						-SCREEN_WIDTH,
+						{
+							duration: 500,
+							easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+						},
+						() => {
+							runOnJS(resolve)();
+						}
+					)
 				);
 			});
 		};
@@ -64,6 +116,16 @@ export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockPro
 			newAchievement: Achievement
 		): Promise<void> => {
 			return new Promise((resolve) => {
+				// Reset won state for new achievement
+				const setWon =
+					category === 'scoring'
+						? setScoringWon
+						: category === 'streaking'
+						? setStreakingWon
+						: setNoveltyWon;
+
+				runOnJS(setWon)(false);
+
 				// Update the achievement state
 				if (category === 'scoring') {
 					setScoring(newAchievement);
@@ -79,6 +141,24 @@ export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockPro
 						: category === 'streaking'
 						? streakingTranslateX
 						: noveltyTranslateX;
+
+				const pulseScale =
+					category === 'scoring'
+						? scoringPulseScale
+						: category === 'streaking'
+						? streakingPulseScale
+						: noveltyPulseScale;
+
+				const pulseOpacity =
+					category === 'scoring'
+						? scoringPulseOpacity
+						: category === 'streaking'
+						? streakingPulseOpacity
+						: noveltyPulseOpacity;
+
+				// Reset pulse values
+				pulseScale.value = 1;
+				pulseOpacity.value = 1;
 
 				// Start from right
 				translateX.value = SCREEN_WIDTH;
@@ -135,15 +215,27 @@ export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockPro
 		}));
 
 		const scoringAnimatedStyle = useAnimatedStyle(() => ({
-			transform: [{ translateX: scoringTranslateX.value }],
+			transform: [
+				{ translateX: scoringTranslateX.value },
+				{ scale: scoringPulseScale.value },
+			],
+			opacity: scoringPulseOpacity.value,
 		}));
 
 		const streakingAnimatedStyle = useAnimatedStyle(() => ({
-			transform: [{ translateX: streakingTranslateX.value }],
+			transform: [
+				{ translateX: streakingTranslateX.value },
+				{ scale: streakingPulseScale.value },
+			],
+			opacity: streakingPulseOpacity.value,
 		}));
 
 		const noveltyAnimatedStyle = useAnimatedStyle(() => ({
-			transform: [{ translateX: noveltyTranslateX.value }],
+			transform: [
+				{ translateX: noveltyTranslateX.value },
+				{ scale: noveltyPulseScale.value },
+			],
+			opacity: noveltyPulseOpacity.value,
 		}));
 
 		const blockAnimatedStyle = useAnimatedStyle(() => ({
@@ -160,15 +252,15 @@ export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockPro
 				</ThemedText>
 
 				<Animated.View style={[styles.tileWrapper, scoringAnimatedStyle]}>
-					<AchievementTile achievement={scoring} />
+					<AchievementTile achievement={scoring} isWon={scoringWon} />
 				</Animated.View>
 
 				<Animated.View style={[styles.tileWrapper, streakingAnimatedStyle]}>
-					<AchievementTile achievement={streaking} />
+					<AchievementTile achievement={streaking} isWon={streakingWon} />
 				</Animated.View>
 
 				<Animated.View style={[styles.tileWrapper, noveltyAnimatedStyle]}>
-					<AchievementTile achievement={novelty} />
+					<AchievementTile achievement={novelty} isWon={noveltyWon} />
 				</Animated.View>
 			</Animated.View>
 		);

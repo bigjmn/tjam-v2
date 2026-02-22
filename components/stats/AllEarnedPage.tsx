@@ -47,6 +47,7 @@ export const AllEarnedPage: React.FC = () => {
             renderItem={({ item }) => (
               <AchievementTile
                 achievement={item}
+                isWon={true}
                 style={styles.tile}
               />
             )}
@@ -61,6 +62,7 @@ export const AllEarnedPage: React.FC = () => {
               <AchievementTile
                 key={achievement.key}
                 achievement={achievement}
+                isWon={true}
                 style={styles.tile}
               />
             ))}

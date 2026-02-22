@@ -39,7 +39,8 @@ export const LegendaryPage: React.FC = () => {
               <AchievementTile
                 key={achievement.key}
                 achievement={achievement}
-                style={[styles.tile, { opacity: isEarned ? 1 : 0.4 }]}
+                isWon={isEarned}
+                style={styles.tile}
               />
             );
           })}

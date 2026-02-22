@@ -123,6 +123,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 							<AchievementTile
 								achievement={achievement}
 								isPlaceholder={!isRevealed}
+								isWon={isRevealed}
 							/>
 						</View>
 					);

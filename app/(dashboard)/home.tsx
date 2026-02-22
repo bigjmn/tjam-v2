@@ -19,7 +19,7 @@ const Home = () => {
 				style={styles.playButton}
 				onPress={() => router.push("/(dashboard)/stats")}
 			>
-				<ThemedText style={styles.playButtonText}>Play</ThemedText>
+				<ThemedText style={styles.playButtonText}>stats</ThemedText>
 			</Pressable>
 		</ThemedView>
 	);

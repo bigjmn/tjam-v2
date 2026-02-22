@@ -13,9 +13,11 @@ export const ThemeContext = createContext<ThemeContextProps>({
 });
 
 const THEME_STORAGE_KEY = "@app_theme";
+const SFX_STORAGE_KEY = "@app_sfx"
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const systemColorScheme = useColorScheme();
 	const [theme, setTheme] = useState<ThemeStyle>("light");
+	const [sfxOn, setSfxOn] = useState<boolean>(true)
 
 	useEffect(() => {
 		loadSavedTheme();
@@ -37,6 +39,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 			console.error("Failed to load theme:", error);
 		}
 	};
+	const loadSavedSfx = async () => {
+		try {
+			const savedSfx = await AsyncStorage.getItem(SFX_STORAGE_KEY)
+			if (savedSfx === "off"){
+				setSfxOn(false)
+			} else {
+				setSfxOn(true)
+			}
+		} catch (error){
+			console.log("failed to load sfx: ", error)
+		}
+	}
 
 	const toggleTheme = async () => {
 		const newTheme = theme === "light" ? "dark" : "light";
@@ -47,6 +61,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 			console.error("Failed to save theme:", error);
 		}
 	};
+
+	const toggleSfx = async () => {
+		const newSfx = !setSfxOn 
+		setSfxOn(newSfx)
+		const sfxname = newSfx ? "on" : "off"
+		try {
+			await AsyncStorage.setItem(SFX_STORAGE_KEY, sfxname)
+		} catch (error){
+			console.error("failed to save theme: ", error)
+		}
+	}
 
 	return (
 		<ThemeContext.Provider value={{ theme, toggleTheme }}>

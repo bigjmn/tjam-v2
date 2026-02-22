@@ -23,6 +23,8 @@ interface TileProps {
 	inMotion: string | null;
 }
 
+type ThemeStyle = "light"|"dark"
+
 interface Tile {
 	id: string;
 	letter: string;

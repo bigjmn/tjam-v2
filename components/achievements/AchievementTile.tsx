@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import ThemedText from '../ui/ThemedText';
 import ThemedView from '../ui/ThemedView';
-
+import { StarIconGroup } from './StarIcon';
 interface AchievementTileProps {
 	achievement: Achievement;
 	isPlaceholder?: boolean;
@@ -16,20 +16,20 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 }) => {
 	return (
 		<ThemedView style={[styles.container, style]}>
-			<ThemedView style={styles.iconArea}>
-				<ThemedText variant="uber">{isPlaceholder ? '❓' : '🏆'}</ThemedText>
-			</ThemedView>
+			
 			<ThemedView style={styles.contentArea}>
 				<ThemedText variant="strong">{achievement.name}</ThemedText>
 				<ThemedText variant="soft" style={styles.explainer}>
 					{isPlaceholder ? 'Hmm... what could it be?' : achievement.explainer}
 				</ThemedText>
-				<ThemedView style={styles.rewardContainer}>
-					{Array.from({ length: achievement.reward }).map((_, index) => (
-						<ThemedText key={index} variant="regular">⭐</ThemedText>
-					))}
-				</ThemedView>
+				
 			</ThemedView>
+			<ThemedView style={styles.rewardContainer}>
+					{/* {achievement.reward <= 5 ? Array.from({ length: achievement.reward }).map((_, index) => (
+						<ThemedText key={index} variant="regular">⭐</ThemedText>
+					)) : <ThemedText variant="regular">{achievement.reward}x⭐</ThemedText>} */}
+					<StarIconGroup totalCount={achievement.reward} filledCount={achievement.reward} />
+				</ThemedView>
 		</ThemedView>
 	);
 };
@@ -37,7 +37,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		flexDirection: 'row',
-		backgroundColor: '#2a2a2a',
+		// backgroundColor: '#2a2a2a',
 		borderRadius: 12,
 		padding: 16,
 		marginVertical: 8,

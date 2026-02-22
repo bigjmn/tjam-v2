@@ -5,6 +5,7 @@ export default function DashboardLayout() {
 		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Screen name="home" />
 			<Stack.Screen name="game" />
+			<Stack.Screen name="stats" />
 		</Stack>
 	);
 }

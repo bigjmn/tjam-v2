@@ -15,6 +15,12 @@ const Home = () => {
 			>
 				<ThemedText style={styles.playButtonText}>Play</ThemedText>
 			</Pressable>
+			<Pressable
+				style={styles.playButton}
+				onPress={() => router.push("/(dashboard)/stats")}
+			>
+				<ThemedText style={styles.playButtonText}>Play</ThemedText>
+			</Pressable>
 		</ThemedView>
 	);
 };

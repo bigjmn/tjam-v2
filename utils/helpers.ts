@@ -82,8 +82,8 @@ export const playerStatConverter = {
 			numGames: playerStats.numGames,
 			gameHist: playerStats.gameHist,
 			achievementsWon: playerStats.achievementsWon,
-			email: playerStats.email,
-			username: playerStats.username,
+			email: playerStats.email || null,
+			username: playerStats.username || null,
 		};
 	},
 	fromFirestore(snapshot: QueryDocumentSnapshot): PlayerStats {
@@ -95,8 +95,8 @@ export const playerStatConverter = {
 			gameHist: data.gameHist,
 			achievementsWon: data.achievementsWon,
 			username: data.username,
-			email: data.email,
-			name: data.name,
+			email: data.email || null,
+			// name: data.name,
 		} as PlayerStats;
 	},
 };

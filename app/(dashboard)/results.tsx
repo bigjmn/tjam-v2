@@ -52,7 +52,9 @@ export default function Results(){
             numGames: playerStats.numGames + 1,
         })
 
-        router.back()
+        router.replace({
+            pathname: '/(dashboard)/game'
+        })
     }
 
     return <AchievementsScreen earnedKeys={achievementList} onComplete={completeCallback} />

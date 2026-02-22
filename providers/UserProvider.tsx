@@ -9,6 +9,8 @@ import {
 	updateProfile,
 	FacebookAuthProvider,
 	signInWithCredential,
+	linkWithCredential,
+	signInAnonymously
 } from "firebase/auth";
 // import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth"
 import { firestore } from "../lib/firebase";
@@ -73,13 +75,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			if (!googleCred) {
 				throw "something went wrong!";
 			}
-			const googleUser = await signInWithCredential(auth, googleCred);
+			if (!user){
+				throw "no user, something wrong!"
+			}
+			const googleUser = await linkWithCredential(user, googleCred);
 			const googleUserData = googleUser.user;
 			// see if they are logging back in or signing up
 			const udocRef = doc(
 				firestore,
 				"users",
-				googleUserData.uid,
+				user.uid,
 			).withConverter(playerStatConverter);
 			const uDoc = await getDoc(udocRef);
 			if (!uDoc.exists()) {
@@ -182,7 +187,42 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			const playerOb: PlayerStats = JSON.parse(playerJson);
 			setPlayerStats(playerOb);
 		}
+		
+		
 	}
+	useEffect(() => {
+		console.log('player stats: ', playerStats)
+	}, [playerStats])
+
+	const makeOrGetDoc = async () => {
+		if (!user){
+			return 
+		}
+		const udocRef = doc(
+				firestore,
+				"users",
+				user.uid,
+			).withConverter(playerStatConverter);
+			const uDoc = await getDoc(udocRef)
+			if (!uDoc.exists()){
+				console.log('making doc')
+				await setDoc(udocRef, playerStats)
+			}
+	}
+
+	useEffect(() => {
+		makeOrGetDoc()
+		
+	}, [user])
+	const anonSignIn = async () => {
+			try {
+				const uanon = await signInAnonymously(auth)
+				
+			return uanon.user
+			} catch (e){
+				console.log(e)
+			}
+		}
 
 	async function updatePlayerStats(updates: Partial<PlayerStats>) {
 		if (!playerStats) return;
@@ -201,16 +241,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			await setDoc(userDocRef, updatedStats, { merge: true });
 		}
 	}
-	useEffect(() => {
-		getUserInfo();
-	}, []);
+	// useEffect(() => {
+	// 	getUserInfo();
+	// }, []);
 
 	useEffect(() => {
+		getUserInfo()
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
+			console.log('auth changed!')
 			if (user) {
+				console.log(user)
 				setUser(user);
 			} else {
-				setUser(null);
+				anonSignIn().then((t) => {
+					if (t){
+						setUser(t)
+					}
+				})
 			}
 			setAuthChecked(true);
 		});

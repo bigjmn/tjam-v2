@@ -313,7 +313,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				{!isProcessing && (
 					<View style={styles.completeContainer}>
 						<Pressable style={styles.completeButton} onPress={onComplete}>
-							<ThemedText variant="strong">Continue to Menu</ThemedText>
+							<ThemedText variant="strong">Play Again</ThemedText>
 						</Pressable>
 					</View>
 				)}

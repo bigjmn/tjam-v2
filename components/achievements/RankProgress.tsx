@@ -1,7 +1,8 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 import ThemedText from '../ui/ThemedText';
+import { StarIcon } from './StarIcon';
 
 interface RankProgressProps {
 	rank: Rank;
@@ -66,16 +67,30 @@ interface StarProps {
 }
 
 const Star: React.FC<StarProps> = ({ progress }) => {
+	const [isFilled, setIsFilled] = React.useState(progress.value >= 1);
+
+	// React to progress changes
+	useAnimatedReaction(
+		() => progress.value >= 1,
+		(filled, prevFilled) => {
+			if (filled !== prevFilled) {
+				runOnJS(setIsFilled)(filled);
+			}
+		},
+		[progress]
+	);
+
 	const animatedStyle = useAnimatedStyle(() => {
+		const filled = progress.value >= 1;
 		return {
-			opacity: progress.value,
-			transform: [{ scale: 0.8 + progress.value * 0.2 }],
+			opacity: filled ? 1 : 0.5,
+			transform: [{ scale: filled ? 1 : 0.9 }],
 		};
 	});
 
 	return (
 		<Animated.View style={[styles.star, animatedStyle]}>
-			<ThemedText variant="header">⭐</ThemedText>
+			<StarIcon isFilled={isFilled} size={20} />
 		</Animated.View>
 	);
 };
@@ -93,8 +108,8 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	star: {
-		width: 32,
-		height: 32,
+		width: 24,
+		height: 24,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},

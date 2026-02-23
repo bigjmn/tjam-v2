@@ -2,7 +2,7 @@ import { Colors } from "../constants/Colors";
 import { ThemeContext } from "../providers/ThemeProvider";
 import { useContext } from "react";
 export function useTheme() {
-	const { theme, toggleTheme, sfxOn, toggleSfx } = useContext(ThemeContext);
+	const { theme, toggleTheme, sfxOn, toggleSfx, turnOffSound, turnOnSound } = useContext(ThemeContext);
 	const colors = Colors[theme];
 
 	return {
@@ -10,6 +10,8 @@ export function useTheme() {
 		toggleTheme,
 		colors,
 		sfxOn,
-		toggleSfx
+		toggleSfx,
+		turnOffSound,
+		turnOnSound
 	};
 }

@@ -11,6 +11,7 @@ import Animated, {
 	Easing,
 } from "react-native-reanimated";
 import { Tile as TileType, GRID_CELL_SIZE, GRID_GAP, HOME_ROW } from "./types";
+import { useSfx } from "../../hooks/useSfx";
 
 interface TileProps {
 	tile: TileType;
@@ -35,6 +36,7 @@ export function TileComponent({
 	onDragEnd,
 	isGreenPreview = false,
 }: TileProps) {
+	const { popSound } = useSfx();
 	const getTargetX = (col: number) => boardX + 4 + col * CELL_WITH_GAP;
 	const getTargetY = (row: number) => boardY + 4 + row * CELL_WITH_GAP;
 
@@ -108,6 +110,10 @@ export function TileComponent({
 		}
 	}, [tile.isHomeRowExiting]);
 
+	const playPopSound = () => {
+		popSound();
+	};
+
 	const handleDrop = (currentX: number, currentY: number) => {
 		const newCol = Math.round((currentX - boardX - 4) / CELL_WITH_GAP);
 		const newRow = Math.round((currentY - boardY - 4) / CELL_WITH_GAP);
@@ -168,6 +174,7 @@ export function TileComponent({
 			offsetX.value = 0;
 			offsetY.value = 0;
 			runOnJS(handleDrop)(currentX, currentY);
+			runOnJS(playPopSound)();
 			runOnJS(handleDragEndJS)();
 		});
 

@@ -12,7 +12,7 @@ const RootLayout = () => {
 		<ThemeProvider>
 			<UserProvider>
 				<StatusBar />
-				<ThemedView style={{ flex: 1 }}>
+				<ThemedView safe={true} style={{ flex: 1 }}>
 					<Stack
 						screenOptions={{
 							headerStyle: {

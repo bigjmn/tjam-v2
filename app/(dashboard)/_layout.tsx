@@ -6,6 +6,7 @@ export default function DashboardLayout() {
 			<Stack.Screen name="home" />
 			<Stack.Screen name="game" />
 			<Stack.Screen name="stats" />
+			<Stack.Screen name="settings" />
 		</Stack>
 	);
 }

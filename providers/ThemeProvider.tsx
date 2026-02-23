@@ -8,12 +8,16 @@ interface ThemeContextProps {
 	toggleTheme: () => void;
 	sfxOn: boolean;
 	toggleSfx: () => void;
+	turnOnSound: () => void;
+	turnOffSound: () => void;
 }
 export const ThemeContext = createContext<ThemeContextProps>({
 	theme: "light",
 	toggleTheme: () => {},
 	sfxOn: true,
 	toggleSfx: () => {},
+	turnOnSound: () => {},
+	turnOffSound: () => {}
 });
 
 const THEME_STORAGE_KEY = "@app_theme";
@@ -27,6 +31,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		loadSavedTheme();
 		loadSavedSfx();
 	}, []);
+
+	const turnOnSound = async () => {
+		
+		console.log('turning sound ON')
+		 
+		setSfxOn(true)
+		await AsyncStorage.setItem(SFX_STORAGE_KEY, "on")
+
+	}
+	const turnOffSound = async () => {
+		console.log('turning sound OFF')
+		setSfxOn(false)
+		await AsyncStorage.setItem(SFX_STORAGE_KEY, "off")
+
+	}
 
 	const loadSavedTheme = async () => {
 		try {
@@ -48,10 +67,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		try {
 			const savedSfx = await AsyncStorage.getItem(SFX_STORAGE_KEY)
 			if (savedSfx === "off"){
-				setSfxOn(false)
+				turnOffSound()
 			} else {
-				setSfxOn(true)
+				turnOnSound()
 			}
+			console.log("saved sound: ", savedSfx)
 		} catch (error){
 			console.log("failed to load sfx: ", error)
 		}
@@ -79,7 +99,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<ThemeContext.Provider value={{ theme, toggleTheme, sfxOn, toggleSfx }}>
+		<ThemeContext.Provider value={{ theme, toggleTheme, sfxOn, toggleSfx, turnOnSound, turnOffSound }}>
 			{children}
 		</ThemeContext.Provider>
 	);

@@ -12,6 +12,8 @@ import Animated, {
 } from "react-native-reanimated";
 import SquareLayer from "./SquareLayer";
 import { useGame } from "./useGame";
+import ThemedView from "../ui/ThemedView";
+import { useSfx } from "../../hooks/useSfx";
 
 // interface TileProps {
 //     id: string;
@@ -49,7 +51,7 @@ function Tile({
 	const translateY = useSharedValue(starty * 90 + 3);
 	//id of the square the tile is on
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
-
+	const { popSound } = useSfx()
 	//moving tile when touch ends.
 	const moveTile = useCallback(
 		(to: string) => {
@@ -157,6 +159,7 @@ function Tile({
 		})
 		.onEnd(() => {
 			isPressed.value = false;
+			runOnJS(popSound)()
 			//callback run on js thread
 			runOnJS(moveTile)(
 				toPosition({ x: translateX.value, y: translateY.value }),
@@ -224,13 +227,14 @@ export default function Game() {
 	}, []);
 
 	return (
-		<GestureHandlerRootView style={styles.outerContainer}>
-			<View style={styles.gameWrapper}>
-				<View style={styles.mainBoard}>
-					<View style={styles.layerWrapper}>
+		<GestureHandlerRootView>
+			<ThemedView style={styles.outerContainer}>
+			<ThemedView style={styles.gameWrapper}>
+				<ThemedView style={styles.mainBoard}>
+					<ThemedView style={styles.layerWrapper}>
 						<SquareLayer />
-					</View>
-					<View style={styles.layerWrapper}>
+					</ThemedView>
+					<ThemedView style={styles.layerWrapper}>
 						{tiles &&
 							tiles.map((tile) => (
 								<Tile
@@ -249,8 +253,8 @@ export default function Game() {
 									}
 								/>
 							))}
-					</View>
-				</View>
+					</ThemedView>
+				</ThemedView>
 				<View style={styles.scoreAndButton}>
 					<Pressable
 						disabled={!validBoard || !!inMotion}
@@ -267,7 +271,8 @@ export default function Game() {
 						<Text style={styles.scoreText}>Points: {wordNum}</Text>
 					</View>
 				</View>
-			</View>
+			</ThemedView>
+			</ThemedView>
 		</GestureHandlerRootView>
 	);
 }
@@ -309,7 +314,6 @@ const allSquares = () => {
 const styles = StyleSheet.create({
 	outerContainer: {
 		flex: 1,
-		backgroundColor: "#fff",
 		display: "flex",
 		flexDirection: "column",
 		justifyContent: "center",
@@ -318,7 +322,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		backgroundColor: "#fff",
+		
 		justifyContent: "center",
 		alignItems: "center",
 	},
@@ -380,6 +384,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		borderStyle: "solid",
 		borderWidth: 1,
+
 
 		borderColor: "black",
 	},

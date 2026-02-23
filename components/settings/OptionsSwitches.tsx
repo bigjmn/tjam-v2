@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native";
 import { useUser } from "../../hooks/useUser";
 import Spacer from "../ui/Spacer";
 export default function OptionSwitches(){
-    const { toggleTheme, theme, colors, sfxOn, toggleSfx } = useTheme()
+    const { toggleTheme, theme, colors, sfxOn, turnOffSound, turnOnSound } = useTheme()
     const { user } = useUser()
 
 
@@ -15,11 +15,12 @@ export default function OptionSwitches(){
             toggleTheme()
         }
     }
-    const toggleSoundTo = (soundSetting:boolean) => {
-        if (soundSetting !== sfxOn) {
-            toggleSfx()
-        }
-    }
+    // const toggleSoundTo = (soundSetting:boolean) => {
+    //     if (soundSetting !== sfxOn) {
+    //         console.log(sfxOn)
+    //         toggleSfx()
+    //     }
+    // }
 
     return (
         <ThemedView style={styles.container}>
@@ -43,11 +44,11 @@ export default function OptionSwitches(){
             <ThemedView style={styles.optionHolder}>
             <ThemedText style={{marginBottom:5}}>Answers</ThemedText>
             <ThemedView style={styles.buttonHolder}>
-                <ThemedButton onPress={() => toggleSoundTo(true)} style={{padding:3, width: 100, borderBottomLeftRadius:6, borderTopLeftRadius:6, borderBottomRightRadius:0, borderTopRightRadius:0, backgroundColor: sfxOn ? "#000" : colors.uiBackground}}>
-                    <ThemedText variant='medium' style={{color: "#fff"}}>Public</ThemedText>
+                <ThemedButton onPress={() => turnOnSound()} style={{padding:3, width: 100, borderBottomLeftRadius:6, borderTopLeftRadius:6, borderBottomRightRadius:0, borderTopRightRadius:0, backgroundColor: sfxOn ? "#000" : colors.uiBackground}}>
+                    <ThemedText variant='medium' style={{color: "#fff"}}>On</ThemedText>
                 </ThemedButton>
-                <ThemedButton onPress={() => toggleSoundTo(false)} style={{padding:3, width: 100, borderBottomLeftRadius:0, borderTopLeftRadius:0, borderBottomRightRadius:6, borderTopRightRadius:6, backgroundColor: sfxOn ? colors.uiBackground : "#000"}}>
-                    <ThemedText variant="medium" style={{color: "#fff"}}>Friends</ThemedText>
+                <ThemedButton onPress={() => turnOffSound()} style={{padding:3, width: 100, borderBottomLeftRadius:0, borderTopLeftRadius:0, borderBottomRightRadius:6, borderTopRightRadius:6, backgroundColor: sfxOn ? colors.uiBackground : "#000"}}>
+                    <ThemedText variant="medium" style={{color: "#fff"}}>Off</ThemedText>
                 </ThemedButton>
             </ThemedView>
             {sfxOn && <ThemedText variant="italic">Those sweet sweet dopamine triggers.</ThemedText>}

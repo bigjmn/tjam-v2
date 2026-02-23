@@ -16,7 +16,7 @@ export const Colors = {
 		navBackground: "#2D2535",
 		iconColor: "#9CA3AF",
 		iconColorFocused: "#A78BFA",
-		uiBackground: "rgba(139,92,246,.2)",
+		uiBackground: "rgba(0,0,0,.2)",
 	},
 	light: {
 		primary: commonColors.primary,

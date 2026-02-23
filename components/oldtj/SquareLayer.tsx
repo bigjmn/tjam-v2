@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
-
+import ThemedView from "../ui/ThemedView";
+import { useTheme } from "../../hooks/useTheme";
 const makeSquares = () => {
 	let squarelist = [];
 	for (let i = 0; i < 3; i++) {
@@ -19,11 +20,12 @@ const makeSquares = () => {
 };
 export default function SquareLayer() {
 	const squarelist = makeSquares();
+	const {theme, colors} = useTheme()
 
 	return (
-		<View style={styles.outerContainer}>
+		<ThemedView style={styles.outerContainer}>
 			{squarelist.map((square) => (
-				<View
+				<ThemedView
 					key={square.id}
 					style={{
 						position: "absolute",
@@ -32,13 +34,14 @@ export default function SquareLayer() {
 						height: 90,
 						width: 90,
 						borderWidth: 3,
-						borderColor: "white",
+						// borderColor: "white",
 						borderRadius: 12,
-						backgroundColor: "#e4e4e4",
+						backgroundColor: colors.uiBackground
+						// backgroundColor: "#e4e4e4",
 					}}
-				></View>
+				></ThemedView>
 			))}
-		</View>
+		</ThemedView>
 	);
 }
 

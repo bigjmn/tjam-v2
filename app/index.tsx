@@ -16,6 +16,9 @@ const Home = () => {
 			<Link href="/home">
 				<ThemedText>To page</ThemedText>
 			</Link>
+			<Link href="/settings">
+				<ThemedText>To settings</ThemedText>
+			</Link>
 			<GoogleSigninButton onPress={signInWithGoogle} />
 		</ThemedView>
 	);

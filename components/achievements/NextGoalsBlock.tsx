@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { AchievementTile } from './AchievementTile';
 import ThemedText from '../ui/ThemedText';
+import { useSfx } from '../../hooks/useSfx';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -29,6 +30,7 @@ export interface NextGoalsBlockHandle {
 
 export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockProps>(
 	({ scoringAchievement, streakingAchievement, noveltyAchievement }, ref) => {
+		const { achieveSound } = useSfx();
 		const [scoring, setScoring] = useState(scoringAchievement);
 		const [streaking, setStreaking] = useState(streakingAchievement);
 		const [novelty, setNovelty] = useState(noveltyAchievement);
@@ -82,6 +84,7 @@ export const NextGoalsBlock = forwardRef<NextGoalsBlockHandle, NextGoalsBlockPro
 						: setNoveltyWon;
 
 				runOnJS(setWon)(true);
+				runOnJS(achieveSound)();
 
 				// Step 1: Pulse animation (300ms)
 				pulseScale.value = withSequence(

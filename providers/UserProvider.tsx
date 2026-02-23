@@ -15,7 +15,7 @@ import {
 // import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth"
 import { firestore } from "../lib/firebase";
 import { doc, collection, setDoc, getDoc } from "firebase/firestore";
-import { googleGetCred } from "../components/auth/GoogleLoginButton";
+import { googleGetCred, getGoogleName } from "../components/auth/GoogleLoginButton";
 import { usernameNumberTail } from "../utils/helpers";
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -56,13 +56,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			}
 			const googleUser = await linkWithCredential(user, googleCred);
 			const googleUserData = googleUser.user;
+			const nm = googleUserData
 			const uid = googleUserData.uid;
 			const udocRef = doc(firestore, "users", uid).withConverter(playerStatConverter);
 			const uDoc = await getDoc(udocRef);
 			if (!uDoc.exists()) {
 				
 				const userEmail = googleUserData.email!;
-				let newUsername = googleUserData.displayName || userEmail.split("@")[0];
+				let newUsername = getGoogleName() || googleUserData.displayName || userEmail.split("@")[0];
 				const uNameDocRef = doc(firestore, "usernames", newUsername);
 				const uNameDoc = await getDoc(uNameDocRef);
 				if (uNameDoc.exists()) {
@@ -77,15 +78,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 					userid: googleUserData.uid,
 				});
 			} else {
-				const pstats = uDoc.data();
-				setPlayerStats(pstats)
+				const playstats = uDoc.data();
 				const userEmail = googleUserData.email!;
-				let newUsername = googleUserData.displayName || userEmail.split("@")[0];
+				let newUsername = getGoogleName() || userEmail.split("@")[0];
+				
+
 				const uNameDocRef = doc(firestore, "usernames", newUsername);
 				const uNameDoc = await getDoc(uNameDocRef);
-				if (uNameDoc.exists()) {
+				if (uNameDoc.exists() && uNameDoc.data().userid !== googleUserData.uid) {
 					newUsername += usernameNumberTail();
 				}
+				const pstats = { ...playstats, email: userEmail, username: newUsername}
+				setPlayerStats(pstats)
 				await setDoc(udocRef, {
 					...pstats,
 					

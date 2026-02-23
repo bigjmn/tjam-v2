@@ -32,3 +32,12 @@ export const googleGetCred = async () => {
 		console.log("Error", error);
 	}
 };
+
+export const getGoogleName = () => {
+	const currentUser = GoogleSignin.getCurrentUser()
+	if (!currentUser){
+		return null
+	}
+	const uname = currentUser.user.name
+	return uname 
+}

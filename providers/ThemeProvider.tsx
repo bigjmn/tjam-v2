@@ -6,10 +6,14 @@ type ThemeStyle = "light" | "dark";
 interface ThemeContextProps {
 	theme: ThemeStyle;
 	toggleTheme: () => void;
+	sfxOn: boolean;
+	toggleSfx: () => void;
 }
 export const ThemeContext = createContext<ThemeContextProps>({
 	theme: "light",
 	toggleTheme: () => {},
+	sfxOn: true,
+	toggleSfx: () => {},
 });
 
 const THEME_STORAGE_KEY = "@app_theme";
@@ -21,6 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		loadSavedTheme();
+		loadSavedSfx();
 	}, []);
 
 	const loadSavedTheme = async () => {
@@ -74,7 +79,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<ThemeContext.Provider value={{ theme, toggleTheme }}>
+		<ThemeContext.Provider value={{ theme, toggleTheme, sfxOn, toggleSfx }}>
 			{children}
 		</ThemeContext.Provider>
 	);

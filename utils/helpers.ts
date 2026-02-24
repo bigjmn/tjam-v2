@@ -5,6 +5,7 @@ import {
 	QueryDocumentSnapshot,
 	DocumentData,
 } from "firebase/firestore";
+import moment from "moment";
 //fisher-yates shuffle
 export function shuffle<T>(array: T[]) {
 	var m = array.length,
@@ -157,3 +158,14 @@ export const bareBilly = (turns: TurnInfo[]) => {
 	}
 	return false;
 };
+
+export const weekBest = (pstat:PlayerStats) => {
+	const cutoff = moment(Date()).startOf('day').subtract(1, "week")
+	const possibleGames = pstat.gameHist.filter(gr => (gr.timestamp > cutoff.toDate()) && !gr.abandoned).sort((a, b) => b.score-a.score)
+	return possibleGames.length === 0 ? 0 : possibleGames[0].score 
+}
+
+export const playerToLeader = (pstat:PlayerStats):BaseLeader => {
+	const uname = pstat.username || ""
+	return {id: pstat.id, bestAllTime: pstat.topScore, username: uname, bestWeek: weekBest(pstat)}
+}

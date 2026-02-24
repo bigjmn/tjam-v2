@@ -52,6 +52,22 @@ interface PlayerDoc extends PlayerStats {
 	email: string;
 	lastUpdate: Date;
 }
+interface BaseLeader {
+	id: string; 
+	bestAllTime: number;
+	username: string;
+	bestWeek: number;
+}
+interface GlobalLeader extends BaseLeader {
+	type: "global";
+	globalRank: number
+}
+interface WeeklyLeader extends BaseLeader {
+	type: "weekly";
+	weeklyRank: number;
+}
+
+type Leader = GlobalLeader | WeeklyLeader
 
 interface BaseAchievement {
 	key: string;

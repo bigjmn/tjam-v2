@@ -19,6 +19,7 @@ export const PlayCard = ({wordOfDay}:PlayCardProps) => {
             <Image 
             source={trioImage}
             contentFit="cover"
+            style={styles.imageStyle}
             />
             <View>
                 <ThemedText variant="header">Trio Jam</ThemedText>
@@ -44,5 +45,9 @@ const styles = StyleSheet.create({
         height: 120,
         width: "80%",
         flexDirection: "row"
+    },
+    imageStyle: {
+        height:50,
+        width:50
     }
 })

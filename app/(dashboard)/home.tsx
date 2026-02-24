@@ -1,26 +1,44 @@
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import ThemedText from "../../components/ui/ThemedText";
 import ThemedView from "../../components/ui/ThemedView";
+import ThemedButton from "../../components/ui/ThemedButton";
+import { PlayCard } from "../../components/home/PlayCard";
 
 const Home = () => {
+	const WORD_OF_DAY = "CAT"
 	const router = useRouter();
 
 	return (
 		<ThemedView style={styles.container}>
-			<ThemedText style={styles.title}>Trio Jam</ThemedText>
-			<Pressable
+			<TouchableOpacity onPress={() => router.push("/(dashboard)/game")}>
+			<PlayCard wordOfDay={WORD_OF_DAY} />
+			</TouchableOpacity>
+			{/* <ThemedText style={styles.title}>Trio Jam</ThemedText>
+			<ThemedButton
 				style={styles.playButton}
 				onPress={() => router.push("/(dashboard)/game")}
 			>
 				<ThemedText style={styles.playButtonText}>Play</ThemedText>
-			</Pressable>
-			<Pressable
+			</ThemedButton>
+			<ThemedButton
 				style={styles.playButton}
 				onPress={() => router.push("/(dashboard)/stats")}
 			>
 				<ThemedText style={styles.playButtonText}>stats</ThemedText>
-			</Pressable>
+			</ThemedButton>
+			<ThemedButton
+				style={styles.playButton}
+				onPress={() => router.push("/(dashboard)/leaderboard")}
+			>
+				<ThemedText style={styles.playButtonText}>Leaderboard</ThemedText>
+			</ThemedButton>
+			<Pressable
+				style={styles.playButton}
+				onPress={() => router.push("/(dashboard)/settings")}
+			>
+				<ThemedText style={styles.playButtonText}>Settings</ThemedText>
+			</Pressable> */}
 		</ThemedView>
 	);
 };

@@ -31,7 +31,7 @@ const RootLayout = () => {
 
 						<Stack.Screen
 							name="index"
-							options={{ title: "Home" }}
+							options={{ title: "RootHome" }}
 						/>
 					</Stack>
 				</ThemedView>

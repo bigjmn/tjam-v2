@@ -14,7 +14,8 @@ import SquareLayer from "./SquareLayer";
 import { useGame } from "./useGame";
 import ThemedView from "../ui/ThemedView";
 import { useSfx } from "../../hooks/useSfx";
-
+import ThemedButton from "../ui/ThemedButton";
+import { GameHeader } from "./GameHeader";
 // interface TileProps {
 //     id: string;
 //     letter: string;
@@ -229,6 +230,7 @@ export default function Game() {
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
+				<GameHeader />
 			<ThemedView style={styles.gameWrapper}>
 				<ThemedView style={styles.mainBoard}>
 					<ThemedView style={styles.layerWrapper}>
@@ -256,7 +258,17 @@ export default function Game() {
 					</ThemedView>
 				</ThemedView>
 				<View style={styles.scoreAndButton}>
-					<Pressable
+					<ThemedButton
+					disabled={!validBoard || !!inMotion}
+						style={[
+							styles.buttonStyle,
+							{ opacity: !validBoard || !!inMotion ? 0.3 : 1 },
+						]}
+						onPress={nextTurn}
+						hitSlop={10}>
+							<Text style={[styles.buttonText]}>Commit Move</Text>
+						</ThemedButton>
+					{/* <Pressable
 						disabled={!validBoard || !!inMotion}
 						style={[
 							styles.buttonStyle,
@@ -266,7 +278,7 @@ export default function Game() {
 						hitSlop={10}
 					>
 						<Text style={[styles.buttonText]}>Commit Move</Text>
-					</Pressable>
+					</Pressable> */}
 					<View style={styles.scoreHolder}>
 						<Text style={styles.scoreText}>Points: {wordNum}</Text>
 					</View>

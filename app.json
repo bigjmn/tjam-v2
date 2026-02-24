@@ -19,12 +19,12 @@
 			"infoPlist": {
 				"ITSAppUsesNonExemptEncryption": false,
 				"CFBundleURLTypes": [
-          {
-            "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.69866138009-ife8ui5n34uhgur4mqcsmjeol5s4o9nl"
-            ]
-          }
-        ]
+					{
+						"CFBundleURLSchemes": [
+							"com.googleusercontent.apps.69866138009-ife8ui5n34uhgur4mqcsmjeol5s4o9nl"
+						]
+					}
+				]
 			}
 		},
 		"android": {

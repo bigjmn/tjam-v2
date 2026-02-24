@@ -23,7 +23,7 @@ interface TileProps {
 	inMotion: string | null;
 }
 
-type ThemeStyle = "light"|"dark"
+type ThemeStyle = "light" | "dark";
 
 interface Tile {
 	id: string;
@@ -53,21 +53,21 @@ interface PlayerDoc extends PlayerStats {
 	lastUpdate: Date;
 }
 interface BaseLeader {
-	id: string; 
+	id: string;
 	bestAllTime: number;
 	username: string;
 	bestWeek: number;
 }
 interface GlobalLeader extends BaseLeader {
 	type: "global";
-	globalRank: number
+	globalRank: number;
 }
 interface WeeklyLeader extends BaseLeader {
 	type: "weekly";
 	weeklyRank: number;
 }
 
-type Leader = GlobalLeader | WeeklyLeader
+type Leader = GlobalLeader | WeeklyLeader;
 
 interface BaseAchievement {
 	key: string;
@@ -112,46 +112,50 @@ interface TurnInfo {
 }
 
 interface Rank {
-    name: string;
-    starsToFill: number;
+	name: string;
+	starsToFill: number;
 }
 
 interface BoardRank {
-	rankNo: number,
-	score: number,
-	username: string,
-	id: string
+	rankNo: number;
+	score: number;
+	username: string;
+	id: string;
 }
 interface AllTimeBoardRank extends BoardRank {
-	type: "all-time"
+	type: "all-time";
 }
 interface WeeklyBoardRank extends BoardRank {
-	type: "weekly"
+	type: "weekly";
 }
 
 // Achievement Animation Types
 type AnimationPhase =
-	| 'idle'
-	| 'next-goals-enter'
-	| 'next-goals-animating'
-	| 'next-goals-exit'
-	| 'legendary-enter'
-	| 'legendary-animating'
-	| 'legendary-exit'
-	| 'secret-enter'
-	| 'secret-animating'
-	| 'secret-exit'
-	| 'rank-up-modal'
-	| 'complete';
+	| "idle"
+	| "next-goals-enter"
+	| "next-goals-animating"
+	| "next-goals-exit"
+	| "legendary-enter"
+	| "legendary-animating"
+	| "legendary-exit"
+	| "secret-enter"
+	| "secret-animating"
+	| "secret-exit"
+	| "rank-up-modal"
+	| "complete";
 
-type FillStarEvent = { type: 'fillStar'; rankIndex: number };
+type FillStarEvent = { type: "fillStar"; rankIndex: number };
 type SlideTileEvent = {
-	type: 'slideTile';
-	direction: 'out' | 'in';
-	category: 'scoring' | 'streaking' | 'novelty';
-	newAchievement?: Achievement
+	type: "slideTile";
+	direction: "out" | "in";
+	category: "scoring" | "streaking" | "novelty";
+	newAchievement?: Achievement;
 };
-type RevealSecretEvent = { type: 'revealSecret'; achievementKey: string };
-type ShowRankUpEvent = { type: 'showRankUp'; newRank: Rank; rankIndex: number };
+type RevealSecretEvent = { type: "revealSecret"; achievementKey: string };
+type ShowRankUpEvent = { type: "showRankUp"; newRank: Rank; rankIndex: number };
 
-type AchievementAnimationEvent = FillStarEvent | SlideTileEvent | RevealSecretEvent | ShowRankUpEvent;
+type AchievementAnimationEvent =
+	| FillStarEvent
+	| SlideTileEvent
+	| RevealSecretEvent
+	| ShowRankUpEvent;

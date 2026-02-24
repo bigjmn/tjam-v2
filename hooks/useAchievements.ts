@@ -5,8 +5,8 @@ import {
 	noveltyAchievements,
 	secretAchievements,
 	legendaryAchievements,
-    allAchievements,
-    ranksList
+	allAchievements,
+	ranksList,
 } from "../utils/achievements";
 import { groupFreq, bareBilly } from "../utils/helpers";
 
@@ -112,29 +112,38 @@ export const useAchievements = () => {
 		return newAchievements;
 	};
 
-    const scoreAndRank = () => {
-        const sum = allAchievements.reduce((accumulator, currentValue) => {
-        return playerStats.achievementsWon.includes(currentValue.key) ? accumulator + currentValue.reward : accumulator;
-}, 0);
-    let tempVal = sum;
-    for (let i = 0; i < ranksList.length; i++){
-        const rank = ranksList[i];
-        if (rank.starsToFill > tempVal){
-            return {playerRank: rank, starsEarned: tempVal}
-        }
-        tempVal -= rank.starsToFill;
-    }
-    // If we've gone through all ranks, return the last rank
-    return {playerRank: ranksList[ranksList.length - 1], starsEarned: tempVal}
-    }
+	const scoreAndRank = () => {
+		const sum = allAchievements.reduce((accumulator, currentValue) => {
+			return playerStats.achievementsWon.includes(currentValue.key)
+				? accumulator + currentValue.reward
+				: accumulator;
+		}, 0);
+		let tempVal = sum;
+		for (let i = 0; i < ranksList.length; i++) {
+			const rank = ranksList[i];
+			if (rank.starsToFill > tempVal) {
+				return { playerRank: rank, starsEarned: tempVal };
+			}
+			tempVal -= rank.starsToFill;
+		}
+		// If we've gone through all ranks, return the last rank
+		return {
+			playerRank: ranksList[ranksList.length - 1],
+			starsEarned: tempVal,
+		};
+	};
 
 	/**
 	 * Get the next uncompleted achievements for the Next Goals section
 	 * Can optionally pass in a new top score and current achievements to calculate what's next
 	 */
-	const getNextAchievements = (newTopScore?: number, currentAchievements?: string[]) => {
+	const getNextAchievements = (
+		newTopScore?: number,
+		currentAchievements?: string[],
+	) => {
 		const topScore = newTopScore ?? playerStats.topScore;
-		const wonAchievements = currentAchievements ?? playerStats.achievementsWon;
+		const wonAchievements =
+			currentAchievements ?? playerStats.achievementsWon;
 
 		// Find next scoring goal based on top score
 		const nextScoringGoal = scoringAchievements
@@ -165,7 +174,9 @@ export const useAchievements = () => {
 	/**
 	 * Categorize earned achievement keys into Next Goals, Legendary, and Secret
 	 */
-	const categorizeAchievements = (keys: string[]): {
+	const categorizeAchievements = (
+		keys: string[],
+	): {
 		nextGoals: string[];
 		legendary: string[];
 		secret: string[];
@@ -201,7 +212,11 @@ export const useAchievements = () => {
 	const calculateRankChanges = (
 		earnedKeys: string[],
 	): Array<{ starIndex: number; newRank: Rank; rankIndex: number }> => {
-		const rankChanges: Array<{ starIndex: number; newRank: Rank; rankIndex: number }> = [];
+		const rankChanges: Array<{
+			starIndex: number;
+			newRank: Rank;
+			rankIndex: number;
+		}> = [];
 
 		// Calculate current stars and rank
 		let currentStars = allAchievements.reduce((sum, achievement) => {
@@ -254,7 +269,13 @@ export const useAchievements = () => {
 		return rankChanges;
 	};
 
-	return { gameAchievements, getNextAchievements, categorizeAchievements, calculateRankChanges, scoreAndRank };
+	return {
+		gameAchievements,
+		getNextAchievements,
+		categorizeAchievements,
+		calculateRankChanges,
+		scoreAndRank,
+	};
 };
 
 const eCount = (letterlist: string[]) => {

@@ -6,13 +6,13 @@ import ThemedButton from "../../components/ui/ThemedButton";
 import { PlayCard } from "../../components/home/PlayCard";
 
 const Home = () => {
-	const WORD_OF_DAY = "CAT"
+	const WORD_OF_DAY = "CAT";
 	const router = useRouter();
 
 	return (
 		<ThemedView style={styles.container}>
 			<TouchableOpacity onPress={() => router.push("/(dashboard)/game")}>
-			<PlayCard wordOfDay={WORD_OF_DAY} />
+				<PlayCard wordOfDay={WORD_OF_DAY} />
 			</TouchableOpacity>
 			{/* <ThemedText style={styles.title}>Trio Jam</ThemedText>
 			<ThemedButton

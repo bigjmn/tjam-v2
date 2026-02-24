@@ -202,7 +202,7 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		type: "novelty",
 		reward: 3,
 	},
-	
+
 	{
 		key: "qclear",
 		name: "Q Slayer",
@@ -291,17 +291,17 @@ export const allAchievements: Achievement[] = [
 	...secretAchievements,
 ];
 export const ranksList: Rank[] = [
-	{name: "Newbie", starsToFill: 3},
-	{name: "Rookie", starsToFill: 3},
-	{name: "Showing Promise", starsToFill: 3},
-	{name: "Not Half Brad", starsToFill: 5},
-	{name: "Pretty Dece", starsToFill: 5},
-	{name: "Semi-Pro (starring Will Ferrell)", starsToFill: 5},
-	{name: "Seasoned Player", starsToFill: 5},
-	{name: "Pro", starsToFill: 5},
-	{name: "Expert", starsToFill: 5},
-	{name: "Master", starsToFill: 5},
-	{name: "Senior Master", starsToFill: 5},
-	{name: "International Master", starsToFill: 5},
-	{name: "Grandmaster", starsToFill: 5},
+	{ name: "Newbie", starsToFill: 3 },
+	{ name: "Rookie", starsToFill: 3 },
+	{ name: "Showing Promise", starsToFill: 3 },
+	{ name: "Not Half Brad", starsToFill: 5 },
+	{ name: "Pretty Dece", starsToFill: 5 },
+	{ name: "Semi-Pro (starring Will Ferrell)", starsToFill: 5 },
+	{ name: "Seasoned Player", starsToFill: 5 },
+	{ name: "Pro", starsToFill: 5 },
+	{ name: "Expert", starsToFill: 5 },
+	{ name: "Master", starsToFill: 5 },
+	{ name: "Senior Master", starsToFill: 5 },
+	{ name: "International Master", starsToFill: 5 },
+	{ name: "Grandmaster", starsToFill: 5 },
 ];

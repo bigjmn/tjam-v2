@@ -1,15 +1,15 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { RankProgress, RankProgressHandle } from './RankProgress';
-import { NextGoalsBlock, NextGoalsBlockHandle } from './NextGoalsBlock';
-import { LegendaryBlock, LegendaryBlockHandle } from './LegendaryBlock';
-import { SecretBlock, SecretBlockHandle } from './SecretBlock';
-import { RankUpModal, RankUpModalHandle } from './RankUpModal';
-import { useAchievements } from '../../hooks/useAchievements';
-import { useUser } from '../../hooks/useUser';
-import { allAchievements, ranksList } from '../../utils/achievements';
-import ThemedText from '../ui/ThemedText';
+import React, { useRef, useEffect, useState } from "react";
+import { View, StyleSheet, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { RankProgress, RankProgressHandle } from "./RankProgress";
+import { NextGoalsBlock, NextGoalsBlockHandle } from "./NextGoalsBlock";
+import { LegendaryBlock, LegendaryBlockHandle } from "./LegendaryBlock";
+import { SecretBlock, SecretBlockHandle } from "./SecretBlock";
+import { RankUpModal, RankUpModalHandle } from "./RankUpModal";
+import { useAchievements } from "../../hooks/useAchievements";
+import { useUser } from "../../hooks/useUser";
+import { allAchievements, ranksList } from "../../utils/achievements";
+import ThemedText from "../ui/ThemedText";
 
 interface AchievementsScreenProps {
 	earnedKeys: string[];
@@ -24,7 +24,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 }) => {
 	const achievements = useAchievements();
 	const { playerStats } = useUser();
-	const [phase, setPhase] = useState<AnimationPhase>('idle');
+	const [phase, setPhase] = useState<AnimationPhase>("idle");
 	const [isProcessing, setIsProcessing] = useState(true);
 
 	const rankProgressRef = useRef<RankProgressHandle>(null);
@@ -35,7 +35,10 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 	// Calculate initial rank and stars
 	const { playerRank: initialRank, starsEarned: initialStars } =
-		achievements?.scoreAndRank() || { playerRank: ranksList[0], starsEarned: 0 };
+		achievements?.scoreAndRank() || {
+			playerRank: ranksList[0],
+			starsEarned: 0,
+		};
 
 	const [currentRankIndex, setCurrentRankIndex] = useState(() => {
 		return ranksList.findIndex((r) => r.name === initialRank.name);
@@ -46,7 +49,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	const buildAnimationQueue = (): AchievementAnimationEvent[] => {
 		if (!achievements || !playerStats) return [];
 
-		const { nextGoals, legendary, secret } = achievements.categorizeAchievements(earnedKeys);
+		const { nextGoals, legendary, secret } =
+			achievements.categorizeAchievements(earnedKeys);
 		const rankChanges = achievements.calculateRankChanges(earnedKeys);
 
 		const queue: AchievementAnimationEvent[] = [];
@@ -59,12 +63,12 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 		// Find the highest scoring achievement threshold in earned keys to use as simulated top score
 		const earnedScoringAchievements = nextGoals
-			.map(key => allAchievements.find(a => a.key === key))
-			.filter((a): a is ScoringAchievement => a?.type === 'scoring');
+			.map((key) => allAchievements.find((a) => a.key === key))
+			.filter((a): a is ScoringAchievement => a?.type === "scoring");
 
 		if (earnedScoringAchievements.length > 0) {
 			const highestThreshold = Math.max(
-				...earnedScoringAchievements.map(a => a.scoreThreshhold)
+				...earnedScoringAchievements.map((a) => a.scoreThreshhold),
 			);
 			simulatedTopScore = Math.max(simulatedTopScore, highestThreshold);
 		}
@@ -75,20 +79,25 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			if (!achievement) continue;
 
 			// Determine category
-			let category: 'scoring' | 'streaking' | 'novelty' = 'scoring';
-			if (achievement.type === 'streaking') category = 'streaking';
-			else if (achievement.type === 'novelty') category = 'novelty';
+			let category: "scoring" | "streaking" | "novelty" = "scoring";
+			if (achievement.type === "streaking") category = "streaking";
+			else if (achievement.type === "novelty") category = "novelty";
 
 			// Add star fills
 			for (let i = 0; i < achievement.reward; i++) {
 				starCounter++;
-				queue.push({ type: 'fillStar', rankIndex: currentRankIndex } as FillStarEvent);
+				queue.push({
+					type: "fillStar",
+					rankIndex: currentRankIndex,
+				} as FillStarEvent);
 
 				// Check for rank-up
-				const rankChange = rankChanges.find((rc) => rc.starIndex === starCounter);
+				const rankChange = rankChanges.find(
+					(rc) => rc.starIndex === starCounter,
+				);
 				if (rankChange) {
 					queue.push({
-						type: 'showRankUp',
+						type: "showRankUp",
 						newRank: rankChange.newRank,
 						rankIndex: rankChange.rankIndex,
 					} as ShowRankUpEvent);
@@ -101,31 +110,38 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			// Check if this achievement progresses to a new goal
 			const nextGoalsAfterThis = achievements.getNextAchievements(
 				simulatedTopScore,
-				simulatedAchievements
+				simulatedAchievements,
 			);
 
 			if (nextGoalsAfterThis) {
 				let newAchievement: Achievement | undefined;
 
-				if (category === 'scoring' && achievement.key !== nextGoalsAfterThis.scoring.key) {
+				if (
+					category === "scoring" &&
+					achievement.key !== nextGoalsAfterThis.scoring.key
+				) {
 					newAchievement = nextGoalsAfterThis.scoring;
 				} else if (
-					category === 'streaking' &&
+					category === "streaking" &&
 					achievement.key !== nextGoalsAfterThis.streaking.key
 				) {
 					newAchievement = nextGoalsAfterThis.streaking;
 				} else if (
-					category === 'novelty' &&
+					category === "novelty" &&
 					achievement.key !== nextGoalsAfterThis.novelty.key
 				) {
 					newAchievement = nextGoalsAfterThis.novelty;
 				}
 
 				if (newAchievement) {
-					queue.push({ type: 'slideTile', direction: 'out', category } as SlideTileEvent);
 					queue.push({
-						type: 'slideTile',
-						direction: 'in',
+						type: "slideTile",
+						direction: "out",
+						category,
+					} as SlideTileEvent);
+					queue.push({
+						type: "slideTile",
+						direction: "in",
 						category,
 						newAchievement,
 					} as SlideTileEvent);
@@ -140,12 +156,17 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 			for (let i = 0; i < achievement.reward; i++) {
 				starCounter++;
-				queue.push({ type: 'fillStar', rankIndex: currentRankIndex } as FillStarEvent);
+				queue.push({
+					type: "fillStar",
+					rankIndex: currentRankIndex,
+				} as FillStarEvent);
 
-				const rankChange = rankChanges.find((rc) => rc.starIndex === starCounter);
+				const rankChange = rankChanges.find(
+					(rc) => rc.starIndex === starCounter,
+				);
 				if (rankChange) {
 					queue.push({
-						type: 'showRankUp',
+						type: "showRankUp",
 						newRank: rankChange.newRank,
 						rankIndex: rankChange.rankIndex,
 					} as ShowRankUpEvent);
@@ -158,16 +179,24 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			const achievement = allAchievements.find((a) => a.key === key);
 			if (!achievement) continue;
 
-			queue.push({ type: 'revealSecret', achievementKey: key } as RevealSecretEvent);
+			queue.push({
+				type: "revealSecret",
+				achievementKey: key,
+			} as RevealSecretEvent);
 
 			for (let i = 0; i < achievement.reward; i++) {
 				starCounter++;
-				queue.push({ type: 'fillStar', rankIndex: currentRankIndex } as FillStarEvent);
+				queue.push({
+					type: "fillStar",
+					rankIndex: currentRankIndex,
+				} as FillStarEvent);
 
-				const rankChange = rankChanges.find((rc) => rc.starIndex === starCounter);
+				const rankChange = rankChanges.find(
+					(rc) => rc.starIndex === starCounter,
+				);
 				if (rankChange) {
 					queue.push({
-						type: 'showRankUp',
+						type: "showRankUp",
 						newRank: rankChange.newRank,
 						rankIndex: rankChange.rankIndex,
 					} as ShowRankUpEvent);
@@ -182,50 +211,57 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		if (!achievements) return;
 
 		const queue = buildAnimationQueue();
-		const { nextGoals, legendary, secret } = achievements.categorizeAchievements(earnedKeys);
+		const { nextGoals, legendary, secret } =
+			achievements.categorizeAchievements(earnedKeys);
 
 		// Enter Next Goals block if there are any
 		if (nextGoals.length > 0) {
-			setPhase('next-goals-enter');
+			setPhase("next-goals-enter");
 			await nextGoalsRef.current?.enter();
 			await delay(200);
-			setPhase('next-goals-animating');
+			setPhase("next-goals-animating");
 		}
 
 		// Process queue
 		for (const event of queue) {
-			if (event.type === 'fillStar') {
+			if (event.type === "fillStar") {
 				await rankProgressRef.current?.fillNextStar();
 				setStarsInCurrentRank((prev) => prev + 1);
 				await delay(400);
-			} else if (event.type === 'slideTile') {
+			} else if (event.type === "slideTile") {
 				const slideEvent = event as unknown as SlideTileEvent;
-				if (slideEvent.direction === 'out') {
+				if (slideEvent.direction === "out") {
 					await nextGoalsRef.current?.slideOut(slideEvent.category);
-				} else if (slideEvent.direction === 'in' && slideEvent.newAchievement) {
+				} else if (
+					slideEvent.direction === "in" &&
+					slideEvent.newAchievement
+				) {
 					await nextGoalsRef.current?.slideIn(
 						slideEvent.category,
-						slideEvent.newAchievement
+						slideEvent.newAchievement,
 					);
 				}
 				await delay(200);
-			} else if (event.type === 'revealSecret') {
+			} else if (event.type === "revealSecret") {
 				const revealEvent = event as unknown as RevealSecretEvent;
 				await secretRef.current?.revealTile(revealEvent.achievementKey);
 				await delay(400);
-			} else if (event.type === 'showRankUp') {
+			} else if (event.type === "showRankUp") {
 				const rankUpEvent = event as unknown as ShowRankUpEvent;
-				setPhase('rank-up-modal');
+				setPhase("rank-up-modal");
 				await rankUpModalRef.current?.show(rankUpEvent.newRank);
 				setCurrentRankIndex(rankUpEvent.rankIndex);
 				setStarsInCurrentRank(0);
 				// Continue with previous phase
-				if (nextGoals.length > 0 && queue.indexOf(event) < queue.length - 1) {
-					setPhase('next-goals-animating');
+				if (
+					nextGoals.length > 0 &&
+					queue.indexOf(event) < queue.length - 1
+				) {
+					setPhase("next-goals-animating");
 				} else if (legendary.length > 0) {
-					setPhase('legendary-animating');
+					setPhase("legendary-animating");
 				} else if (secret.length > 0) {
-					setPhase('secret-animating');
+					setPhase("secret-animating");
 				}
 				await delay(200);
 			}
@@ -233,36 +269,36 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 		// Exit Next Goals if present
 		if (nextGoals.length > 0) {
-			setPhase('next-goals-exit');
+			setPhase("next-goals-exit");
 			await nextGoalsRef.current?.exit();
 			await delay(200);
 		}
 
 		// Show Legendary block if any
 		if (legendary.length > 0) {
-			setPhase('legendary-enter');
+			setPhase("legendary-enter");
 			await legendaryRef.current?.enter();
 			await delay(200);
-			setPhase('legendary-animating');
+			setPhase("legendary-animating");
 			// Stars already filled in queue
-			setPhase('legendary-exit');
+			setPhase("legendary-exit");
 			await legendaryRef.current?.exit();
 			await delay(200);
 		}
 
 		// Show Secret block if any
 		if (secret.length > 0) {
-			setPhase('secret-enter');
+			setPhase("secret-enter");
 			await secretRef.current?.enter();
 			await delay(200);
-			setPhase('secret-animating');
+			setPhase("secret-animating");
 			// Reveals and stars already done in queue
-			setPhase('secret-exit');
+			setPhase("secret-exit");
 			await secretRef.current?.exit();
 			await delay(200);
 		}
 
-		setPhase('complete');
+		setPhase("complete");
 		setIsProcessing(false);
 	};
 
@@ -271,12 +307,15 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	}, []);
 
 	const nextAchievements = achievements?.getNextAchievements();
-	const { nextGoals: nextGoalKeys, legendary: legendaryKeys, secret: secretKeys } =
-		achievements?.categorizeAchievements(earnedKeys) || {
-			nextGoals: [],
-			legendary: [],
-			secret: [],
-		};
+	const {
+		nextGoals: nextGoalKeys,
+		legendary: legendaryKeys,
+		secret: secretKeys,
+	} = achievements?.categorizeAchievements(earnedKeys) || {
+		nextGoals: [],
+		legendary: [],
+		secret: [],
+	};
 
 	const currentRank = ranksList[currentRankIndex];
 
@@ -302,7 +341,10 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				)}
 
 				{legendaryKeys.length > 0 && (
-					<LegendaryBlock ref={legendaryRef} earnedKeys={legendaryKeys} />
+					<LegendaryBlock
+						ref={legendaryRef}
+						earnedKeys={legendaryKeys}
+					/>
 				)}
 
 				{secretKeys.length > 0 && (
@@ -312,7 +354,10 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				{/* Complete button */}
 				{!isProcessing && (
 					<View style={styles.completeContainer}>
-						<Pressable style={styles.completeButton} onPress={onComplete}>
+						<Pressable
+							style={styles.completeButton}
+							onPress={onComplete}
+						>
 							<ThemedText variant="strong">Play Again</ThemedText>
 						</Pressable>
 					</View>
@@ -328,21 +373,21 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#1a1a1a',
+		backgroundColor: "#1a1a1a",
 	},
 	content: {
 		flex: 1,
 	},
 	completeContainer: {
 		padding: 16,
-		alignItems: 'center',
+		alignItems: "center",
 	},
 	completeButton: {
-		backgroundColor: '#4a4a4a',
+		backgroundColor: "#4a4a4a",
 		paddingHorizontal: 32,
 		paddingVertical: 16,
 		borderRadius: 12,
 		minWidth: 200,
-		alignItems: 'center',
+		alignItems: "center",
 	},
 });

@@ -7,11 +7,11 @@ interface ThemedButtonProps {
 	[key: string]: any;
 }
 interface UnderlinedButtonProps {
-    style?: StyleProp<ViewStyle>;
-    name: string;
-    isActive:boolean;
-    [key: string]: any;
-  }
+	style?: StyleProp<ViewStyle>;
+	name: string;
+	isActive: boolean;
+	[key: string]: any;
+}
 function ThemedButton({ style, ...props }: ThemedButtonProps) {
 	return (
 		<Pressable
@@ -24,21 +24,34 @@ function ThemedButton({ style, ...props }: ThemedButtonProps) {
 		/>
 	);
 }
-export function UnderlinedButton({style, name, isActive, ...props}:UnderlinedButtonProps){
-  const { colors } = useTheme()
+export function UnderlinedButton({
+	style,
+	name,
+	isActive,
+	...props
+}: UnderlinedButtonProps) {
+	const { colors } = useTheme();
 
-  return (
-    <Pressable 
-    style={({pressed}) => [styles.ulineBtn, pressed && styles.pressed, style]}
-    {...props}
-    >
-      <ThemedText variant="medium" style={{color: isActive ? colors.secondary : colors.text, textDecorationLine:"underline" }}>
-        {name}
-      </ThemedText>
-
-    </Pressable>
-  )
-
+	return (
+		<Pressable
+			style={({ pressed }) => [
+				styles.ulineBtn,
+				pressed && styles.pressed,
+				style,
+			]}
+			{...props}
+		>
+			<ThemedText
+				variant="medium"
+				style={{
+					color: isActive ? colors.secondary : colors.text,
+					textDecorationLine: "underline",
+				}}
+			>
+				{name}
+			</ThemedText>
+		</Pressable>
+	);
 }
 const styles = StyleSheet.create({
 	btn: {
@@ -52,11 +65,11 @@ const styles = StyleSheet.create({
 		opacity: 0.5,
 	},
 	ulineBtn: {
-      padding: 10,
-      borderRadius: 6,
-      marginVertical: 5,
-      alignItems: "center",
-    }
+		padding: 10,
+		borderRadius: 6,
+		marginVertical: 5,
+		alignItems: "center",
+	},
 });
 
 export default ThemedButton;

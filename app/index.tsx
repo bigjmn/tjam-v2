@@ -6,13 +6,13 @@ import { Grid3x3 } from "../components/fliptest";
 import { useUser } from "../hooks/useUser";
 import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 const Home = () => {
-	const { signInWithGoogle } = useUser()
-	
+	const { signInWithGoogle } = useUser();
+
 	return (
 		<ThemedView style={styles.container}>
 			<ThemedText>Home</ThemedText>
-			
-			<View style={styles.headbutton} >
+
+			<View style={styles.headbutton}>
 				<View />
 				<ThemedText>Trio Jame</ThemedText>
 			</View>
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 	headbutton: {
 		flexDirection: "row",
 		width: "70%",
-		justifyContent: "space-between"
-	}
+		justifyContent: "space-between",
+	},
 });
 export default Home;

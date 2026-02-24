@@ -1,17 +1,17 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { forwardRef, useImperativeHandle } from "react";
+import { View, StyleSheet, Dimensions } from "react-native";
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
 	withTiming,
 	Easing,
 	runOnJS,
-} from 'react-native-reanimated';
-import { AchievementTile } from './AchievementTile';
-import ThemedText from '../ui/ThemedText';
-import { allAchievements } from '../../utils/achievements';
+} from "react-native-reanimated";
+import { AchievementTile } from "./AchievementTile";
+import ThemedText from "../ui/ThemedText";
+import { allAchievements } from "../../utils/achievements";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface SecretBlockProps {
 	earnedKeys: string[];
@@ -30,15 +30,18 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 		const blockTranslateX = useSharedValue(0);
 
 		// Shared values for each tile's flip rotation
-		const tileRotations = React.useRef<Map<string, Animated.SharedValue<number>>>(
-			new Map()
-		);
+		const tileRotations = React.useRef<
+			Map<string, Animated.SharedValue<number>>
+		>(new Map());
 
 		const revealTile = async (achievementKey: string): Promise<void> => {
 			return new Promise((resolve) => {
 				// Get or create rotation value for this tile
 				if (!tileRotations.current.has(achievementKey)) {
-					tileRotations.current.set(achievementKey, useSharedValue(0));
+					tileRotations.current.set(
+						achievementKey,
+						useSharedValue(0),
+					);
 				}
 
 				const rotation = tileRotations.current.get(achievementKey)!;
@@ -52,9 +55,12 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 					},
 					() => {
 						// Reveal the achievement after flip
-						runOnJS(setRevealedKeys)([...revealedKeys, achievementKey]);
+						runOnJS(setRevealedKeys)([
+							...revealedKeys,
+							achievementKey,
+						]);
 						runOnJS(resolve)();
-					}
+					},
 				);
 			});
 		};
@@ -69,7 +75,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 					},
 					() => {
 						runOnJS(resolve)();
-					}
+					},
 				);
 			});
 		};
@@ -84,7 +90,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 					},
 					() => {
 						runOnJS(resolve)();
-					}
+					},
 				);
 			});
 		};
@@ -113,7 +119,9 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 				</ThemedText>
 
 				{earnedKeys.map((key) => {
-					const achievement = allAchievements.find((a) => a.key === key);
+					const achievement = allAchievements.find(
+						(a) => a.key === key,
+					);
 					if (!achievement) return null;
 
 					const isRevealed = revealedKeys.includes(key);
@@ -130,7 +138,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 				})}
 			</Animated.View>
 		);
-	}
+	},
 );
 
 const styles = StyleSheet.create({

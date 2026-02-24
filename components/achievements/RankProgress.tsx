@@ -1,8 +1,15 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, runOnJS, useAnimatedReaction } from 'react-native-reanimated';
-import ThemedText from '../ui/ThemedText';
-import { StarIcon } from './StarIcon';
+import React, { forwardRef, useImperativeHandle } from "react";
+import { View, StyleSheet } from "react-native";
+import Animated, {
+	useSharedValue,
+	useAnimatedStyle,
+	withTiming,
+	withSequence,
+	runOnJS,
+	useAnimatedReaction,
+} from "react-native-reanimated";
+import ThemedText from "../ui/ThemedText";
+import { StarIcon } from "./StarIcon";
 
 interface RankProgressProps {
 	rank: Rank;
@@ -17,7 +24,9 @@ export interface RankProgressHandle {
 export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 	({ rank, totalStars, filledStars }, ref) => {
 		// Create shared values for each star's progress (0 to 1)
-		const starProgress = Array.from({ length: totalStars }, () => useSharedValue(0));
+		const starProgress = Array.from({ length: totalStars }, () =>
+			useSharedValue(0),
+		);
 
 		// Initialize stars that should already be filled
 		React.useEffect(() => {
@@ -29,7 +38,9 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 		const fillNextStar = async (): Promise<void> => {
 			return new Promise((resolve) => {
 				// Find the next unfilled star
-				const nextStarIndex = starProgress.findIndex((progress) => progress.value < 1);
+				const nextStarIndex = starProgress.findIndex(
+					(progress) => progress.value < 1,
+				);
 				if (nextStarIndex === -1) {
 					resolve();
 					return;
@@ -40,7 +51,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 					withTiming(1, { duration: 300 }),
 					withTiming(1, { duration: 0 }, () => {
 						runOnJS(resolve)();
-					})
+					}),
 				);
 			});
 		};
@@ -59,7 +70,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 				</View>
 			</View>
 		);
-	}
+	},
 );
 
 interface StarProps {
@@ -77,7 +88,7 @@ const Star: React.FC<StarProps> = ({ progress }) => {
 				runOnJS(setIsFilled)(filled);
 			}
 		},
-		[progress]
+		[progress],
 	);
 
 	const animatedStyle = useAnimatedStyle(() => {
@@ -97,20 +108,20 @@ const Star: React.FC<StarProps> = ({ progress }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		alignItems: 'center',
+		alignItems: "center",
 		paddingVertical: 20,
 		paddingHorizontal: 16,
-		backgroundColor: '#1a1a1a',
+		backgroundColor: "#1a1a1a",
 	},
 	starsContainer: {
-		flexDirection: 'row',
+		flexDirection: "row",
 		marginTop: 12,
 		gap: 8,
 	},
 	star: {
 		width: 24,
 		height: 24,
-		alignItems: 'center',
-		justifyContent: 'center',
+		alignItems: "center",
+		justifyContent: "center",
 	},
 });

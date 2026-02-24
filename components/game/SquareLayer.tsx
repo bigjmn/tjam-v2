@@ -20,7 +20,7 @@ const makeSquares = () => {
 };
 export default function SquareLayer() {
 	const squarelist = makeSquares();
-	const {theme, colors} = useTheme()
+	const { theme, colors } = useTheme();
 
 	return (
 		<ThemedView style={styles.outerContainer}>
@@ -36,7 +36,7 @@ export default function SquareLayer() {
 						borderWidth: 3,
 						// borderColor: "white",
 						borderRadius: 12,
-						backgroundColor: colors.uiBackground
+						backgroundColor: colors.uiBackground,
 						// backgroundColor: "#e4e4e4",
 					}}
 				></ThemedView>

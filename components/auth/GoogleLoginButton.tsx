@@ -1,5 +1,8 @@
 import React from "react";
-import { GoogleSignin, GoogleSigninButton } from "@react-native-google-signin/google-signin";
+import {
+	GoogleSignin,
+	GoogleSigninButton,
+} from "@react-native-google-signin/google-signin";
 import { GoogleAuthProvider } from "firebase/auth";
 GoogleSignin.configure({
 	webClientId: process.env.EXPO_PUBLIC_WEB_ID,
@@ -34,10 +37,10 @@ export const googleGetCred = async () => {
 };
 
 export const getGoogleName = () => {
-	const currentUser = GoogleSignin.getCurrentUser()
-	if (!currentUser){
-		return null
+	const currentUser = GoogleSignin.getCurrentUser();
+	if (!currentUser) {
+		return null;
 	}
-	const uname = currentUser.user.name
-	return uname 
-}
+	const uname = currentUser.user.name;
+	return uname;
+};

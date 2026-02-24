@@ -17,15 +17,15 @@ export const ThemeContext = createContext<ThemeContextProps>({
 	sfxOn: true,
 	toggleSfx: () => {},
 	turnOnSound: () => {},
-	turnOffSound: () => {}
+	turnOffSound: () => {},
 });
 
 const THEME_STORAGE_KEY = "@app_theme";
-const SFX_STORAGE_KEY = "@app_sfx"
+const SFX_STORAGE_KEY = "@app_sfx";
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const systemColorScheme = useColorScheme();
 	const [theme, setTheme] = useState<ThemeStyle>("light");
-	const [sfxOn, setSfxOn] = useState<boolean>(true)
+	const [sfxOn, setSfxOn] = useState<boolean>(true);
 
 	useEffect(() => {
 		loadSavedTheme();
@@ -33,19 +33,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	const turnOnSound = async () => {
-		
-		console.log('turning sound ON')
-		 
-		setSfxOn(true)
-		await AsyncStorage.setItem(SFX_STORAGE_KEY, "on")
+		console.log("turning sound ON");
 
-	}
+		setSfxOn(true);
+		await AsyncStorage.setItem(SFX_STORAGE_KEY, "on");
+	};
 	const turnOffSound = async () => {
-		console.log('turning sound OFF')
-		setSfxOn(false)
-		await AsyncStorage.setItem(SFX_STORAGE_KEY, "off")
-
-	}
+		console.log("turning sound OFF");
+		setSfxOn(false);
+		await AsyncStorage.setItem(SFX_STORAGE_KEY, "off");
+	};
 
 	const loadSavedTheme = async () => {
 		try {
@@ -65,17 +62,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	};
 	const loadSavedSfx = async () => {
 		try {
-			const savedSfx = await AsyncStorage.getItem(SFX_STORAGE_KEY)
-			if (savedSfx === "off"){
-				turnOffSound()
+			const savedSfx = await AsyncStorage.getItem(SFX_STORAGE_KEY);
+			if (savedSfx === "off") {
+				turnOffSound();
 			} else {
-				turnOnSound()
+				turnOnSound();
 			}
-			console.log("saved sound: ", savedSfx)
-		} catch (error){
-			console.log("failed to load sfx: ", error)
+			console.log("saved sound: ", savedSfx);
+		} catch (error) {
+			console.log("failed to load sfx: ", error);
 		}
-	}
+	};
 
 	const toggleTheme = async () => {
 		const newTheme = theme === "light" ? "dark" : "light";
@@ -88,18 +85,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	const toggleSfx = async () => {
-		const newSfx = !setSfxOn 
-		setSfxOn(newSfx)
-		const sfxname = newSfx ? "on" : "off"
+		const newSfx = !setSfxOn;
+		setSfxOn(newSfx);
+		const sfxname = newSfx ? "on" : "off";
 		try {
-			await AsyncStorage.setItem(SFX_STORAGE_KEY, sfxname)
-		} catch (error){
-			console.error("failed to save theme: ", error)
+			await AsyncStorage.setItem(SFX_STORAGE_KEY, sfxname);
+		} catch (error) {
+			console.error("failed to save theme: ", error);
 		}
-	}
+	};
 
 	return (
-		<ThemeContext.Provider value={{ theme, toggleTheme, sfxOn, toggleSfx, turnOnSound, turnOffSound }}>
+		<ThemeContext.Provider
+			value={{
+				theme,
+				toggleTheme,
+				sfxOn,
+				toggleSfx,
+				turnOnSound,
+				turnOffSound,
+			}}
+		>
 			{children}
 		</ThemeContext.Provider>
 	);

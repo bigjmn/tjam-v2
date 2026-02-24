@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+	Gesture,
+	GestureDetector,
+	GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
@@ -52,7 +56,7 @@ function Tile({
 	const translateY = useSharedValue(starty * 90 + 3);
 	//id of the square the tile is on
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
-	const { popSound } = useSfx()
+	const { popSound } = useSfx();
 	//moving tile when touch ends.
 	const moveTile = useCallback(
 		(to: string) => {
@@ -160,7 +164,7 @@ function Tile({
 		})
 		.onEnd(() => {
 			isPressed.value = false;
-			runOnJS(popSound)()
+			runOnJS(popSound)();
 			//callback run on js thread
 			runOnJS(moveTile)(
 				toPosition({ x: translateX.value, y: translateY.value }),
@@ -231,44 +235,49 @@ export default function Game() {
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
 				<GameHeader />
-			<ThemedView style={styles.gameWrapper}>
-				<ThemedView style={styles.mainBoard}>
-					<ThemedView style={styles.layerWrapper}>
-						<SquareLayer />
+				<ThemedView style={styles.gameWrapper}>
+					<ThemedView style={styles.mainBoard}>
+						<ThemedView style={styles.layerWrapper}>
+							<SquareLayer />
+						</ThemedView>
+						<ThemedView style={styles.layerWrapper}>
+							{tiles &&
+								tiles.map((tile) => (
+									<Tile
+										key={tile.id}
+										id={tile.id}
+										partValid={validRows}
+										letter={tile.letter}
+										startx={tile.x}
+										starty={tile.y}
+										givePos={givePos}
+										claimMovement={claimMovement}
+										inMotion={inMotion}
+										takenSpots={takenSpots}
+										canMove={
+											tile.canMove &&
+											tile.id != frozenHome
+										}
+									/>
+								))}
+						</ThemedView>
 					</ThemedView>
-					<ThemedView style={styles.layerWrapper}>
-						{tiles &&
-							tiles.map((tile) => (
-								<Tile
-									key={tile.id}
-									id={tile.id}
-									partValid={validRows}
-									letter={tile.letter}
-									startx={tile.x}
-									starty={tile.y}
-									givePos={givePos}
-									claimMovement={claimMovement}
-									inMotion={inMotion}
-									takenSpots={takenSpots}
-									canMove={
-										tile.canMove && tile.id != frozenHome
-									}
-								/>
-							))}
-					</ThemedView>
-				</ThemedView>
-				<View style={styles.scoreAndButton}>
-					<ThemedButton
-					disabled={!validBoard || !!inMotion}
-						style={[
-							styles.buttonStyle,
-							{ opacity: !validBoard || !!inMotion ? 0.3 : 1 },
-						]}
-						onPress={nextTurn}
-						hitSlop={10}>
+					<View style={styles.scoreAndButton}>
+						<ThemedButton
+							disabled={!validBoard || !!inMotion}
+							style={[
+								styles.buttonStyle,
+								{
+									opacity:
+										!validBoard || !!inMotion ? 0.3 : 1,
+								},
+							]}
+							onPress={nextTurn}
+							hitSlop={10}
+						>
 							<Text style={[styles.buttonText]}>Commit Move</Text>
 						</ThemedButton>
-					{/* <Pressable
+						{/* <Pressable
 						disabled={!validBoard || !!inMotion}
 						style={[
 							styles.buttonStyle,
@@ -279,11 +288,13 @@ export default function Game() {
 					>
 						<Text style={[styles.buttonText]}>Commit Move</Text>
 					</Pressable> */}
-					<View style={styles.scoreHolder}>
-						<Text style={styles.scoreText}>Points: {wordNum}</Text>
+						<View style={styles.scoreHolder}>
+							<Text style={styles.scoreText}>
+								Points: {wordNum}
+							</Text>
+						</View>
 					</View>
-				</View>
-			</ThemedView>
+				</ThemedView>
 			</ThemedView>
 		</GestureHandlerRootView>
 	);
@@ -330,11 +341,11 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		justifyContent: "center",
 		alignItems: "center",
-		padding: 12
+		padding: 12,
 	},
 	container: {
 		flex: 1,
-		
+
 		justifyContent: "center",
 		alignItems: "center",
 	},
@@ -396,7 +407,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		borderStyle: "solid",
 		borderWidth: 1,
-
 
 		borderColor: "black",
 	},

@@ -21,13 +21,9 @@ export const useGame = () => {
 	const [validWords, setValidWords] = useState<string[]>([]);
 	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
 
-	const router = useRouter()
+	const router = useRouter();
 
-	const achieve = useAchievements()
-
-	
-
-
+	const achieve = useAchievements();
 
 	const checkSquareArr = (arr: string[]) => {
 		let rowword = "";
@@ -159,8 +155,8 @@ export const useGame = () => {
 		setGameTurns((gt) => [...gt, turnInfo]);
 		setTiles(newboard);
 
-		if (newboard.length >= 11){
-			handleGameEnd()
+		if (newboard.length >= 11) {
+			handleGameEnd();
 		}
 	};
 	const nextTurn = () => {
@@ -168,20 +164,20 @@ export const useGame = () => {
 	};
 
 	const handleGameEnd = () => {
-		const newAchievements = achieve!.gameAchievements(gameTurns)
+		const newAchievements = achieve!.gameAchievements(gameTurns);
 		router.push({
 			pathname: "/(dashboard)/results",
 			params: {
-				achievedJson: JSON.stringify({achieved: newAchievements}),
-				gameTurnsJson: JSON.stringify(gameTurns)
-			}
-		})
-	}
+				achievedJson: JSON.stringify({ achieved: newAchievements }),
+				gameTurnsJson: JSON.stringify(gameTurns),
+			},
+		});
+	};
 
 	const startGame = () => {
-		setWordList(shuffle(wordlist))
-		setWordNum(0)
-	}
+		setWordList(shuffle(wordlist));
+		setWordNum(0);
+	};
 
 	const givePos = (id: string, pos: string) => {
 		setTiles(

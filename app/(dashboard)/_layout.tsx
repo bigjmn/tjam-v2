@@ -11,7 +11,7 @@ export default function DashboardLayout() {
 					paddingTop: 10,
 					height: 90,
 				},
-				tabBarActiveTintColor: colors.iconColorFocused,
+				tabBarActiveTintColor: colors.iconColorFocus,
 				tabBarInactiveTintColor: colors.iconColor,
 			}}
 		>

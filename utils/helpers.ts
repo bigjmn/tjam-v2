@@ -6,6 +6,8 @@ import {
 	DocumentData,
 } from "firebase/firestore";
 import moment from "moment";
+
+const wordDates = require('../assets/wordDates.json')
 //fisher-yates shuffle
 export function shuffle<T>(array: T[]) {
 	var m = array.length,
@@ -160,10 +162,14 @@ export const bareBilly = (turns: TurnInfo[]) => {
 };
 
 export const weekBest = (pstat: PlayerStats) => {
-	const cutoff = moment(Date()).startOf("day").subtract(1, "week");
+	const cutoff = moment(new Date()).startOf("day").subtract(1, "week");
 	const possibleGames = pstat.gameHist
-		.filter((gr) => gr.timestamp > cutoff.toDate() && !gr.abandoned)
+		.filter((gr) => {
+			const gameDate = moment(gr.timestamp);
+			return gameDate.isAfter(cutoff) && !gr.abandoned;
+		})
 		.sort((a, b) => b.score - a.score);
+	console.log('Cutoff:', cutoff.format(), 'Possible games:', possibleGames)
 	return possibleGames.length === 0 ? 0 : possibleGames[0].score;
 };
 
@@ -176,3 +182,8 @@ export const playerToLeader = (pstat: PlayerStats): BaseLeader => {
 		bestWeek: weekBest(pstat),
 	};
 };
+
+export const getDailyWord = ():string => {
+	const datestring = moment(new Date()).format('M/DD/YYYY')
+	return wordDates[datestring]
+}

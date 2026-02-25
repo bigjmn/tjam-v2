@@ -20,6 +20,9 @@ export const useLeaderboard = () => {
 	const [boardErr, setBoardErr] = useState<Error | null>(null);
 
 	const [boardScope, setBoardScope] = useState<BoardScope>("global");
+    useEffect(() => {
+        console.log('globalLeaders', globalLeaders)
+    }, [globalLeaders])
 
 	const getLeaders = async () => {
 		const leadersRef = collection(firestore, "users").withConverter(
@@ -35,15 +38,16 @@ export const useLeaderboard = () => {
 					.filter((d) => d.username !== null)
 					.map((d) => playerToLeader(d));
 			});
-			const globalList: GlobalLeader[] = playerRanks
-				.toSorted((a, b) => b.bestAllTime - a.bestAllTime)
+            console.log('PLAYER RANKS', playerRanks)
+			const globalList: GlobalLeader[] = [...playerRanks]
+				.sort((a, b) => b.bestAllTime - a.bestAllTime)
 				.map((pRank, i) => ({
 					...pRank,
 					type: "global",
 					globalRank: i + 1,
 				}));
-			const weeklyList: WeeklyLeader[] = playerRanks
-				.toSorted((a, b) => b.bestWeek - a.bestWeek)
+			const weeklyList: WeeklyLeader[] = [...playerRanks]
+				.sort((a, b) => b.bestWeek - a.bestWeek)
 				.map((pRank, i) => ({
 					...pRank,
 					type: "weekly",
@@ -55,6 +59,7 @@ export const useLeaderboard = () => {
 		} catch (err) {
 			console.log(err);
 			if (err instanceof Error) {
+                
 				setBoardErr(err);
 			} else {
 				setBoardErr(new Error("something went wrong!"));

@@ -6,12 +6,11 @@ import ThemedText from "../ui/ThemedText";
 
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
-
+import { getDailyWord } from "../../utils/helpers";
 const trioImage = require("../../assets/trioicon.png");
-interface PlayCardProps {
-	wordOfDay: string;
-}
-export const PlayCard = ({ wordOfDay }: PlayCardProps) => {
+
+export const PlayCard = () => {
+    const dailyWord = getDailyWord()
 	return (
 		<ThemedCard style={styles.container}>
 			<View style={styles.cardRow}>
@@ -26,7 +25,7 @@ export const PlayCard = ({ wordOfDay }: PlayCardProps) => {
 				</View>
 			</View>
 			<View>
-				<ThemedText>Word of the Day: {wordOfDay}</ThemedText>
+				<ThemedText>Word of the Day: {dailyWord}</ThemedText>
 			</View>
 		</ThemedCard>
 	);

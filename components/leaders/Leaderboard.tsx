@@ -17,6 +17,7 @@ export const Leaderboard = () => {
 	} = useLeaderboard();
 	const { playerStats } = useUser();
 	if (!playerStats) {
+        console.log("no stats")
 		return null;
 	}
 
@@ -59,7 +60,7 @@ export const Leaderboard = () => {
 					Last updated: {lastRefresh.toTimeString()}
 				</ThemedText>
 			)}
-			{boardErr ? <ThemedText>{boardErr}</ThemedText> : null}
+			{boardErr ? <ThemedText>{boardErr.message}</ThemedText> : null}
 		</ThemedView>
 	);
 };

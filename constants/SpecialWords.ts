@@ -1,0 +1,43 @@
+export const bodyParts:string[] = [
+    "EYE",
+    "EAR",
+    "ARM",
+    "LEG",
+    "TOE",
+    "LIP",
+    "GUM",
+    "JAW",
+    "HIP",
+    "RIB"
+
+] 
+
+export const animals:string[] = [
+    "CAT",
+    "DOG",
+    "FOX",
+    "PIG",
+    "RAT",
+    "BAT",
+    "COW",
+    "ELK",
+    "YAK",
+    "RAM",
+    "APE",
+    "GNU",
+    "DOE",
+    "SOW",
+    "OWL",
+    "EMU",
+    "HEN",
+    "JAY",
+    "TIT",
+    "KEA",
+    "MOA",
+    "EEL",
+    "ASP",
+    "BOA",
+    "COD",
+    "KOI",
+    "EWE"
+]

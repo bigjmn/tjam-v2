@@ -281,6 +281,20 @@ export const secretAchievements: SecretAchievement[] = [
 		type: "secret",
 		reward: 4,
 	},
+	{
+		key: "zootrip",
+		name: "Trip to the Zoo",
+		explainer: "Clear three animals in one game",
+		type: "secret",
+		reward: 1,
+	},
+	{
+		key: "bodyshop",
+		name: "The Body Shop",
+		explainer: "Clear five body parts in one game",
+		type: "secret",
+		reward: 2
+	}
 ];
 
 export const allAchievements: Achievement[] = [
@@ -304,4 +318,4 @@ export const ranksList: Rank[] = [
 	{ name: "Senior Master", starsToFill: 5 },
 	{ name: "International Master", starsToFill: 5 },
 	{ name: "Grandmaster", starsToFill: 5 },
-];
+].map((rk, i) => ({...rk, level: i+1}));

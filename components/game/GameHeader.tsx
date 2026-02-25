@@ -2,12 +2,17 @@ import ThemedView from "../ui/ThemedView";
 import MenuTest from "./MenuButton";
 import ThemedText from "../ui/ThemedText";
 import { StyleSheet } from "react-native";
-export const GameHeader = () => {
+
+interface GameHeaderProps {
+	onExitPress: () => void;
+}
+
+export const GameHeader = ({ onExitPress }: GameHeaderProps) => {
 	return (
 		<ThemedView style={styles.gameHeader}>
 			<ThemedView />
 			<ThemedText variant="header">Trio Jam</ThemedText>
-			<MenuTest />
+			<MenuTest onExitPress={onExitPress} />
 		</ThemedView>
 	);
 };

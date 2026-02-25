@@ -39,7 +39,8 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 						variant="soft"
 						style={
 							isWon
-								? [styles.explainer, { color: "white" }]
+								? [styles.explainer, { color: "white" }] :
+								isPlaceholder ? [styles.explainer, {fontStyle: "italic"}]
 								: styles.explainer
 						}
 					>

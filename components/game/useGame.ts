@@ -112,52 +112,66 @@ export const useGame = () => {
 		if (wordNum === null) {
 			return;
 		}
-		const word = wordList[wordNum];
-		const wordParts = word.split("");
-		const newTiles: Tile[] = wordParts.map((w, i) => ({
-			id: "w" + wordNum.toString() + "l" + i.toString(),
-			letter: w,
-			x: i,
-			y: 0,
-			sitOn: i.toString() + "0",
-			canMove: true,
-		}));
 
-		const clearedLets = tiles
-			.filter(
-				(tile) =>
-					tile.sitOn[1] != "0" &&
-					!tile.canMove &&
-					validRows.includes(tile.sitOn),
-			)
-			.map((tile) => tile.letter);
+		// Step 1: Mark old home row tiles for exit animation
+		const tilesWithExit = tiles.map((tile) => {
+			if (tile.sitOn[1] === "0") {
+				return { ...tile, isHomeRowExiting: true };
+			}
+			return tile;
+		});
+		setTiles(tilesWithExit);
 
-		//filter out old tiles in words and remaining in home row
-		//and make moveable tiles unmovable, then add new tiles
-		const newboard = [
-			...tiles
+		// Step 2: Wait for exit animation, then add new tiles
+		setTimeout(() => {
+			const word = wordList[wordNum];
+			const wordParts = word.split("");
+			const newTiles: Tile[] = wordParts.map((w, i) => ({
+				id: "w" + wordNum.toString() + "l" + i.toString(),
+				letter: w,
+				x: i,
+				y: 0,
+				sitOn: i.toString() + "0",
+				canMove: true,
+				isNew: true,
+			}));
+
+			const clearedLets = tiles
 				.filter(
 					(tile) =>
 						tile.sitOn[1] != "0" &&
-						(tile.canMove || !validRows.includes(tile.sitOn)),
+						!tile.canMove &&
+						validRows.includes(tile.sitOn),
 				)
-				.map((tile) => ({ ...tile, canMove: false })),
-			...newTiles,
-		];
-		const stringBoard = getBoardstate(newboard);
-		const turnInfo: TurnInfo = {
-			turnNo: wordNum,
-			wordsMade: validWords,
-			lettersCleared: clearedLets,
-			boardState: stringBoard,
-		};
+				.map((tile) => tile.letter);
 
-		setGameTurns((gt) => [...gt, turnInfo]);
-		setTiles(newboard);
+			//filter out old tiles in words and remaining in home row
+			//and make moveable tiles unmovable, then add new tiles
+			const newboard = [
+				...tiles
+					.filter(
+						(tile) =>
+							tile.sitOn[1] != "0" &&
+							(tile.canMove || !validRows.includes(tile.sitOn)),
+					)
+					.map((tile) => ({ ...tile, canMove: false })),
+				...newTiles,
+			];
+			const stringBoard = getBoardstate(newboard);
+			const turnInfo: TurnInfo = {
+				turnNo: wordNum,
+				wordsMade: validWords,
+				lettersCleared: clearedLets,
+				boardState: stringBoard,
+			};
 
-		if (newboard.length >= 11) {
-			handleGameEnd();
-		}
+			setGameTurns((gt) => [...gt, turnInfo]);
+			setTiles(newboard);
+
+			if (newboard.length >= 11) {
+				handleGameEnd();
+			}
+		}, 500); // Wait for staggered exit animations to complete
 	};
 	const nextTurn = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
@@ -172,6 +186,10 @@ export const useGame = () => {
 				gameTurnsJson: JSON.stringify(gameTurns),
 			},
 		});
+	};
+
+	const handleAbandonGame = () => {
+		router.push("/(dashboard)/home");
 	};
 
 	const startGame = () => {
@@ -215,5 +233,6 @@ export const useGame = () => {
 		frozenHome,
 		startGame,
 		gameTurns,
+		handleAbandonGame,
 	};
 };

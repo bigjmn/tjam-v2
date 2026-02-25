@@ -32,6 +32,8 @@ interface Tile {
 	y: number;
 	sitOn: string;
 	canMove: boolean;
+	isNew?: boolean;
+	isHomeRowExiting?: boolean;
 }
 type GameRecord = {
 	timestamp: Date;
@@ -114,6 +116,7 @@ interface TurnInfo {
 interface Rank {
 	name: string;
 	starsToFill: number;
+	level: number;
 }
 
 interface BoardRank {

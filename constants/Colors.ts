@@ -1,15 +1,18 @@
 export const commonColors = {
 	primary: "#5B5CFF",
 	secondary: "#FF6B5E",
-	warning: "#F59E0B",
+	warning: "#FF4D4F",
 };
 export const Colors = {
 	primary: commonColors.primary,
 	secondary: commonColors.secondary,
+	warning: commonColors.warning,
+	
 
 	light: {
 		primary: commonColors.primary,
 		secondary: commonColors.secondary,
+		warning: commonColors.warning,
 		background: "#F7F8FC",
 		uiBackground: " #FFFFFF",
 		navBackground: "#FFFFFF",
@@ -24,6 +27,7 @@ export const Colors = {
 	dark: {
 		primary: commonColors.primary,
 		secondary: commonColors.secondary,
+		warning: commonColors.warning,
 		background: "#0F1222",
 		uiBackground: "#181C2F",
 		navBackground: "#15182A",

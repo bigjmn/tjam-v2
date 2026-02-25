@@ -11,6 +11,7 @@ import Animated, {
 	withSpring,
 	withTiming,
 	withSequence,
+	withDelay,
 	runOnJS,
 	Easing,
 } from "react-native-reanimated";
@@ -20,19 +21,22 @@ import ThemedView from "../ui/ThemedView";
 import { useSfx } from "../../hooks/useSfx";
 import ThemedButton from "../ui/ThemedButton";
 import { GameHeader } from "./GameHeader";
-// interface TileProps {
-//     id: string;
-//     letter: string;
-//     startx: number;
-//     starty: number;
-//     givePos: (id:string,dest:string) =>{};
-//     takenSpots: string[];
-//     canMove: boolean;
-//     partValid: string[];
-//     claimMovement: (id:string)=>{};
-//     inMotion:string|null;
-
-// }
+import ExitConfirmModal from "./ExitConfirmModal";
+import { useUser } from "../../hooks/useUser";
+interface TileProps {
+    id: string;
+    letter: string;
+    startx: number;
+    starty: number;
+    givePos: (id:string,dest:string) => void;
+    takenSpots: string[];
+    canMove: boolean;
+    partValid: string[];
+    claimMovement: (id:string) => void;
+    inMotion:string|null;
+    isNew?: boolean;
+    isHomeRowExiting?: boolean;
+}
 function Tile({
 	id,
 	letter,
@@ -44,6 +48,8 @@ function Tile({
 	partValid,
 	claimMovement,
 	inMotion,
+	isNew,
+	isHomeRowExiting,
 }: TileProps) {
 	//active is tile is being moved
 	const isPressed = useSharedValue(false);
@@ -52,11 +58,52 @@ function Tile({
 	const offsetX = useSharedValue(0);
 	const offsetY = useSharedValue(0);
 	//total offset from 0, 0
-	const translateX = useSharedValue(startx * 90 + 3);
-	const translateY = useSharedValue(starty * 90 + 3);
+	const targetX = startx * 90 + 3;
+	const targetY = starty * 90 + 3;
+	const translateX = useSharedValue(isNew ? targetX + 350 : targetX);
+	const translateY = useSharedValue(targetY);
+	const opacity = useSharedValue(isNew ? 0 : 1);
 	//id of the square the tile is on
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
 	const { popSound } = useSfx();
+
+	const SLIDE_DURATION = 720;
+	const STAGGER = 60; // ms delay per column index
+
+	// Entrance animation for new home row tiles
+	useEffect(() => {
+		if (isNew && starty === 0) {
+			const delay = startx * STAGGER;
+			translateX.value = withDelay(
+				delay,
+				withTiming(targetX, {
+					duration: SLIDE_DURATION,
+					// easing: Easing.out(Easing.cubic),
+					easing: Easing.linear
+				}),
+			);
+			opacity.value = withDelay(delay, withTiming(1, { duration: 80 }));
+		}
+	}, [isNew]);
+
+	// Exit animation for home row tiles
+	useEffect(() => {
+		if (isHomeRowExiting) {
+			const delay = startx * STAGGER;
+			translateX.value = withDelay(
+				delay,
+				withTiming(translateX.value - 380, {
+					duration: SLIDE_DURATION,
+					easing: Easing.in(Easing.cubic),
+				}),
+			);
+			opacity.value = withDelay(
+				delay,
+				withTiming(0, { duration: SLIDE_DURATION - 40 }),
+			);
+		}
+	}, [isHomeRowExiting]);
+
 	//moving tile when touch ends.
 	const moveTile = useCallback(
 		(to: string) => {
@@ -110,8 +157,9 @@ function Tile({
 			backgroundColor: canMove
 				? "tan"
 				: partValid.includes(sitsOn.value)
-					? "rgba(0,255,0,.2)"
+					? "#7FAA7A"
 					: "#e2e2e2",
+			opacity: opacity.value,
 		};
 	});
 	//style of 'shadow' on square currently dragged over
@@ -130,7 +178,7 @@ function Tile({
 				{ translateY: translation.y },
 			],
 			zIndex: 0,
-			backgroundColor: [
+			backgroundColor: !inMotion ? "transparent" : [
 				"00",
 				"10",
 				"20",
@@ -225,16 +273,56 @@ export default function Game() {
 		frozenHome,
 		nextTurn,
 		startGame,
+		handleAbandonGame,
+		gameTurns,
 	} = useGame();
+
+	const { playerStats, updatePlayerStats } = useUser();
+	const [showExitModal, setShowExitModal] = useState(false);
 
 	useEffect(() => {
 		startGame();
 	}, []);
 
+	const openExitModal = () => {
+		setShowExitModal(true);
+	};
+
+	const closeExitModal = () => {
+		setShowExitModal(false);
+	};
+
+	const confirmExit = async () => {
+		setShowExitModal(false);
+
+		// Save abandoned game record
+		if (playerStats) {
+			const gameRecord: GameRecord = {
+				timestamp: new Date(),
+				score: wordNum || 0,
+				abandoned: true,
+			};
+
+			const newGameHist = [...playerStats.gameHist, gameRecord];
+
+			await updatePlayerStats({
+				gameHist: newGameHist,
+				numGames: playerStats.numGames + 1,
+			});
+		}
+
+		handleAbandonGame();
+	};
+
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
-				<GameHeader />
+				<GameHeader onExitPress={openExitModal} />
+				<ExitConfirmModal
+					visible={showExitModal}
+					onCancel={closeExitModal}
+					onConfirm={confirmExit}
+				/>
 				<ThemedView style={styles.gameWrapper}>
 					<ThemedView style={styles.mainBoard}>
 						<ThemedView style={styles.layerWrapper}>
@@ -258,6 +346,8 @@ export default function Game() {
 											tile.canMove &&
 											tile.id != frozenHome
 										}
+										isNew={tile.isNew}
+										isHomeRowExiting={tile.isHomeRowExiting}
 									/>
 								))}
 						</ThemedView>

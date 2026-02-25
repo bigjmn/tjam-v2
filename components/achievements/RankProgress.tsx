@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import ThemedText from "../ui/ThemedText";
 import { StarIcon } from "./StarIcon";
-
+import DividerWithText from "../ui/DividerWithText";
 interface RankProgressProps {
 	rank: Rank;
 	totalStars: number;
@@ -63,6 +63,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 		return (
 			<View style={styles.container}>
 				<ThemedText variant="header">{rank.name}</ThemedText>
+				<DividerWithText text={`Level ${rank.level}`} />
 				<View style={styles.starsContainer}>
 					{starProgress.map((progress, index) => (
 						<Star key={index} progress={progress} />
@@ -111,11 +112,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		paddingVertical: 20,
 		paddingHorizontal: 16,
-		backgroundColor: "#1a1a1a",
+		
 	},
 	starsContainer: {
 		flexDirection: "row",
-		marginTop: 12,
+		marginTop: 4,
 		gap: 8,
 	},
 	star: {

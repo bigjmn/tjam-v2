@@ -170,6 +170,7 @@ const ThemedText = ({
 						color: textColor,
 						fontFamily: "Roboto-LightItalic",
 						fontSize: 16,
+						fontStyle: "italic"
 					},
 					style,
 				]}

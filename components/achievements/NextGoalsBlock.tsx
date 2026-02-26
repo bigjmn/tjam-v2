@@ -19,6 +19,8 @@ interface NextGoalsBlockProps {
 	scoringAchievement: Achievement;
 	streakingAchievement: Achievement;
 	noveltyAchievement: Achievement;
+	dailyWordAchievement?: DailyWordAchievement;
+	dailyWordWon?: boolean;
 }
 
 export interface NextGoalsBlockHandle {
@@ -34,7 +36,7 @@ export interface NextGoalsBlockHandle {
 export const NextGoalsBlock = forwardRef<
 	NextGoalsBlockHandle,
 	NextGoalsBlockProps
->(({ scoringAchievement, streakingAchievement, noveltyAchievement }, ref) => {
+>(({ scoringAchievement, streakingAchievement, noveltyAchievement, dailyWordAchievement, dailyWordWon }, ref) => {
 	const { achieveSound } = useSfx();
 	const [scoring, setScoring] = useState(scoringAchievement);
 	const [streaking, setStreaking] = useState(streakingAchievement);
@@ -272,6 +274,16 @@ export const NextGoalsBlock = forwardRef<
 			<Animated.View style={[styles.tileWrapper, noveltyAnimatedStyle]}>
 				<AchievementTile achievement={novelty} isWon={noveltyWon} />
 			</Animated.View>
+
+			{dailyWordAchievement && (
+				<View style={styles.tileWrapper}>
+					<AchievementTile
+						achievement={dailyWordAchievement}
+						isWon={dailyWordWon}
+						showDate={true}
+					/>
+				</View>
+			)}
 		</Animated.View>
 	);
 });

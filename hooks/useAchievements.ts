@@ -8,7 +8,8 @@ import {
 	allAchievements,
 	ranksList,
 } from "../utils/achievements";
-import { groupFreq, bareBilly } from "../utils/helpers";
+import { groupFreq, bareBilly, getDailyWord } from "../utils/helpers";
+import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 export const useAchievements = () => {
@@ -24,7 +25,7 @@ export const useAchievements = () => {
 			return [];
 		}
 		const pastThree: number[] = [
-			...playerStats.gameHist.map((gr) => (gr.abandoned ? 0 : gr.score)),
+			...playerStats.gameHist.map((gr) => (gr.abandoned ? 0 : gr.score)).slice(-2),
 			newscore,
 		];
 		const newStreakAchs = streakingAchievements
@@ -96,6 +97,17 @@ export const useAchievements = () => {
 			allAchievements.push("bareboard");
 		}
 
+		// Check daily word achievement
+		const dailyWord = getDailyWord();
+		const datestring = moment(new Date()).format('M/DD/YYYY');
+		const dailyWordKey = `wordoftheday_${datestring}`;
+
+		if (dailyWord && allWordsMade.includes(dailyWord.toUpperCase())) {
+			if (!playerStats.achievementsWon.includes(dailyWordKey)) {
+				allAchievements.push(dailyWordKey);
+			}
+		}
+
 		// Get the current novelty goal
 		const currentNoveltyGoal = noveltyAchievements.filter(
 			(na) => !playerStats.achievementsWon.includes(na.key),
@@ -113,12 +125,22 @@ export const useAchievements = () => {
 	};
 
 	const scoreAndRank = () => {
-		const sum = allAchievements.reduce((accumulator, currentValue) => {
-			return playerStats.achievementsWon.includes(currentValue.key)
-				? accumulator + currentValue.reward
-				: accumulator;
-		}, 0);
-		let tempVal = sum;
+		let totalStars = 0;
+
+		// Count all achievement rewards
+		for (const achKey of playerStats.achievementsWon) {
+			// Daily word achievements have date suffixes
+			const baseKey = achKey.startsWith("wordoftheday_")
+				? "wordoftheday"
+				: achKey;
+
+			const achievement = allAchievements.find((ach) => ach.key === baseKey);
+			if (achievement) {
+				totalStars += achievement.reward;
+			}
+		}
+
+		let tempVal = totalStars;
 		for (let i = 0; i < ranksList.length; i++) {
 			const rank = ranksList[i];
 			if (rank.starsToFill > tempVal) {

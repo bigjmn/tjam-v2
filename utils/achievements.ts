@@ -297,12 +297,23 @@ export const secretAchievements: SecretAchievement[] = [
 	}
 ];
 
+export const dailyWordAchievements: DailyWordAchievement[] = [
+	{
+		key: "wordoftheday",
+		name: "Word of the Day",
+		explainer: "Make today's daily word",
+		type: "dailyWord",
+		reward: 1,
+	},
+];
+
 export const allAchievements: Achievement[] = [
 	...scoringAchievements,
 	...streakingAchievements,
 	...noveltyAchievements,
 	...legendaryAchievements,
 	...secretAchievements,
+	...dailyWordAchievements,
 ];
 export const ranksList: Rank[] = [
 	{ name: "Newbie", starsToFill: 3 },

@@ -5,12 +5,15 @@ import ThemedText from "../ui/ThemedText";
 import ThemedView from "../ui/ThemedView";
 import { StarIconGroup } from "./StarIcon";
 import { useTheme } from "../../hooks/useTheme";
+import moment from "moment";
+import { getDailyWord } from "../../utils/helpers";
 
 interface AchievementTileProps {
 	achievement: Achievement;
 	isPlaceholder?: boolean;
 	isWon?: boolean;
 	style?: ViewStyle;
+	showDate?: boolean;
 }
 
 export const AchievementTile: React.FC<AchievementTileProps> = ({
@@ -18,22 +21,41 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 	isPlaceholder = false,
 	isWon = false,
 	style,
+	showDate = false,
 }) => {
 	const { colors } = useTheme();
 	const borderColor = isWon ? `${colors.primary}80` : "#3a3a3a";
 	const backgroundColor = isWon ? "#8922DD" : "transparent";
+
+	// Get daily word for dynamic text
+	const dailyWord = achievement.type === 'dailyWord' ? getDailyWord() : null;
+	const title = achievement.type === 'dailyWord' && dailyWord
+		? `${achievement.name} - ${dailyWord.toUpperCase()}`
+		: achievement.name;
+	const explainer = achievement.type === 'dailyWord' && dailyWord
+		? `Make the word ${dailyWord.toUpperCase()}`
+		: achievement.explainer;
 
 	return (
 		<View style={[styles.badgeContainer, style]}>
 			<ThemedView
 				style={[styles.container, { borderColor, backgroundColor }]}
 			>
+				{/* Add date display for daily word */}
+				{showDate && achievement.type === 'dailyWord' && (
+					<View style={styles.dateContainer}>
+						<ThemedText variant="soft" style={styles.dateText}>
+							{moment(new Date()).format('MMM DD')}
+						</ThemedText>
+					</View>
+				)}
+
 				<ThemedView style={[styles.contentArea, { backgroundColor }]}>
 					<ThemedText
 						variant="strong"
 						style={isWon ? { color: "white" } : {}}
 					>
-						{achievement.name}
+						{title}
 					</ThemedText>
 					<ThemedText
 						variant="soft"
@@ -46,7 +68,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 					>
 						{isPlaceholder
 							? "Hmm... what could it be?"
-							: achievement.explainer}
+							: explainer}
 					</ThemedText>
 				</ThemedView>
 				<ThemedView style={styles.rewardContainer}>
@@ -110,5 +132,19 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.3,
 		shadowRadius: 4,
 		elevation: 4,
+	},
+	dateContainer: {
+		position: 'absolute',
+		top: 8,
+		left: 8,
+		backgroundColor: 'rgba(0, 0, 0, 0.2)',
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+		zIndex: 1,
+	},
+	dateText: {
+		fontSize: 11,
+		fontWeight: '600',
 	},
 });

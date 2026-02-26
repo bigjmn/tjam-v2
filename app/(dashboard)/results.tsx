@@ -53,7 +53,7 @@ export default function Results() {
 		});
 
 		router.replace({
-			pathname: "/(dashboard)/game",
+			pathname: "/(dashboard)/home",
 		});
 	};
 

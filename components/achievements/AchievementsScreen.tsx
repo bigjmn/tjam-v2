@@ -8,8 +8,9 @@ import { SecretBlock, SecretBlockHandle } from "./SecretBlock";
 import { RankUpModal, RankUpModalHandle } from "./RankUpModal";
 import { useAchievements } from "../../hooks/useAchievements";
 import { useUser } from "../../hooks/useUser";
-import { allAchievements, ranksList } from "../../utils/achievements";
+import { allAchievements, ranksList, dailyWordAchievements } from "../../utils/achievements";
 import ThemedText from "../ui/ThemedText";
+import moment from "moment";
 
 interface AchievementsScreenProps {
 	earnedKeys: string[];
@@ -317,6 +318,14 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		secret: [],
 	};
 
+	// Get today's daily word achievement status
+	const datestring = moment(new Date()).format('M/DD/YYYY');
+	const dailyWordKey = `wordoftheday_${datestring}`;
+	const dailyWordWon = earnedKeys.includes(dailyWordKey);
+
+	// Find the daily word achievement
+	const dailyWordAchievement = dailyWordAchievements[0];
+
 	const currentRank = ranksList[currentRankIndex];
 
 	return (
@@ -337,6 +346,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 						scoringAchievement={nextAchievements.scoring}
 						streakingAchievement={nextAchievements.streaking}
 						noveltyAchievement={nextAchievements.novelty}
+						dailyWordAchievement={dailyWordAchievement}
+						dailyWordWon={dailyWordWon}
 					/>
 				)}
 

@@ -108,7 +108,7 @@ export default function MenuTest({ onExitPress }: MenuTestProps) {
 					<FloatingActionButton
 						isExpanded={isExpanded}
 						index={1}
-						iconName={sfxOn ? "volume" : "volume"}
+						iconName={sfxOn ? "volume-high" : "volume-mute"}
 						pressFn={sfxOn ? turnOffSound : turnOnSound}
 					/>
 					<FloatingActionButton

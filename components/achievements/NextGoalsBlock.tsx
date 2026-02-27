@@ -24,6 +24,7 @@ interface NextGoalsBlockProps {
 }
 
 export interface NextGoalsBlockHandle {
+	markAsWon: (category: "scoring" | "streaking" | "novelty") => Promise<void>;
 	slideOut: (category: "scoring" | "streaking" | "novelty") => Promise<void>;
 	slideIn: (
 		category: "scoring" | "streaking" | "novelty",
@@ -59,17 +60,11 @@ export const NextGoalsBlock = forwardRef<
 	const noveltyPulseScale = useSharedValue(1);
 	const noveltyPulseOpacity = useSharedValue(1);
 
-	const slideOut = async (
+	const markAsWon = async (
 		category: "scoring" | "streaking" | "novelty",
 	): Promise<void> => {
 		return new Promise((resolve) => {
-			const translateX =
-				category === "scoring"
-					? scoringTranslateX
-					: category === "streaking"
-						? streakingTranslateX
-						: noveltyTranslateX;
-
+			console.log('[NEXTGOALS] markAsWon called for', category);
 			const pulseScale =
 				category === "scoring"
 					? scoringPulseScale
@@ -84,7 +79,7 @@ export const NextGoalsBlock = forwardRef<
 						? streakingPulseOpacity
 						: noveltyPulseOpacity;
 
-			// Mark as won before animation
+			// Mark as won
 			const setWon =
 				category === "scoring"
 					? setScoringWon
@@ -94,31 +89,45 @@ export const NextGoalsBlock = forwardRef<
 
 			runOnJS(setWon)(true);
 			runOnJS(achieveSound)();
+			console.log('[NEXTGOALS] Marked as won, playing sound and pulsing');
 
-			// Step 1: Pulse animation (300ms)
+			// Pulse animation (300ms)
 			pulseScale.value = withSequence(
 				withTiming(1.05, { duration: 150 }),
-				withTiming(1, { duration: 150 }),
+				withTiming(1, { duration: 150 }, () => {
+					console.log('[NEXTGOALS] Pulse complete');
+					runOnJS(resolve)();
+				}),
 			);
 
 			pulseOpacity.value = withSequence(
 				withTiming(0.8, { duration: 150 }),
 				withTiming(1, { duration: 150 }),
 			);
+		});
+	};
 
-			// Step 2: Pause (200ms) then slide out (500ms)
-			translateX.value = withDelay(
-				500, // Wait for pulse (300ms) + pause (200ms)
-				withTiming(
-					-SCREEN_WIDTH,
-					{
-						duration: 500,
-						easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-					},
-					() => {
-						runOnJS(resolve)();
-					},
-				),
+	const slideOut = async (
+		category: "scoring" | "streaking" | "novelty",
+	): Promise<void> => {
+		return new Promise((resolve) => {
+			const translateX =
+				category === "scoring"
+					? scoringTranslateX
+					: category === "streaking"
+						? streakingTranslateX
+						: noveltyTranslateX;
+
+			// Slide out (500ms) - achievement already marked as won
+			translateX.value = withTiming(
+				-SCREEN_WIDTH,
+				{
+					duration: 500,
+					easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+				},
+				() => {
+					runOnJS(resolve)();
+				},
 			);
 		});
 	};
@@ -220,6 +229,7 @@ export const NextGoalsBlock = forwardRef<
 	};
 
 	useImperativeHandle(ref, () => ({
+		markAsWon,
 		slideOut,
 		slideIn,
 		enter,

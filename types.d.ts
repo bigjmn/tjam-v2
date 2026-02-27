@@ -148,6 +148,11 @@ type AnimationPhase =
 	| "complete";
 
 type FillStarEvent = { type: "fillStar"; rankIndex: number };
+type MarkWonEvent = {
+	type: "markWon";
+	category: "scoring" | "streaking" | "novelty";
+	achievementKey: string;
+};
 type SlideTileEvent = {
 	type: "slideTile";
 	direction: "out" | "in";
@@ -159,6 +164,7 @@ type ShowRankUpEvent = { type: "showRankUp"; newRank: Rank; rankIndex: number };
 
 type AchievementAnimationEvent =
 	| FillStarEvent
+	| MarkWonEvent
 	| SlideTileEvent
 	| RevealSecretEvent
 	| ShowRankUpEvent;

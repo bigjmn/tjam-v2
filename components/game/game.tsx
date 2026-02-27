@@ -5,6 +5,7 @@ import {
 	GestureDetector,
 	GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import { useFocusEffect } from "@react-navigation/native";
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
@@ -23,6 +24,7 @@ import ThemedButton from "../ui/ThemedButton";
 import { GameHeader } from "./GameHeader";
 import ExitConfirmModal from "./ExitConfirmModal";
 import { useUser } from "../../hooks/useUser";
+import ThemedText from "../ui/ThemedText";
 interface TileProps {
     id: string;
     letter: string;
@@ -60,9 +62,9 @@ function Tile({
 	//total offset from 0, 0
 	const targetX = startx * 90 + 3;
 	const targetY = starty * 90 + 3;
-	const translateX = useSharedValue(isNew ? targetX + 350 : targetX);
+	const translateX = useSharedValue(isNew ? targetX + 380 : targetX);
 	const translateY = useSharedValue(targetY);
-	const opacity = useSharedValue(isNew ? 0 : 1);
+	// const opacity = useSharedValue(isNew ? 0 : 1);
 	//id of the square the tile is on
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
 	const { popSound } = useSfx();
@@ -73,7 +75,8 @@ function Tile({
 	// Entrance animation for new home row tiles
 	useEffect(() => {
 		if (isNew && starty === 0) {
-			const delay = startx * STAGGER;
+			const delay = 400
+			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,
 				withTiming(targetX, {
@@ -82,25 +85,27 @@ function Tile({
 					easing: Easing.linear
 				}),
 			);
-			opacity.value = withDelay(delay, withTiming(1, { duration: 80 }));
+			// opacity.value = withDelay(delay, withTiming(1, { duration: 80 }));
 		}
 	}, [isNew]);
 
 	// Exit animation for home row tiles
 	useEffect(() => {
 		if (isHomeRowExiting) {
-			const delay = startx * STAGGER;
+			const delay = 50
+			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,
 				withTiming(translateX.value - 380, {
 					duration: SLIDE_DURATION,
-					easing: Easing.in(Easing.cubic),
+					easing: Easing.linear
+					// easing: Easing.in(Easing.cubic),
 				}),
 			);
-			opacity.value = withDelay(
-				delay,
-				withTiming(0, { duration: SLIDE_DURATION - 40 }),
-			);
+			// opacity.value = withDelay(
+			// 	delay,
+			// 	withTiming(0, { duration: SLIDE_DURATION - 40 }),
+			// );
 		}
 	}, [isHomeRowExiting]);
 
@@ -159,7 +164,7 @@ function Tile({
 				: partValid.includes(sitsOn.value)
 					? "#7FAA7A"
 					: "#e2e2e2",
-			opacity: opacity.value,
+			// opacity: opacity.value,
 		};
 	});
 	//style of 'shadow' on square currently dragged over
@@ -280,9 +285,11 @@ export default function Game() {
 	const { playerStats, updatePlayerStats } = useUser();
 	const [showExitModal, setShowExitModal] = useState(false);
 
-	useEffect(() => {
-		startGame();
-	}, []);
+	useFocusEffect(
+		useCallback(() => {
+			startGame();
+		}, [])
+	);
 
 	const openExitModal = () => {
 		setShowExitModal(true);
@@ -379,9 +386,9 @@ export default function Game() {
 						<Text style={[styles.buttonText]}>Commit Move</Text>
 					</Pressable> */}
 						<View style={styles.scoreHolder}>
-							<Text style={styles.scoreText}>
+							<ThemedText style={styles.scoreText}>
 								Points: {wordNum}
-							</Text>
+							</ThemedText>
 						</View>
 					</View>
 				</ThemedView>

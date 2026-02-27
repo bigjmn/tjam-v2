@@ -21,6 +21,8 @@ export const useGame = () => {
 	const [validWords, setValidWords] = useState<string[]>([]);
 	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
 
+	const [gameActive, setGameActive] = useState(false)
+
 	const router = useRouter();
 
 	const achieve = useAchievements();
@@ -178,6 +180,7 @@ export const useGame = () => {
 	};
 
 	const handleGameEnd = () => {
+		setGameActive(false)
 		const newAchievements = achieve!.gameAchievements(gameTurns);
 		router.push({
 			pathname: "/(dashboard)/results",
@@ -193,8 +196,11 @@ export const useGame = () => {
 	};
 
 	const startGame = () => {
+		setTiles([])
+		setGameActive(true)
 		setWordList(shuffle(wordlist));
 		setWordNum(0);
+		setGameTurns([]);
 	};
 
 	const givePos = (id: string, pos: string) => {
@@ -211,6 +217,9 @@ export const useGame = () => {
 	};
 
 	useEffect(() => {
+		if (!gameActive){
+			return
+		}
 		markTaken();
 		checkValidRows();
 		checkValidBoard();

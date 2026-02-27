@@ -11,7 +11,8 @@ import { useUser } from "../../hooks/useUser";
 import { allAchievements, ranksList, dailyWordAchievements } from "../../utils/achievements";
 import ThemedText from "../ui/ThemedText";
 import moment from "moment";
-
+import ThemedView from "../ui/ThemedView";
+import ThemedButton from "../ui/ThemedButton";
 interface AchievementsScreenProps {
 	earnedKeys: string[];
 	onComplete: () => void;
@@ -54,6 +55,14 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			achievements.categorizeAchievements(earnedKeys);
 		const rankChanges = achievements.calculateRankChanges(earnedKeys);
 
+		// Separate out daily word achievements
+		const dailyWordKeys = earnedKeys.filter(key => {
+			const achievement = allAchievements.find(a => a.key === key);
+			return achievement?.type === "dailyWord";
+		});
+
+		console.log('[ACHIEVEMENTS] Daily word keys:', dailyWordKeys);
+
 		const queue: AchievementAnimationEvent[] = [];
 		let starCounter = 0;
 
@@ -83,6 +92,13 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			let category: "scoring" | "streaking" | "novelty" = "scoring";
 			if (achievement.type === "streaking") category = "streaking";
 			else if (achievement.type === "novelty") category = "novelty";
+
+			// Mark achievement as won BEFORE filling stars
+			queue.push({
+				type: "markWon",
+				category,
+				achievementKey: key,
+			} as MarkWonEvent);
 
 			// Add star fills
 			for (let i = 0; i < achievement.reward; i++) {
@@ -150,6 +166,36 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			}
 		}
 
+		// Process Daily Word achievements
+		for (const key of dailyWordKeys) {
+			const achievement = allAchievements.find((a) => a.key === key);
+			if (!achievement) continue;
+
+			console.log('[ACHIEVEMENTS] Processing daily word achievement:', achievement);
+
+			// Daily word achievements don't have a markWon event since they're not in NextGoalsBlock categories
+			// Just fill stars directly
+			for (let i = 0; i < achievement.reward; i++) {
+				starCounter++;
+				queue.push({
+					type: "fillStar",
+					rankIndex: currentRankIndex,
+				} as FillStarEvent);
+
+				// Check for rank-up
+				const rankChange = rankChanges.find(
+					(rc) => rc.starIndex === starCounter,
+				);
+				if (rankChange) {
+					queue.push({
+						type: "showRankUp",
+						newRank: rankChange.newRank,
+						rankIndex: rankChange.rankIndex,
+					} as ShowRankUpEvent);
+				}
+			}
+		}
+
 		// Process Legendary achievements
 		for (const key of legendary) {
 			const achievement = allAchievements.find((a) => a.key === key);
@@ -209,14 +255,29 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	};
 
 	const processAnimationQueue = async () => {
-		if (!achievements) return;
+		if (!achievements) {
+			console.log('[ACHIEVEMENTS] No achievements, returning');
+			return;
+		}
 
 		const queue = buildAnimationQueue();
+		console.log('[ACHIEVEMENTS] Built queue with', queue.length, 'events');
+		console.log('[ACHIEVEMENTS] Queue:', queue.map(e => e.type).join(', '));
+
 		const { nextGoals, legendary, secret } =
 			achievements.categorizeAchievements(earnedKeys);
 
-		// Enter Next Goals block if there are any
-		if (nextGoals.length > 0) {
+		console.log('[ACHIEVEMENTS] Categories:', { nextGoals, legendary, secret });
+
+		// Separate out daily word achievements
+		const dailyWordKeys = earnedKeys.filter(key => {
+			const achievement = allAchievements.find(a => a.key === key);
+			return achievement?.type === "dailyWord";
+		});
+
+		// Enter Next Goals block if there are any next goals OR daily word achievements
+		if (nextGoals.length > 0 || dailyWordKeys.length > 0) {
+			console.log('[ACHIEVEMENTS] Entering next goals');
 			setPhase("next-goals-enter");
 			await nextGoalsRef.current?.enter();
 			await delay(200);
@@ -224,8 +285,20 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		}
 
 		// Process queue
+		console.log('[ACHIEVEMENTS] Starting queue processing');
 		for (const event of queue) {
-			if (event.type === "fillStar") {
+			console.log('[ACHIEVEMENTS] Processing event:', event.type);
+			if (event.type === "markWon") {
+				const markWonEvent = event as unknown as MarkWonEvent;
+				console.log('[ACHIEVEMENTS] Marking as won:', markWonEvent.category);
+				try {
+					await nextGoalsRef.current?.markAsWon(markWonEvent.category);
+					await delay(200);
+				} catch (error) {
+					console.error('[ACHIEVEMENTS] Error marking as won:', error);
+				}
+			} else if (event.type === "fillStar") {
+				console.log('[ACHIEVEMENTS] Filling star');
 				await rankProgressRef.current?.fillNextStar();
 				setStarsInCurrentRank((prev) => prev + 1);
 				await delay(400);
@@ -249,8 +322,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				await delay(400);
 			} else if (event.type === "showRankUp") {
 				const rankUpEvent = event as unknown as ShowRankUpEvent;
-				setPhase("rank-up-modal");
-				await rankUpModalRef.current?.show(rankUpEvent.newRank);
+				// Use slide transition instead of modal
+				await rankProgressRef.current?.transitionToNewRank(rankUpEvent.newRank);
 				setCurrentRankIndex(rankUpEvent.rankIndex);
 				setStarsInCurrentRank(0);
 				// Continue with previous phase
@@ -269,8 +342,10 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		}
 
 		// Exit Next Goals if present
-		if (nextGoals.length > 0) {
+		if (nextGoals.length > 0 || dailyWordKeys.length > 0) {
+
 			setPhase("next-goals-exit");
+			await delay(500)
 			await nextGoalsRef.current?.exit();
 			await delay(200);
 		}
@@ -283,6 +358,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			setPhase("legendary-animating");
 			// Stars already filled in queue
 			setPhase("legendary-exit");
+			await delay(500)
 			await legendaryRef.current?.exit();
 			await delay(200);
 		}
@@ -295,6 +371,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			setPhase("secret-animating");
 			// Reveals and stars already done in queue
 			setPhase("secret-exit");
+			await delay(500)
 			await secretRef.current?.exit();
 			await delay(200);
 		}
@@ -304,6 +381,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	};
 
 	useEffect(() => {
+		console.log('[ACHIEVEMENTS] useEffect triggered, starting animation queue');
+		console.log('[ACHIEVEMENTS] Earned keys:', earnedKeys);
 		processAnimationQueue();
 	}, []);
 
@@ -330,7 +409,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 	return (
 		<SafeAreaView style={styles.container}>
-			<View style={styles.content}>
+			<ThemedView style={styles.content}>
 				{/* Rank Progress - always visible at top */}
 				<RankProgress
 					ref={rankProgressRef}
@@ -364,16 +443,16 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 				{/* Complete button */}
 				{!isProcessing && (
-					<View style={styles.completeContainer}>
-						<Pressable
+					<ThemedView style={styles.completeContainer}>
+						<ThemedButton
 							style={styles.completeButton}
 							onPress={onComplete}
 						>
 							<ThemedText variant="strong">Play Again</ThemedText>
-						</Pressable>
-					</View>
+						</ThemedButton>
+					</ThemedView>
 				)}
-			</View>
+			</ThemedView>
 
 			{/* Rank Up Modal */}
 			<RankUpModal ref={rankUpModalRef} />
@@ -384,7 +463,6 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#1a1a1a",
 	},
 	content: {
 		flex: 1,
@@ -394,7 +472,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	completeButton: {
-		backgroundColor: "#4a4a4a",
 		paddingHorizontal: 32,
 		paddingVertical: 16,
 		borderRadius: 12,

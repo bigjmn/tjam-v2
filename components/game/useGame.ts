@@ -3,7 +3,9 @@ import wordlist from "../../assets/wordlist";
 import { shuffle, boardSquares } from "../../utils/helpers";
 import { useAchievements } from "../../hooks/useAchievements";
 import { useRouter } from "expo-router";
+import { useSfx } from "../../hooks/useSfx";
 export const useGame = () => {
+	const { poofSound } = useSfx()
 	const [tiles, setTiles] = useState<Tile[]>([]);
 	const [wordList, setWordList] = useState(shuffle(wordlist));
 	const [inMotion, setInMotion] = useState<string | null>(null);
@@ -22,6 +24,9 @@ export const useGame = () => {
 	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
 
 	const [gameActive, setGameActive] = useState(false)
+	const [isAnimating, setIsAnimating] = useState(false);
+	const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(new Set());
+	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(new Set());
 
 	const router = useRouter();
 
@@ -179,6 +184,39 @@ export const useGame = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
 	};
 
+	const handleCommitMove = () => {
+		console.log('ANIMATION START');
+
+		// Capture which tiles should animate RIGHT NOW (before state changes)
+		const tilesToFlip = new Set(
+			tiles.filter(t => (t.canMove && t.id !== frozenHome)).map(t => t.id)
+		);
+		const tilesToPinwheel = new Set(
+			tiles.filter(t => validRows.includes(t.sitOn) && !t.canMove).map(t => t.id)
+		);
+
+		setFlippingTileIds(tilesToFlip);
+		setPinwheelingTileIds(tilesToPinwheel);
+		setIsAnimating(true);
+		if (tilesToPinwheel.size !== 0){
+			poofSound()
+		}
+
+		// Wait for flip animation to complete, then trigger next turn
+		setTimeout(() => {
+			console.log('ANIMATION END');
+			nextTurn();
+			console.log('NEXT TURN TRIGGERED');
+
+			// Wait for getNextBoard to update tiles (500ms) before clearing animation state
+			setTimeout(() => {
+				setIsAnimating(false);
+				setFlippingTileIds(new Set());
+				setPinwheelingTileIds(new Set());
+			}, 550);
+		}, 950);
+	};
+
 	const handleGameEnd = () => {
 		setGameActive(false)
 		const newAchievements = achieve!.gameAchievements(gameTurns);
@@ -243,5 +281,9 @@ export const useGame = () => {
 		startGame,
 		gameTurns,
 		handleAbandonGame,
+		handleCommitMove,
+		isAnimating,
+		flippingTileIds,
+		pinwheelingTileIds,
 	};
 };

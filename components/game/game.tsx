@@ -25,20 +25,7 @@ import { GameHeader } from "./GameHeader";
 import ExitConfirmModal from "./ExitConfirmModal";
 import { useUser } from "../../hooks/useUser";
 import ThemedText from "../ui/ThemedText";
-interface TileProps {
-    id: string;
-    letter: string;
-    startx: number;
-    starty: number;
-    givePos: (id:string,dest:string) => void;
-    takenSpots: string[];
-    canMove: boolean;
-    partValid: string[];
-    claimMovement: (id:string) => void;
-    inMotion:string|null;
-    isNew?: boolean;
-    isHomeRowExiting?: boolean;
-}
+
 function Tile({
 	id,
 	letter,
@@ -52,6 +39,8 @@ function Tile({
 	inMotion,
 	isNew,
 	isHomeRowExiting,
+	shouldFlip,
+	shouldPinwheel,
 }: TileProps) {
 	//active is tile is being moved
 	const isPressed = useSharedValue(false);
@@ -69,8 +58,14 @@ function Tile({
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
 	const { popSound } = useSfx();
 
-	const SLIDE_DURATION = 720;
+	// Animation values for flip and pinwheel
+	const rotateY = useSharedValue(0);
+	const pinwheelRotate = useSharedValue(0);
+	const pinwheelScale = useSharedValue(1);
+
+	const SLIDE_DURATION = 520;
 	const STAGGER = 60; // ms delay per column index
+	const FLIP_DURATION = 800;
 
 	// Entrance animation for new home row tiles
 	useEffect(() => {
@@ -108,6 +103,30 @@ function Tile({
 			// );
 		}
 	}, [isHomeRowExiting]);
+
+	// Flip animation for tan tiles becoming gray
+	useEffect(() => {
+		if (shouldFlip) {
+			rotateY.value = withTiming(180, {
+				duration: FLIP_DURATION,
+				easing: Easing.out(Easing.cubic),
+			});
+		}
+	}, [shouldFlip]);
+
+	// Pinwheel animation for green tiles
+	useEffect(() => {
+		if (shouldPinwheel) {
+			pinwheelRotate.value = withTiming(540, {
+				duration: FLIP_DURATION,
+				easing: Easing.out(Easing.cubic),
+			});
+			pinwheelScale.value = withTiming(0, {
+				duration: FLIP_DURATION,
+				easing: Easing.out(Easing.cubic),
+			});
+		}
+	}, [shouldPinwheel]);
 
 	//moving tile when touch ends.
 	const moveTile = useCallback(
@@ -150,12 +169,19 @@ function Tile({
 	//prevent moving multiple tiles at a time
 	//dynamic styles
 	const animatedStyles = useAnimatedStyle(() => {
+		const transforms: any[] = [
+			{ translateX: translateX.value },
+			{ translateY: translateY.value },
+		];
+
+		// Add pinwheel transforms if pinwheeling
+		if (pinwheelScale.value < 1) {
+			transforms.push({ rotate: `${pinwheelRotate.value}deg` });
+			transforms.push({ scale: pinwheelScale.value });
+		}
+
 		return {
-			//set essentially 'left' and 'top' values
-			transform: [
-				{ translateX: translateX.value },
-				{ translateY: translateY.value },
-			],
+			transform: transforms,
 			//make sure active tile is the top layer
 			zIndex: isPressed.value ? 100 : 10,
 			//moveable tiles always tan. parts of word green, otherwise gray
@@ -167,6 +193,31 @@ function Tile({
 			// opacity: opacity.value,
 		};
 	});
+
+	// Front face style for flip animation
+	const frontFaceStyle = useAnimatedStyle(() => ({
+		transform: [{ rotateY: `${rotateY.value}deg` }],
+		backfaceVisibility: 'hidden',
+		position: 'absolute',
+		width: '100%',
+		height: '100%',
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderRadius:12
+	}));
+
+	// Back face style for flip animation (pre-rotated 180deg)
+	const backFaceStyle = useAnimatedStyle(() => ({
+		transform: [{ rotateY: `${rotateY.value + 180}deg` }],
+		backfaceVisibility: 'hidden',
+		position: 'absolute',
+		width: '100%',
+		height: '100%',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: '#e2e2e2',
+		borderRadius:12
+	}));
 	//style of 'shadow' on square currently dragged over
 	const underlay = useAnimatedStyle(() => {
 		//real offset -> square position -> position of square.
@@ -258,7 +309,20 @@ function Tile({
 
 			<GestureDetector gesture={panGesture}>
 				<Animated.View style={[styles.baseTile, animatedStyles]}>
-					<Text style={styles.baseText}>{letter}</Text>
+					{shouldFlip ? (
+						// Render front and back faces for flip animation
+						<>
+							<Animated.View style={frontFaceStyle}>
+								<Text style={styles.baseText}>{letter}</Text>
+							</Animated.View>
+							<Animated.View style={backFaceStyle}>
+								<Text style={styles.baseText}>{letter}</Text>
+							</Animated.View>
+						</>
+					) : (
+						// Normal rendering
+						<Text style={styles.baseText}>{letter}</Text>
+					)}
 				</Animated.View>
 			</GestureDetector>
 		</>
@@ -280,6 +344,10 @@ export default function Game() {
 		startGame,
 		handleAbandonGame,
 		gameTurns,
+		handleCommitMove,
+		isAnimating,
+		flippingTileIds,
+		pinwheelingTileIds,
 	} = useGame();
 
 	const { playerStats, updatePlayerStats } = useUser();
@@ -355,21 +423,23 @@ export default function Game() {
 										}
 										isNew={tile.isNew}
 										isHomeRowExiting={tile.isHomeRowExiting}
+										shouldFlip={flippingTileIds.has(tile.id)}
+										shouldPinwheel={pinwheelingTileIds.has(tile.id)}
 									/>
 								))}
 						</ThemedView>
 					</ThemedView>
 					<View style={styles.scoreAndButton}>
 						<ThemedButton
-							disabled={!validBoard || !!inMotion}
+							disabled={!validBoard || !!inMotion || isAnimating}
 							style={[
 								styles.buttonStyle,
 								{
 									opacity:
-										!validBoard || !!inMotion ? 0.3 : 1,
+										!validBoard || !!inMotion || isAnimating ? 0.3 : 1,
 								},
 							]}
-							onPress={nextTurn}
+							onPress={handleCommitMove}
 							hitSlop={10}
 						>
 							<Text style={[styles.buttonText]}>Commit Move</Text>

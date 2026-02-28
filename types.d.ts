@@ -21,6 +21,10 @@ interface TileProps {
 	partValid: string[];
 	claimMovement: (id: string) => void;
 	inMotion: string | null;
+	shouldFlip: boolean;
+	shouldPinwheel: boolean;
+	isNew?: boolean;
+	isHomeRowExiting?: boolean;
 }
 
 type ThemeStyle = "light" | "dark";

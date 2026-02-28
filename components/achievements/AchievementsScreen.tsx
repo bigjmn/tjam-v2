@@ -408,7 +408,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	const currentRank = ranksList[currentRankIndex];
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<ThemedView style={styles.container}>
 			<ThemedView style={styles.content}>
 				{/* Rank Progress - always visible at top */}
 				<RankProgress
@@ -456,7 +456,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 			{/* Rank Up Modal */}
 			<RankUpModal ref={rankUpModalRef} />
-		</SafeAreaView>
+		</ThemedView>
 	);
 };
 

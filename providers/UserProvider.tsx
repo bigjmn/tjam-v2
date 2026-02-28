@@ -13,8 +13,10 @@ import {
 	OAuthProvider,
 	signInAnonymously,
 } from "firebase/auth";
+import { getAppleCredential } from "../utils/authHelpers/appleAuth";
 // import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth"
 import { firestore } from "../lib/firebase";
+import { ensureUserDocAndUsername } from "../utils/authHelpers/ensureUserDoc";
 import { doc, collection, setDoc, getDoc } from "firebase/firestore";
 import {
 	googleGetCred,
@@ -33,7 +35,7 @@ import {
 interface UserContextProps {
 	user: User | null;
 	signInWithGoogle: () => Promise<void>;
-
+	signInWithApple: () => Promise<void>;
 	logout: () => Promise<void>;
 	authChecked: boolean;
 	playerStats: PlayerStats | null;
@@ -45,6 +47,75 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [authChecked, setAuthChecked] = useState<boolean>(false);
 	const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
+
+	const signInWithApple = async () => {
+		try {
+			if (playerStats === null) {
+				throw "No stats, something's wrong!";
+			}
+			const { credential, profile } = await getAppleCredential()
+			const appleUserData = await linkOrSignIn(credential);
+
+    // Email may be null if user hides it; Firebase user.email may be relay or null too.
+    		const email = profile.email ?? appleUserData.email ?? undefined;
+			const uid = appleUserData.uid 
+			let newUsername =
+					profile.givenName || profile.familyName || email?.split('@')[0] || `user${uid.slice(0, 6)}`
+			
+			const udocRef = doc(firestore, "users", uid).withConverter(
+				playerStatConverter,
+			);
+			const uDoc = await getDoc(udocRef);
+			if (!uDoc.exists()) {
+				
+					
+				const uNameDocRef = doc(firestore, "usernames", newUsername);
+				const uNameDoc = await getDoc(uNameDocRef);
+				if (uNameDoc.exists()) {
+					newUsername += usernameNumberTail();
+				}
+				await setDoc(udocRef, {
+					...playerStats,
+					email: email,
+					username: newUsername,
+				});
+				await setDoc(doc(firestore, "usernames", newUsername), {
+					userid: uid,
+				});
+			} else {
+				const playstats = uDoc.data()
+				let uEmail = playstats.email ?? email
+				let username = playstats.username ?? newUsername
+
+				const uNameDocRef = doc(firestore, "usernames", username);
+				const uNameDoc = await getDoc(uNameDocRef);
+				if (
+					uNameDoc.exists() &&
+					uNameDoc.data().userid !== uid
+				) {
+					username += usernameNumberTail();
+				}
+				const pstats = {
+					...playstats,
+					email: uEmail,
+					username: username,
+				};
+				setPlayerStats(pstats);
+				await setDoc(udocRef, {
+					...pstats,
+
+					email: uEmail,
+					username: newUsername,
+				});
+				await setDoc(doc(firestore, "usernames", newUsername), {
+					userid: uid,
+				});
+			}
+
+		} catch (e){
+			console.log(e)
+		}
+	}
 
 	
 
@@ -217,7 +288,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			value={{
 				user,
 				signInWithGoogle,
-
+				signInWithApple,
 				logout,
 				authChecked,
 				playerStats,

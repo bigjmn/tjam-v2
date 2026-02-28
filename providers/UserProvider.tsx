@@ -10,6 +10,7 @@ import {
 	FacebookAuthProvider,
 	signInWithCredential,
 	linkWithCredential,
+	OAuthProvider,
 	signInAnonymously,
 } from "firebase/auth";
 // import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth"
@@ -20,6 +21,7 @@ import {
 	getGoogleName,
 } from "../components/auth/GoogleLoginButton";
 import { usernameNumberTail } from "../utils/helpers";
+import { linkOrSignIn } from "../components/auth/loginHelper";
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -44,6 +46,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [authChecked, setAuthChecked] = useState<boolean>(false);
 	const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
 
+	
+
 	const signInWithGoogle = async () => {
 		try {
 			if (playerStats === null) {
@@ -56,9 +60,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			if (!user) {
 				throw "no user, something wrong!";
 			}
-			const googleUser = await linkWithCredential(user, googleCred);
-			const googleUserData = googleUser.user;
-			const nm = googleUserData;
+			// const googleUser = await linkWithCredential(user, googleCred);
+			// const googleUserData = googleUser.user;
+			const googleUserData = await linkOrSignIn(googleCred);
 			const uid = googleUserData.uid;
 			const udocRef = doc(firestore, "users", uid).withConverter(
 				playerStatConverter,

@@ -10,7 +10,7 @@ import React from "react";
 export default function LeaderBoard() {
 	const { user, authChecked } = useUser();
     if (authChecked && (user === null || user.isAnonymous)){
-        return DeniedLeaderboard
+        return <DeniedLeaderboard />
     }
     if (!authChecked || !user){
 		return (

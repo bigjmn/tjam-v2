@@ -4,6 +4,7 @@ import { useLeaderboard } from "../../hooks/useLeaderboard";
 import { FlatList, StyleSheet } from "react-native";
 import { UnderlinedButton } from "../ui/ThemedButton";
 import { useUser } from "../../hooks/useUser";
+import { useTheme } from "../../hooks/useTheme";
 export const Leaderboard = () => {
 	const {
 		globalLeaders,
@@ -66,6 +67,7 @@ export const Leaderboard = () => {
 };
 
 function ResultBar({ result }: { result: Leader }) {
+    const { colors } = useTheme()
 	const { playerStats } = useUser();
 	if (!playerStats) {
 		return;
@@ -78,7 +80,7 @@ function ResultBar({ result }: { result: Leader }) {
 	const isMe = result.id === playerStats.id;
 
 	return (
-		<ThemedView style={styles.resBar}>
+		<ThemedView style={[styles.resBar, { borderBottomColor: colors.secondary }]}>
 			<ThemedText variant={isMe ? "strong" : "medium"}>
 				{boardRank}
 			</ThemedText>
@@ -98,8 +100,12 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
+        width: "100%",
+        padding:12,
+        
+        borderBottomWidth: 4
 	},
-	listHolder: { alignItems: "center" },
+	listHolder: { alignItems: "center", width: "80%" },
 	buttonPanel: {
 		flexDirection: "row",
 		justifyContent: "center",

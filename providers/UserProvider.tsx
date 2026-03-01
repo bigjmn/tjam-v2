@@ -31,6 +31,7 @@ import {
 	createPlayer,
 	converter,
 	playerStatConverter,
+	mergeStats
 } from "../utils/helpers";
 interface UserContextProps {
 	user: User | null;
@@ -152,6 +153,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				}
 				await setDoc(udocRef, {
 					...playerStats,
+					id: uid,
 					email: userEmail,
 					username: newUsername,
 				});
@@ -159,9 +161,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 					userid: googleUserData.uid,
 				});
 			} else {
-				const playstats = uDoc.data();
+				const docStats = uDoc.data();
+				const mergedStats = mergeStats(playerStats, docStats)
 				const userEmail = googleUserData.email!;
-				let newUsername = getGoogleName() || userEmail.split("@")[0];
+				let newUsername = getGoogleName() ?? userEmail.split("@")[0] ?? `user${uid.slice(0, 6)}`;
 
 				const uNameDocRef = doc(firestore, "usernames", newUsername);
 				const uNameDoc = await getDoc(uNameDocRef);
@@ -171,18 +174,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				) {
 					newUsername += usernameNumberTail();
 				}
+
 				const pstats = {
-					...playstats,
-					email: userEmail,
-					username: newUsername,
+					...mergedStats,
+					email: mergedStats.email ?? userEmail,
+					username: mergedStats.username ?? newUsername,
 				};
 				setPlayerStats(pstats);
-				await setDoc(udocRef, {
-					...pstats,
+				await setDoc(udocRef, pstats)
+				// await setDoc(udocRef, {
+				// 	...pstats,
 
-					email: userEmail,
-					username: newUsername,
-				});
+				// 	email: userEmail,
+				// 	username: newUsername,
+				// });
 				await setDoc(doc(firestore, "usernames", newUsername), {
 					userid: googleUserData.uid,
 				});

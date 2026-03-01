@@ -104,6 +104,23 @@ export const playerStatConverter = {
 	},
 };
 
+export const mergeStats = (localStats:PlayerStats, remoteStats:PlayerStats) => {
+	const mergedBest = Math.max(localStats.topScore, remoteStats.topScore)
+	const mergedAchs = Array.from(new Set([...localStats.achievementsWon, ...remoteStats.achievementsWon]))
+	const combinedRecords = [...localStats.gameHist, ...remoteStats.gameHist]
+	// filter duplicate game records (using game timestamp) and sort by date (oldest first)
+	const uniqueRecords = combinedRecords.filter((record, index, self) =>
+		index === self.findIndex((t) => t.timestamp === record.timestamp),
+	);
+	const sortedRecords = uniqueRecords.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+	const numGames = Math.max(localStats.numGames, remoteStats.numGames)
+	const id = remoteStats.id 
+	const uName = localStats.username ?? remoteStats.username ?? null 
+	const uEmail = localStats.email ?? remoteStats.email ?? null 
+	return {achievementsWon: mergedAchs, topScore: mergedBest, numGames: numGames, id: id, gameHist: sortedRecords, username: uName, email: uEmail} as PlayerStats
+	
+
+}
 export function getFreq(arr: string[]) {
 	let maxCount = 0;
 	const counts: Record<string, number> = {};

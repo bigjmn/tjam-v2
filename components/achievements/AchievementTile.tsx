@@ -71,7 +71,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 							: explainer}
 					</ThemedText>
 				</ThemedView>
-				<ThemedView style={styles.rewardContainer}>
+				<ThemedView style={[styles.rewardContainer, { backgroundColor }]}>
 					<StarIconGroup
 						totalCount={achievement.reward}
 						filledCount={achievement.reward}

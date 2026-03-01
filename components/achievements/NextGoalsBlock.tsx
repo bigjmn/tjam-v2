@@ -13,7 +13,7 @@ import { AchievementTile } from "./AchievementTile";
 import ThemedText from "../ui/ThemedText";
 import { useSfx } from "../../hooks/useSfx";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface NextGoalsBlockProps {
 	scoringAchievement: Achievement;
@@ -50,7 +50,7 @@ export const NextGoalsBlock = forwardRef<
 	const scoringTranslateX = useSharedValue(0);
 	const streakingTranslateX = useSharedValue(0);
 	const noveltyTranslateX = useSharedValue(0);
-	const blockTranslateY = useSharedValue(SCREEN_WIDTH); // Start below screen
+	const blockTranslateY = useSharedValue(SCREEN_HEIGHT); // Start below screen
 	const blockTranslateX = useSharedValue(0);
 
 	const scoringPulseScale = useSharedValue(1);

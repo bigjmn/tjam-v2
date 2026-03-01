@@ -5,7 +5,16 @@ import { ThemeProvider } from "../providers/ThemeProvider";
 import { Stack } from "expo-router";
 import { UserProvider } from "../providers/UserProvider";
 import "react-native-reanimated";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from 'react-native-reanimated';
 
+// This is the default configuration
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, // Reanimated runs in strict mode by default
+});
 const RootLayout = () => {
 	const { colors } = useTheme();
 	return (

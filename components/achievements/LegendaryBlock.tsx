@@ -11,7 +11,7 @@ import { AchievementTile } from "./AchievementTile";
 import ThemedText from "../ui/ThemedText";
 import { legendaryAchievements } from "../../utils/achievements";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface LegendaryBlockProps {
 	earnedKeys: string[];
@@ -26,7 +26,7 @@ export const LegendaryBlock = forwardRef<
 	LegendaryBlockHandle,
 	LegendaryBlockProps
 >(({ earnedKeys }, ref) => {
-	const blockTranslateY = useSharedValue(SCREEN_WIDTH);
+	const blockTranslateY = useSharedValue(SCREEN_HEIGHT);
 	const blockTranslateX = useSharedValue(0);
 
 	const enter = async (): Promise<void> => {

@@ -6,12 +6,13 @@ import Animated, {
 	withTiming,
 	Easing,
 	runOnJS,
+	makeMutable,
 } from "react-native-reanimated";
 import { AchievementTile } from "./AchievementTile";
 import ThemedText from "../ui/ThemedText";
 import { allAchievements } from "../../utils/achievements";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+import { useSfx } from "../../hooks/useSfx";
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface SecretBlockProps {
 	earnedKeys: string[];
@@ -26,25 +27,28 @@ export interface SecretBlockHandle {
 export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 	({ earnedKeys }, ref) => {
 		const [revealedKeys, setRevealedKeys] = React.useState<string[]>([]);
-		const blockTranslateY = useSharedValue(SCREEN_WIDTH);
+		const blockTranslateY = useSharedValue(SCREEN_HEIGHT);
 		const blockTranslateX = useSharedValue(0);
 
-		// Shared values for each tile's flip rotation
-		const tileRotations = React.useRef<
-			Map<string, Animated.SharedValue<number>>
-		>(new Map());
+		const { achieveSound } = useSfx()
+
+		// Store shared values in a ref - create them imperatively, not with hooks
+		const tileRotations = React.useRef<Map<string, Animated.SharedValue<number>>>(
+			new Map()
+		);
+
+		// Helper to get or create rotation value (imperatively using makeMutable)
+		const getRotation = (key: string): Animated.SharedValue<number> => {
+			if (!tileRotations.current.has(key)) {
+				// Create shared value imperatively using makeMutable
+				tileRotations.current.set(key, makeMutable(0));
+			}
+			return tileRotations.current.get(key)!;
+		};
 
 		const revealTile = async (achievementKey: string): Promise<void> => {
 			return new Promise((resolve) => {
-				// Get or create rotation value for this tile
-				if (!tileRotations.current.has(achievementKey)) {
-					tileRotations.current.set(
-						achievementKey,
-						useSharedValue(0),
-					);
-				}
-
-				const rotation = tileRotations.current.get(achievementKey)!;
+				const rotation = getRotation(achievementKey);
 
 				// Flip animation
 				rotation.value = withTiming(
@@ -59,6 +63,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 							...revealedKeys,
 							achievementKey,
 						]);
+						runOnJS(achieveSound)()
 						runOnJS(resolve)();
 					},
 				);

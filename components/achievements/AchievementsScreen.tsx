@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RankProgress, RankProgressHandle } from "./RankProgress";
 import { NextGoalsBlock, NextGoalsBlockHandle } from "./NextGoalsBlock";
@@ -255,6 +255,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	};
 
 	const processAnimationQueue = async () => {
+		console.log('[ACHIEVEMENTS] ========== STARTING ANIMATION QUEUE ==========');
 		if (!achievements) {
 			console.log('[ACHIEVEMENTS] No achievements, returning');
 			return;
@@ -267,7 +268,11 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		const { nextGoals, legendary, secret } =
 			achievements.categorizeAchievements(earnedKeys);
 
-		console.log('[ACHIEVEMENTS] Categories:', { nextGoals, legendary, secret });
+		console.log('[ACHIEVEMENTS] Categories:', {
+			nextGoals: nextGoals.length,
+			legendary: legendary.length,
+			secret: secret.length
+		});
 
 		// Separate out daily word achievements
 		const dailyWordKeys = earnedKeys.filter(key => {
@@ -275,19 +280,39 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			return achievement?.type === "dailyWord";
 		});
 
-		// Enter Next Goals block if there are any next goals OR daily word achievements
+		// Track which events belong to which block
+		let currentBlock: 'nextGoals' | 'legendary' | 'secret' = 'nextGoals';
+		const firstRevealSecretIndex = queue.findIndex(e => e.type === "revealSecret");
+
+		// Helper to determine if event belongs to current block
+		const eventBelongsToCurrentBlock = (event: AchievementAnimationEvent, index: number) => {
+			if (event.type === "markWon" || event.type === "slideTile") return currentBlock === 'nextGoals';
+			if (event.type === "revealSecret") return currentBlock === 'secret';
+			if (event.type === "showRankUp" || event.type === "fillStar") {
+				// Star fills belong to the block that earned them
+				if (currentBlock === 'nextGoals' && (firstRevealSecretIndex === -1 || index < firstRevealSecretIndex)) return true;
+				if (currentBlock === 'legendary' && index >= firstRevealSecretIndex) return false;
+				if (currentBlock === 'secret' && firstRevealSecretIndex !== -1 && index >= firstRevealSecretIndex) return true;
+			}
+			return false;
+		};
+
+		// NEXT GOALS BLOCK
 		if (nextGoals.length > 0 || dailyWordKeys.length > 0) {
-			console.log('[ACHIEVEMENTS] Entering next goals');
+			console.log('[ACHIEVEMENTS] Entering next goals block');
 			setPhase("next-goals-enter");
 			await nextGoalsRef.current?.enter();
 			await delay(200);
 			setPhase("next-goals-animating");
-		}
 
-		// Process queue
-		console.log('[ACHIEVEMENTS] Starting queue processing');
-		for (const event of queue) {
-			console.log('[ACHIEVEMENTS] Processing event:', event.type);
+			// Process only Next Goals and Daily Word events
+			console.log('[ACHIEVEMENTS] Processing next goals events');
+			currentBlock = 'nextGoals';
+			for (let i = 0; i < queue.length; i++) {
+				const event = queue[i];
+				if (!eventBelongsToCurrentBlock(event, i)) continue;
+
+				console.log('[ACHIEVEMENTS] Processing event:', event.type);
 			if (event.type === "markWon") {
 				const markWonEvent = event as unknown as MarkWonEvent;
 				console.log('[ACHIEVEMENTS] Marking as won:', markWonEvent.category);
@@ -341,43 +366,92 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			}
 		}
 
-		// Exit Next Goals if present
-		if (nextGoals.length > 0 || dailyWordKeys.length > 0) {
-
+			// Exit Next Goals block
+			console.log('[ACHIEVEMENTS] Exiting next goals block');
 			setPhase("next-goals-exit");
-			await delay(500)
 			await nextGoalsRef.current?.exit();
 			await delay(200);
 		}
 
-		// Show Legendary block if any
+		// LEGENDARY BLOCK
 		if (legendary.length > 0) {
+			console.log('[ACHIEVEMENTS] Entering legendary block');
 			setPhase("legendary-enter");
 			await legendaryRef.current?.enter();
 			await delay(200);
 			setPhase("legendary-animating");
-			// Stars already filled in queue
+
+			// Process Legendary events (star fills only)
+			currentBlock = 'legendary';
+			for (let i = 0; i < queue.length; i++) {
+				const event = queue[i];
+				if (!eventBelongsToCurrentBlock(event, i)) continue;
+
+				console.log('[ACHIEVEMENTS] Processing event:', event.type);
+				if (event.type === "fillStar") {
+					console.log('[ACHIEVEMENTS] Filling star');
+					await rankProgressRef.current?.fillNextStar();
+					setStarsInCurrentRank((prev) => prev + 1);
+					await delay(400);
+				} else if (event.type === "showRankUp") {
+					const rankUpEvent = event as unknown as ShowRankUpEvent;
+					await rankProgressRef.current?.transitionToNewRank(rankUpEvent.newRank);
+					setCurrentRankIndex(rankUpEvent.rankIndex);
+					setStarsInCurrentRank(0);
+					setPhase("legendary-animating");
+					await delay(200);
+				}
+			}
+
+			console.log('[ACHIEVEMENTS] Exiting legendary block');
 			setPhase("legendary-exit");
-			await delay(500)
 			await legendaryRef.current?.exit();
 			await delay(200);
 		}
 
-		// Show Secret block if any
+		// SECRET BLOCK
 		if (secret.length > 0) {
+			console.log('[ACHIEVEMENTS] Entering secret block');
 			setPhase("secret-enter");
 			await secretRef.current?.enter();
 			await delay(200);
 			setPhase("secret-animating");
-			// Reveals and stars already done in queue
+
+			// Process Secret events (reveals and star fills)
+			currentBlock = 'secret';
+			for (let i = 0; i < queue.length; i++) {
+				const event = queue[i];
+				if (!eventBelongsToCurrentBlock(event, i)) continue;
+
+				console.log('[ACHIEVEMENTS] Processing event:', event.type);
+				if (event.type === "revealSecret") {
+					const revealEvent = event as unknown as RevealSecretEvent;
+					await secretRef.current?.revealTile(revealEvent.achievementKey);
+					await delay(400);
+				} else if (event.type === "fillStar") {
+					console.log('[ACHIEVEMENTS] Filling star');
+					await rankProgressRef.current?.fillNextStar();
+					setStarsInCurrentRank((prev) => prev + 1);
+					await delay(400);
+				} else if (event.type === "showRankUp") {
+					const rankUpEvent = event as unknown as ShowRankUpEvent;
+					await rankProgressRef.current?.transitionToNewRank(rankUpEvent.newRank);
+					setCurrentRankIndex(rankUpEvent.rankIndex);
+					setStarsInCurrentRank(0);
+					setPhase("secret-animating");
+					await delay(200);
+				}
+			}
+			console.log('[ACHIEVEMENTS] Exiting secret block');
 			setPhase("secret-exit");
-			await delay(500)
 			await secretRef.current?.exit();
 			await delay(200);
 		}
 
+		console.log('[ACHIEVEMENTS] Animation queue complete');
 		setPhase("complete");
 		setIsProcessing(false);
+		console.log('[ACHIEVEMENTS] ========== ANIMATION QUEUE FINISHED ==========');
 	};
 
 	useEffect(() => {
@@ -409,50 +483,57 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 	return (
 		<ThemedView style={styles.container}>
-			<ThemedView style={styles.content}>
-				{/* Rank Progress - always visible at top */}
-				<RankProgress
-					ref={rankProgressRef}
-					rank={currentRank}
-					totalStars={currentRank.starsToFill}
-					filledStars={starsInCurrentRank}
-				/>
+			{/* Rank Progress - always at top */}
+			<RankProgress
+				ref={rankProgressRef}
+				rank={currentRank}
+				totalStars={currentRank.starsToFill}
+				filledStars={starsInCurrentRank}
+			/>
 
-				{/* Achievement Blocks */}
+			{/* Achievement Blocks Container - positioned beneath RankProgress */}
+			<ThemedView style={styles.blocksContainer}>
+				{/* All blocks positioned absolutely at same location */}
 				{nextGoalKeys.length > 0 && nextAchievements && (
-					<NextGoalsBlock
-						ref={nextGoalsRef}
-						scoringAchievement={nextAchievements.scoring}
-						streakingAchievement={nextAchievements.streaking}
-						noveltyAchievement={nextAchievements.novelty}
-						dailyWordAchievement={dailyWordAchievement}
-						dailyWordWon={dailyWordWon}
-					/>
+					<View style={styles.blockWrapper}>
+						<NextGoalsBlock
+							ref={nextGoalsRef}
+							scoringAchievement={nextAchievements.scoring}
+							streakingAchievement={nextAchievements.streaking}
+							noveltyAchievement={nextAchievements.novelty}
+							dailyWordAchievement={dailyWordAchievement}
+							dailyWordWon={dailyWordWon}
+						/>
+					</View>
 				)}
 
 				{legendaryKeys.length > 0 && (
-					<LegendaryBlock
-						ref={legendaryRef}
-						earnedKeys={legendaryKeys}
-					/>
+					<View style={styles.blockWrapper}>
+						<LegendaryBlock
+							ref={legendaryRef}
+							earnedKeys={legendaryKeys}
+						/>
+					</View>
 				)}
 
 				{secretKeys.length > 0 && (
-					<SecretBlock ref={secretRef} earnedKeys={secretKeys} />
-				)}
-
-				{/* Complete button */}
-				{!isProcessing && (
-					<ThemedView style={styles.completeContainer}>
-						<ThemedButton
-							style={styles.completeButton}
-							onPress={onComplete}
-						>
-							<ThemedText variant="strong">Play Again</ThemedText>
-						</ThemedButton>
-					</ThemedView>
+					<View style={styles.blockWrapper}>
+						<SecretBlock ref={secretRef} earnedKeys={secretKeys} />
+					</View>
 				)}
 			</ThemedView>
+
+			{/* Complete button - fixed at bottom */}
+			{!isProcessing && (
+				<ThemedView style={styles.completeContainer}>
+					<ThemedButton
+						style={styles.completeButton}
+						onPress={onComplete}
+					>
+						<ThemedText variant="strong">Play Again</ThemedText>
+					</ThemedButton>
+				</ThemedView>
+			)}
 
 			{/* Rank Up Modal */}
 			<RankUpModal ref={rankUpModalRef} />
@@ -464,12 +545,25 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	content: {
+	blocksContainer: {
 		flex: 1,
+		position: 'relative',
+	},
+	blockWrapper: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		zIndex: 1,
 	},
 	completeContainer: {
+		position: 'absolute',
+		bottom: 0,
+		left: 0,
+		right: 0,
 		padding: 16,
 		alignItems: "center",
+		zIndex: 2,
 	},
 	completeButton: {
 		paddingHorizontal: 32,

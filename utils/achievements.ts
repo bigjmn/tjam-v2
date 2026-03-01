@@ -282,6 +282,14 @@ export const secretAchievements: SecretAchievement[] = [
 		reward: 4,
 	},
 	{
+		key: "lucky13",
+		name: "Lucky Thirteen",
+		explainer: "Clear numbers adding up to 13",
+		type: "secret",
+		reward: 4
+
+	},
+	{
 		key: "zootrip",
 		name: "Trip to the Zoo",
 		explainer: "Clear three animals in one game",

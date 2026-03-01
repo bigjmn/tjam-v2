@@ -167,6 +167,29 @@ export const isBare = (bstr: string) => {
 	return bstr.split("").filter((l) => l !== "*").length <= 3;
 };
 
+export const luckyThirteen = (wordsMade: string[]) => {
+	let tenCount = 0
+	let sixCount = 0
+	let twoCount = 0 
+	let oneCount = 0 
+	for (const word of wordsMade){
+		if (word === "TEN") tenCount++
+		if (word === "SIX") sixCount++
+		if (word === "TWO") twoCount++
+		if (word === "ONE") oneCount++
+	}
+	if (tenCount >=1 && twoCount >=1 && oneCount >=1) return true 
+	if (tenCount >=1 && oneCount >= 3) return true 
+	if (sixCount >= 2 && oneCount >= 1) return true 
+	if (sixCount >= 1 && twoCount >= 3 && oneCount >= 1) return true 
+	if (sixCount >= 1 && twoCount >= 2 && oneCount >= 3) return true 
+	if (sixCount >= 1 && twoCount >= 1 && oneCount >= 5) return true 
+	if (sixCount >= 1 && oneCount >= 7) return true 
+	const neededOnes = Math.max(13 - twoCount*2, 1)
+	if (oneCount >= neededOnes) return true 
+	return false 
+}
+
 export const bareBilly = (turns: TurnInfo[]) => {
 	let count = 0;
 	for (const turn of turns) {

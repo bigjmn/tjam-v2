@@ -4,6 +4,7 @@ import { useTheme } from "../../hooks/useTheme";
 import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import Spacer from "../ui/Spacer";
+import { View } from "react-native";
 interface StarIconProps {
 	style?: StyleProp<ViewStyle>;
 	isFilled: boolean;
@@ -40,13 +41,13 @@ export function StarIconGroup({
 	canAbbrev = true,
 }: StarIconGroupProps) {
 	return (
-		<ThemedView style={[{ display: "flex", flexDirection: "row" }, style]}>
+		<View style={[{ display: "flex", flexDirection: "row" }, style]}>
 			{totalCount < 5 || filledCount < totalCount || !canAbbrev ? (
 				Array.from({ length: totalCount }).map((_, index) => (
 					<StarIcon key={index} isFilled={index < filledCount} />
 				))
 			) : (
-				<ThemedView
+				<View
 					style={{
 						display: "flex",
 						flexDirection: "row",
@@ -58,8 +59,8 @@ export function StarIconGroup({
 					<ThemedText style={{ fontSize: 10 }}>
 						x {totalCount}
 					</ThemedText>
-				</ThemedView>
+				</View>
 			)}
-		</ThemedView>
+		</View>
 	);
 }

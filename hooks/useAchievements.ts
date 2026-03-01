@@ -8,10 +8,13 @@ import {
 	allAchievements,
 	ranksList,
 } from "../utils/achievements";
-import { groupFreq, bareBilly, getDailyWord } from "../utils/helpers";
+import { animals, bodyParts } from "../constants/SpecialWords";
+import { groupFreq, bareBilly, getDailyWord, luckyThirteen } from "../utils/helpers";
 import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+const DEBUG_SET = ["zootrip", "drdoubleword"]
 export const useAchievements = () => {
 	const { playerStats } = useUser();
 	if (playerStats === null) return;
@@ -97,6 +100,18 @@ export const useAchievements = () => {
 			allAchievements.push("bareboard");
 		}
 
+		if (luckyThirteen(allWordsMade)){
+			allAchievements.push('lucky13')
+		}
+		if (animals.filter(a => allWordsMade.includes(a)).length >= 3){
+			allAchievements.push('zootrip')
+		}
+		if (bodyParts.filter(b => allWordsMade.includes(b)).length >= 5){
+			allAchievements.push('bodyshop')
+		}
+
+
+
 		// Check daily word achievement
 		const dailyWord = getDailyWord();
 		const datestring = moment(new Date()).format('M/DD/YYYY');
@@ -120,8 +135,11 @@ export const useAchievements = () => {
 				(ac === currentNoveltyGoal?.key ||
 					!noveltyAchievements.find((x) => x.key === ac)),
 		);
+		for (const dba of DEBUG_SET){
+			newAchievements.push(dba)
+		}
 
-		return newAchievements;
+		return Array.from(new Set(newAchievements));
 	};
 
 	const scoreAndRank = () => {

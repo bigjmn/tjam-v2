@@ -33,7 +33,7 @@ export const PaginationDots: React.FC<PaginationDotsProps> = ({
 					opacity: isActive ? 1 : 0.4,
 					backgroundColor: isActive
 						? colors.primary
-						: colors.iconColor,
+						: colors.borderSubtle,
 				}));
 
 				return (

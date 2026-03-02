@@ -21,9 +21,7 @@ export default function StatsPage() {
 
 	return (
 		<ThemedView safe style={styles.container}>
-			<ThemedButton onPress={toggleTheme}>
-				<ThemedText>Toggle Me</ThemedText>
-			</ThemedButton>
+			
 
 			{/* Top Section - Fixed */}
 			<View style={styles.topSection}>
@@ -53,6 +51,7 @@ export default function StatsPage() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+        alignItems:"center"
 	},
 	topSection: {
 		paddingVertical: 20,

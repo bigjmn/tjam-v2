@@ -25,6 +25,7 @@ import { GameHeader } from "./GameHeader";
 import ExitConfirmModal from "./ExitConfirmModal";
 import { useUser } from "../../hooks/useUser";
 import ThemedText from "../ui/ThemedText";
+import { useTheme } from "../../hooks/useTheme";
 
 function Tile({
 	id,
@@ -66,6 +67,8 @@ function Tile({
 	const SLIDE_DURATION = 520;
 	const STAGGER = 60; // ms delay per column index
 	const FLIP_DURATION = 800;
+
+	const { colors } = useTheme()
 
 	// Entrance animation for new home row tiles
 	useEffect(() => {
@@ -186,10 +189,10 @@ function Tile({
 			zIndex: isPressed.value ? 100 : 10,
 			//moveable tiles always tan. parts of word green, otherwise gray
 			backgroundColor: canMove
-				? "tan"
+				? colors.tileMovable
 				: partValid.includes(sitsOn.value)
-					? "#7FAA7A"
-					: "#e2e2e2",
+					? colors.tileValid
+					: colors.tileFrozen,
 			// opacity: opacity.value,
 		};
 	});
@@ -215,7 +218,7 @@ function Tile({
 		height: '100%',
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#e2e2e2',
+		backgroundColor: colors.tileFrozen,
 		borderRadius:12
 	}));
 	//style of 'shadow' on square currently dragged over
@@ -442,7 +445,7 @@ export default function Game() {
 							onPress={handleCommitMove}
 							hitSlop={10}
 						>
-							<Text style={[styles.buttonText]}>Commit Move</Text>
+							<ThemedText variant="strong">Commit Move</ThemedText>
 						</ThemedButton>
 						{/* <Pressable
 						disabled={!validBoard || !!inMotion}

@@ -87,7 +87,7 @@ function ResultBar({ result }: { result: Leader }) {
 			<ThemedText variant={isMe ? "strong" : "medium"}>
 				{result.username}
 			</ThemedText>
-			<ThemedText variant={isMe ? "strong" : "medium"}>
+			<ThemedText variant={isMe ? "strong" : "medium"} style={{color: colors.accent}}>
 				{rankScope}
 			</ThemedText>
 		</ThemedView>

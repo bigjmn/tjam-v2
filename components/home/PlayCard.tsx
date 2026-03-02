@@ -7,22 +7,25 @@ import ThemedText from "../ui/ThemedText";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { getDailyWord } from "../../utils/helpers";
+import { useTheme } from "../../hooks/useTheme";
 const trioImage = require("../../assets/trioicon.png");
 
 export const PlayCard = () => {
+    const { colors } = useTheme()
     const dailyWord = getDailyWord()
 	return (
-		<ThemedCard style={styles.container}>
+		<ThemedCard style={[styles.container, {backgroundColor: colors.elevatedCard}]}>
 			<View style={styles.cardRow}>
-				<Image
-					source={trioImage}
-					contentFit="cover"
-					style={styles.imageStyle}
-				/>
+				
 				<View>
 					<ThemedText variant="header">Trio Jam</ThemedText>
 					<ThemedText variant="light"></ThemedText>
 				</View>
+                <Image
+					source={trioImage}
+					contentFit="cover"
+					style={styles.imageStyle}
+				/>
 			</View>
 			<View>
 				<ThemedText>Word of the Day: {dailyWord}</ThemedText>
@@ -35,14 +38,16 @@ const styles = StyleSheet.create({
 	container: {
 		borderRadius: 12,
 		padding: 12,
+        width: 300,
 	},
 	cardRow: {
 		height: 120,
-		width: "80%",
+		width: "100%",
 		flexDirection: "row",
+        gap: 50
 	},
 	imageStyle: {
-		height: 50,
-		width: 50,
+		height: 70,
+		width: 70,
 	},
 });

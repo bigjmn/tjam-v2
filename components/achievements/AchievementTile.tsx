@@ -24,8 +24,8 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 	showDate = false,
 }) => {
 	const { colors } = useTheme();
-	const borderColor = isWon ? `${colors.primary}80` : "#3a3a3a";
-	const backgroundColor = isWon ? "#8922DD" : "transparent";
+	const borderColor = isWon ? colors.primary : colors.borderSubtle;
+	const backgroundColor = isWon ? colors.primary : colors.uiBackground;
 
 	// Get daily word for dynamic text
 	const dailyWord = achievement.type === 'dailyWord' ? getDailyWord() : null;
@@ -53,7 +53,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 				<ThemedView style={[styles.contentArea, { backgroundColor }]}>
 					<ThemedText
 						variant="strong"
-						style={isWon ? { color: "white" } : {}}
+						
 					>
 						{title}
 					</ThemedText>
@@ -61,7 +61,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 						variant="soft"
 						style={
 							isWon
-								? [styles.explainer, { color: "white" }] :
+								? [styles.explainer, { color: colors.primarySoft }] :
 								isPlaceholder ? [styles.explainer, {fontStyle: "italic"}]
 								: styles.explainer
 						}

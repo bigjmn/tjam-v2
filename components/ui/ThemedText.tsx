@@ -15,7 +15,7 @@ const ThemedText = ({
 }: ThemedTextProps) => {
 	const { theme, colors } = useTheme();
 
-	const textColor = title ? colors.title : colors.text;
+	const textColor = (title || variant === "title") ? colors.title : colors.text;
 
 	if (variant === "title") {
 		return (
@@ -103,7 +103,7 @@ const ThemedText = ({
 			<Text
 				style={[
 					{
-						color: textColor,
+						color: colors.title,
 						fontFamily: "Roboto-Bold",
 						fontWeight: 700,
 						fontSize: 16,
@@ -135,7 +135,7 @@ const ThemedText = ({
 			<Text
 				style={[
 					{
-						color: textColor,
+						color: colors.mutedText,
 						fontFamily: "Roboto-Medium",
 						fontSize: 16,
 						opacity: 0.5,

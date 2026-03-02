@@ -127,6 +127,9 @@ export const useAchievements = () => {
 		const currentNoveltyGoal = noveltyAchievements.filter(
 			(na) => !playerStats.achievementsWon.includes(na.key),
 		)[0];
+		for (const dba of DEBUG_SET){
+			allAchievements.push(dba)
+		}
 
 		// Filter out achievements already scored, and novelty achievements besides the next goal
 		const newAchievements = allAchievements.filter(
@@ -135,9 +138,7 @@ export const useAchievements = () => {
 				(ac === currentNoveltyGoal?.key ||
 					!noveltyAchievements.find((x) => x.key === ac)),
 		);
-		for (const dba of DEBUG_SET){
-			newAchievements.push(dba)
-		}
+		
 
 		return Array.from(new Set(newAchievements));
 	};

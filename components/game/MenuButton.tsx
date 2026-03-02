@@ -61,7 +61,7 @@ const FloatingActionButton = ({
 			style={[animatedStyles, styles.shadow, styles.button, {backgroundColor: colors.uiBackground}]}
 		>
 			<Animated.View>
-				<Ionicons size={16} style={styles.content} name={iconName as any} color={iconName === "exit-outline" ? colors.warning : colors.text} />
+				<Ionicons size={16} style={styles.content} name={iconName as any} color={iconName === "exit-outline" ? colors.danger : colors.text} />
 			</Animated.View>
 		</AnimatedPressable>
 	);
@@ -102,7 +102,7 @@ export default function MenuTest({ onExitPress }: MenuTestProps) {
 						style={[styles.shadow, mainButtonStyles.button, {backgroundColor: colors.uiBackground}]}
 					>
 						<Animated.View style={[plusIconStyle]}>
-							<Ionicons name="menu" size={18} color={colors.text} />
+							<Ionicons name="menu" size={18} color={colors.iconColorFocus} />
 						</Animated.View>
 					</AnimatedPressable>
 					<FloatingActionButton

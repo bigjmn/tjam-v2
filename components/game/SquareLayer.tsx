@@ -36,7 +36,7 @@ export default function SquareLayer() {
 						borderWidth: 3,
 						// borderColor: "white",
 						borderRadius: 12,
-						backgroundColor: colors.uiBackground,
+						backgroundColor: colors.emptyTile,
 						// backgroundColor: "#e4e4e4",
 					}}
 				></ThemedView>

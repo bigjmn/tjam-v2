@@ -25,7 +25,7 @@ export default function OptionSwitches() {
 	return (
 		<ThemedView style={styles.container}>
 			<Spacer />
-			<ThemedView style={styles.optionHolder}>
+			<ThemedView style={[styles.optionHolder ]}>
 				<ThemedText style={{ marginBottom: 5 }}>
 					Display Mode
 				</ThemedText>
@@ -40,10 +40,10 @@ export default function OptionSwitches() {
 							borderBottomRightRadius: 0,
 							borderTopRightRadius: 0,
 							backgroundColor:
-								theme === "light" ? "#000" : "#323232",
+								theme === "light" ? colors.primary : colors.background,
 						}}
 					>
-						<ThemedText variant="medium" style={{ color: "#fff" }}>
+						<ThemedText variant="medium">
 							Light
 						</ThemedText>
 					</ThemedButton>
@@ -57,25 +57,25 @@ export default function OptionSwitches() {
 							borderBottomRightRadius: 6,
 							borderTopRightRadius: 6,
 							backgroundColor:
-								theme === "dark" ? "#000" : "#dfdfdf",
+								theme === "dark" ? colors.primary : colors.background,
 						}}
 					>
-						<ThemedText variant="medium" style={{ color: "#fff" }}>
+						<ThemedText variant="medium">
 							Dark
 						</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 				{theme === "light" && (
-					<ThemedText variant="italic">Incorrect.</ThemedText>
+					<ThemedText variant="soft">Incorrect.</ThemedText>
 				)}
 				{theme === "dark" && (
-					<ThemedText variant="italic">Correct.</ThemedText>
+					<ThemedText variant="soft">Correct.</ThemedText>
 				)}
 			</ThemedView>
 			<Spacer height={20} />
 
-			<ThemedView style={styles.optionHolder}>
-				<ThemedText style={{ marginBottom: 5 }}>Answers</ThemedText>
+			<ThemedView style={[styles.optionHolder]}>
+				<ThemedText style={{ marginBottom: 5 }}>Sound FX</ThemedText>
 				<ThemedView style={styles.buttonHolder}>
 					<ThemedButton
 						onPress={() => turnOnSound()}
@@ -87,11 +87,11 @@ export default function OptionSwitches() {
 							borderBottomRightRadius: 0,
 							borderTopRightRadius: 0,
 							backgroundColor: sfxOn
-								? "#000"
-								: colors.uiBackground,
+								? colors.primary
+								: colors.background,
 						}}
 					>
-						<ThemedText variant="medium" style={{ color: "#fff" }}>
+						<ThemedText variant="medium">
 							On
 						</ThemedText>
 					</ThemedButton>
@@ -105,22 +105,22 @@ export default function OptionSwitches() {
 							borderBottomRightRadius: 6,
 							borderTopRightRadius: 6,
 							backgroundColor: sfxOn
-								? colors.uiBackground
-								: "#000",
+								? colors.background
+								: colors.primary,
 						}}
 					>
-						<ThemedText variant="medium" style={{ color: "#fff" }}>
+						<ThemedText variant="medium">
 							Off
 						</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 				{sfxOn && (
-					<ThemedText variant="italic">
+					<ThemedText variant="soft">
 						Those sweet sweet dopamine triggers.
 					</ThemedText>
 				)}
 				{!sfxOn && (
-					<ThemedText variant="italic">
+					<ThemedText variant="soft">
 						I mean I guess that's fair.
 					</ThemedText>
 				)}
@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
 	},
 	optionHolder: {
 		alignItems: "center",
+        width:"80%"
 	},
 	buttonHolder: {
 		flexDirection: "row",

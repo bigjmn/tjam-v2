@@ -200,7 +200,7 @@ export default function UsernamePicker() {
 	const isDisabled = user?.isAnonymous || isLoading;
 
 	return (
-		<ThemedView style={styles.container}>
+		<ThemedView style={[styles.container]}>
 			<ThemedText variant="medium" style={styles.label}>
 				Username
 			</ThemedText>
@@ -212,7 +212,7 @@ export default function UsernamePicker() {
 					onChangeText={handleInputChange}
 					onBlur={handleBlur}
 					editable={!isDisabled}
-					style={[styles.input, isDisabled && styles.disabled]}
+					style={[styles.input, { backgroundColor: colors.uiBackground, borderColor: colors.primary }, isDisabled && styles.disabled]}
 					placeholder="Enter username"
 				/>
 

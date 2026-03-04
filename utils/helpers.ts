@@ -36,6 +36,8 @@ export const convertOldPlayerOb = (oldPlayerOb: any): PlayerStats => {
 	const topScore: number = oldPlayerOb.best;
 	const id: string = oldPlayerOb.id;
 
+	const dateJoined:Date = new Date()
+
 	const scoreAchievementsWon: string[] = [];
 	// score achievements
 	scoringAchievements.forEach((sa) => {
@@ -57,11 +59,12 @@ export const convertOldPlayerOb = (oldPlayerOb: any): PlayerStats => {
 	}
 	const gameHist: GameRecord[] = [];
 
-	return { id, topScore, numGames, achievementsWon, gameHist };
+	return { id, topScore, numGames, achievementsWon, gameHist, dateJoined };
 };
 
 export const createPlayer = (): PlayerStats => {
 	let newId = uuid.v4();
+	const dj = new Date()
 
 	return {
 		id: newId,
@@ -69,6 +72,7 @@ export const createPlayer = (): PlayerStats => {
 		numGames: 0,
 		gameHist: [],
 		achievementsWon: [],
+		dateJoined: dj
 	};
 };
 
@@ -85,6 +89,7 @@ export const playerStatConverter = {
 			numGames: playerStats.numGames,
 			gameHist: playerStats.gameHist,
 			achievementsWon: playerStats.achievementsWon,
+			dateJoined: playerStats.dateJoined,
 			email: playerStats.email || null,
 			username: playerStats.username || null,
 		};
@@ -97,6 +102,7 @@ export const playerStatConverter = {
 			numGames: data.numGames,
 			gameHist: data.gameHist,
 			achievementsWon: data.achievementsWon,
+			dateJoined: data.dateJoined,
 			username: data.username,
 			email: data.email || null,
 			// name: data.name,
@@ -117,7 +123,8 @@ export const mergeStats = (localStats:PlayerStats, remoteStats:PlayerStats) => {
 	const id = remoteStats.id 
 	const uName = localStats.username ?? remoteStats.username ?? null 
 	const uEmail = localStats.email ?? remoteStats.email ?? null 
-	return {achievementsWon: mergedAchs, topScore: mergedBest, numGames: numGames, id: id, gameHist: sortedRecords, username: uName, email: uEmail} as PlayerStats
+	const dj = (localStats.dateJoined < remoteStats.dateJoined) ? localStats.dateJoined : remoteStats.dateJoined
+	return {achievementsWon: mergedAchs, topScore: mergedBest, numGames: numGames, id: id, gameHist: sortedRecords, dateJoined:dj, username: uName, email: uEmail} as PlayerStats
 	
 
 }
@@ -227,3 +234,91 @@ export const getDailyWord = ():string => {
 	const datestring = moment(new Date()).format('M/DD/YYYY')
 	return wordDates[datestring]
 }
+
+export type StreakResult = {
+	longestStreak: number;
+	currentStreak: number;
+  };
+  
+  export function calculateStreaks(dates: Date[]): StreakResult {
+	if (dates.length === 0) return { longestStreak: 0, currentStreak: 0 };
+  
+	const today = moment.utc().startOf("day");
+	const yesterday = moment.utc().startOf("day").subtract(1, "day");
+  
+	let prevDay: moment.Moment | null = null;
+  
+	let run = 0;
+	let longest = 0;
+  
+	let lastUniqueDay: moment.Moment | null = null;
+  
+	for (const d of dates) {
+	  const day = moment.utc(d).startOf("day");
+  
+	  if (!prevDay) {
+		run = 1;
+		prevDay = day;
+		lastUniqueDay = day;
+		continue;
+	  }
+  
+	  // Ignore duplicates
+	  if (day.isSame(prevDay, "day")) continue;
+  
+	  if (day.diff(prevDay, "days") === 1) {
+		run++;
+	  } else {
+		longest = Math.max(longest, run);
+		run = 1;
+	  }
+  
+	  prevDay = day;
+	  lastUniqueDay = day;
+	}
+  
+	longest = Math.max(longest, run);
+  
+	let currentStreak = 0;
+  
+	if (lastUniqueDay) {
+	  if (lastUniqueDay.isSame(today, "day") || lastUniqueDay.isSame(yesterday, "day")) {
+		currentStreak = run;
+	  }
+	}
+  
+	return {
+	  longestStreak: longest,
+	  currentStreak,
+	};
+  }
+
+  const wordDatesFromAchievements = (achievements: string[]) => {
+	const datelist = achievements.filter((ach) => ach.startsWith("wordoftheday_")).map((ach) => ach.split("_")[1])
+	const dates = datelist.map((date) => moment(date, "M/DD/YYYY").toDate())
+	return dates.filter((date) => !isNaN(date.getTime()))
+  }
+
+  export const getLongestStreakFromAchievements = (achievements: string[]) => {
+	const dates = wordDatesFromAchievements(achievements)
+	return calculateStreaks(dates)
+  }
+
+  export const wodPct = (startDate:Date, achievements:string[]) => {
+	const dates = wordDatesFromAchievements(achievements)
+	if (dates.length === 0){
+		return 0 
+	}
+	const latestDate = dates[-1]
+	const currDate = new Date()
+	const todayInclude = moment(currDate).isSame(latestDate)
+	let totalDays = moment(currDate).diff(startDate, "days")
+	if (todayInclude){
+		totalDays++
+	}
+	if (totalDays <= 0){
+		return 0
+	}
+	return 100*(dates.length/totalDays)
+
+  }

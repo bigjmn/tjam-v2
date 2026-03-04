@@ -50,6 +50,7 @@ interface PlayerStats {
 	numGames: number;
 	gameHist: GameRecord[];
 	achievementsWon: string[];
+	dateJoined:Date;
 	username?: string;
 	email?: string;
 }
@@ -172,3 +173,31 @@ type AchievementAnimationEvent =
 	| SlideTileEvent
 	| RevealSecretEvent
 	| ShowRankUpEvent;
+
+
+interface StatBoxProps {
+	highScore: number;
+	globalRank: number;
+	dateJoined: string;
+	points: number;
+	level: number;
+	title: string;
+}
+
+interface VariantBests {
+	scrabble: number;
+	fours: number,
+	fiveline: number
+}
+
+interface GameVariant {
+	name: string; 
+	rules: string; 
+	unlockLevel: number; 
+
+}
+interface WordOfDayStats {
+	longestStreak:number;
+	currentStreak:number;
+	wodRate:number;
+}

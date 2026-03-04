@@ -11,7 +11,7 @@ const Home = () => {
 
 	return (
 		<ThemedView style={styles.container}>
-			<TouchableOpacity onPress={() => router.push("/(dashboard)/game")}>
+			<TouchableOpacity onPress={() => router.push("/game")}>
 				<PlayCard />
 			</TouchableOpacity>
 			{/* <ThemedText style={styles.title}>Trio Jam</ThemedText>

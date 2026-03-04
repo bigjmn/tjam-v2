@@ -5,6 +5,7 @@ import { Link } from "expo-router";
 import { Grid3x3 } from "../components/fliptest";
 import { useUser } from "../hooks/useUser";
 import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
+import TabStackTest, { OverlappingTabsDeck} from "../components/scrap/OverlappingTabStack";
 const Home = () => {
 	const { signInWithGoogle } = useUser();
 
@@ -12,18 +13,15 @@ const Home = () => {
 		<ThemedView style={styles.container}>
 			<ThemedText>Home</ThemedText>
 
-			<View style={styles.headbutton}>
-				<View />
-				<ThemedText>Trio Jame</ThemedText>
-			</View>
-			<Grid3x3 />
+			<TabStackTest
+			   />
 			<Link href="/home">
 				<ThemedText>To page</ThemedText>
 			</Link>
-			<Link href="/settings">
-				<ThemedText>To settings</ThemedText>
+			<Link href="/login">
+				<ThemedText>To login</ThemedText>
 			</Link>
-			<GoogleSigninButton onPress={signInWithGoogle} />
+
 		</ThemedView>
 	);
 };
@@ -31,6 +29,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: "center",
+		overflow:'visible'
 		// position: "relative"
 	},
 	headbutton: {

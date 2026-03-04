@@ -310,7 +310,7 @@ export const option2LightBeta = {
   background: "#F5F6FA",
   uiBackground: "#FFFFFF",
   navBackground: "#FFFFFF",
-  emptyTile: "#ECEAFF",
+  emptyTile: "#cbcbcb",
 
   elevatedCard: "#FFFFFF",
 

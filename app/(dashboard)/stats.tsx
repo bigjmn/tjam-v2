@@ -4,8 +4,7 @@ import ThemedView from "../../components/ui/ThemedView";
 import ThemedButton from "../../components/ui/ThemedButton";
 import ThemedText from "../../components/ui/ThemedText";
 import { RankProgress } from "../../components/achievements/RankProgress";
-import { StatsCarousel } from "../../components/stats/StatsCarousel";
-import { PaginationDots } from "../../components/stats/PaginationDots";
+import { CarouselCard } from "../../components/stats/CarouselCard";
 import { useAchievements } from "../../hooks/useAchievements";
 import { ranksList } from "../../utils/achievements";
 import { useTheme } from "../../hooks/useTheme";
@@ -34,15 +33,10 @@ export default function StatsPage() {
 
 			{/* Carousel Section - Flex */}
 			<View style={styles.carouselSection}>
-				<StatsCarousel
+				<CarouselCard
 					currentPage={currentPage}
 					onPageChange={setCurrentPage}
 				/>
-			</View>
-
-			{/* Pagination Dots - Fixed */}
-			<View style={styles.paginationSection}>
-				<PaginationDots currentPage={currentPage} totalPages={4} />
 			</View>
 		</ThemedView>
 	);
@@ -59,9 +53,5 @@ const styles = StyleSheet.create({
 	},
 	carouselSection: {
 		flex: 1,
-	},
-	paginationSection: {
-		paddingVertical: 16,
-		alignItems: "center",
 	},
 });

@@ -142,6 +142,21 @@ export const useAchievements = () => {
 
 		return Array.from(new Set(newAchievements));
 	};
+	const getCareerStars = () => {
+		let careerStars = 0; 
+		for (const achKey of playerStats.achievementsWon){
+			const baseKey = achKey.startsWith("wordoftheday_")
+				? "wordoftheday"
+				: achKey;
+
+			const achievement = allAchievements.find((ach) => ach.key === baseKey);
+			if (achievement) {
+				careerStars += achievement.reward;
+			}
+
+		}
+		return careerStars
+	}
 
 	const scoreAndRank = () => {
 		let totalStars = 0;
@@ -316,6 +331,7 @@ export const useAchievements = () => {
 		categorizeAchievements,
 		calculateRankChanges,
 		scoreAndRank,
+		getCareerStars
 	};
 };
 

@@ -57,7 +57,7 @@ function Tile({
 	// const opacity = useSharedValue(isNew ? 0 : 1);
 	//id of the square the tile is on
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
-	const { popSound } = useSfx();
+	const { popSound, gearloadSound } = useSfx();
 
 	// Animation values for flip and pinwheel
 	const rotateY = useSharedValue(0);
@@ -65,13 +65,15 @@ function Tile({
 	const pinwheelScale = useSharedValue(1);
 
 	const SLIDE_DURATION = 520;
-	const STAGGER = 60; // ms delay per column index
+	// const STAGGER = 60; // ms delay per column index
 	const FLIP_DURATION = 800;
 
 	const { colors } = useTheme()
 
+
 	// Entrance animation for new home row tiles
 	useEffect(() => {
+		gearloadSound()
 		if (isNew && starty === 0) {
 			const delay = 400
 			// const delay = startx * STAGGER;
@@ -90,6 +92,7 @@ function Tile({
 	// Exit animation for home row tiles
 	useEffect(() => {
 		if (isHomeRowExiting) {
+			// gearloadSound()
 			const delay = 50
 			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
@@ -603,7 +606,6 @@ const styles = StyleSheet.create({
 		borderStyle: "solid",
 		borderRadius: 10,
 		borderWidth: 2,
-		borderColor: "blue",
 
 		display: "flex",
 		justifyContent: "center",

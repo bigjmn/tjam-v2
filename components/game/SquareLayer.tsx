@@ -29,11 +29,11 @@ export default function SquareLayer() {
 					key={square.id}
 					style={{
 						position: "absolute",
-						top: square.topPos,
-						left: square.leftPos,
-						height: 90,
-						width: 90,
-						borderWidth: 3,
+						top: square.topPos+3,
+						left: square.leftPos+3,
+						height: 84,
+						width: 84,
+						borderWidth: 1,
 						// borderColor: "white",
 						borderRadius: 12,
 						backgroundColor: colors.emptyTile,

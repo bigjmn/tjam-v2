@@ -5,7 +5,7 @@ import { useAchievements } from "../../hooks/useAchievements";
 import { useRouter } from "expo-router";
 import { useSfx } from "../../hooks/useSfx";
 export const useGame = () => {
-	const { poofSound } = useSfx()
+	const { wooshSound, gearloadSound } = useSfx()
 	const [tiles, setTiles] = useState<Tile[]>([]);
 	const [wordList, setWordList] = useState(shuffle(wordlist));
 	const [inMotion, setInMotion] = useState<string | null>(null);
@@ -199,7 +199,7 @@ export const useGame = () => {
 		setPinwheelingTileIds(tilesToPinwheel);
 		setIsAnimating(true);
 		if (tilesToPinwheel.size !== 0){
-			poofSound()
+			wooshSound()
 		}
 
 		// Wait for flip animation to complete, then trigger next turn
@@ -221,7 +221,7 @@ export const useGame = () => {
 		setGameActive(false)
 		const newAchievements = achieve!.gameAchievements(gameTurns);
 		router.push({
-			pathname: "/(dashboard)/results",
+			pathname: "/results",
 			params: {
 				achievedJson: JSON.stringify({ achieved: newAchievements }),
 				gameTurnsJson: JSON.stringify(gameTurns),

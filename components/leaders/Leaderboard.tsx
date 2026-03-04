@@ -1,10 +1,12 @@
 import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import { useLeaderboard } from "../../hooks/useLeaderboard";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, Pressable } from "react-native";
 import { UnderlinedButton } from "../ui/ThemedButton";
 import { useUser } from "../../hooks/useUser";
 import { useTheme } from "../../hooks/useTheme";
+import TimeAgo from "../../utils/TimeAgo";
+import { Ionicons } from "@expo/vector-icons";
 export const Leaderboard = () => {
 	const {
 		globalLeaders,
@@ -24,6 +26,7 @@ export const Leaderboard = () => {
 
 	return (
 		<ThemedView style={styles.container}>
+            <ThemedText variant="header">Leaderboard</ThemedText>
 			<ThemedView style={styles.buttonPanel}>
 				<UnderlinedButton
 					name="All Time Leaders"
@@ -54,13 +57,34 @@ export const Leaderboard = () => {
 					/>
 				)}
 			</ThemedView>
-			{isLoading ? (
+            <ThemedView style={styles.refreshWrapper}>
+                <ThemedView />
+                {isLoading ? (<ThemedText>refreshing leader data...</ThemedText>) : (<ThemedView style={{flexDirection:'row', gap:5}}>
+                    <ThemedText>
+					Last updated: 
+				</ThemedText>
+                <TimeAgo date={lastRefresh} />
+                </ThemedView>)}
+                <Pressable onPress={refreshLeaders}>
+                    <Ionicons size={18} color="white" name="refresh" />
+                </Pressable>
+
+                </ThemedView>
+			{/* {isLoading ? (
 				<ThemedText>refreshing leader data...</ThemedText>
 			) : (
-				<ThemedText>
-					Last updated: {lastRefresh.toTimeString()}
+                <ThemedView style={styles.refreshWrapper}>
+                    <ThemedText>
+					Last updated: 
 				</ThemedText>
-			)}
+                <TimeAgo date={lastRefresh} />
+                <Pressable onPress={refreshLeaders}>
+                    <Ionicons size={18} color="white" name="refresh" />
+                </Pressable>
+
+                </ThemedView>
+				
+			)} */}
 			{boardErr ? <ThemedText>{boardErr.message}</ThemedText> : null}
 		</ThemedView>
 	);
@@ -111,4 +135,11 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 	},
+    refreshWrapper: {
+        flexDirection:'row',
+        width: "70%",
+        justifyContent: "space-between",
+        gap: 3,
+        marginTop: 12,
+    }
 });

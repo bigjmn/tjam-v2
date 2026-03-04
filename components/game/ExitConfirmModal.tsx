@@ -54,7 +54,7 @@ export default function ExitConfirmModal({
 							onPress={onConfirm}
 							style={[
 								styles.button,
-								{ backgroundColor: colors.warning },
+								{ backgroundColor: colors.danger },
 							]}
 						>
 							<ThemedText

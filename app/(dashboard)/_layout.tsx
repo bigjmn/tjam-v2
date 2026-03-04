@@ -1,6 +1,5 @@
-import { Stack, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { useTheme } from "../../hooks/useTheme";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Ionicons } from "@expo/vector-icons";
 export default function DashboardLayout() {
 	const { colors } = useTheme();
@@ -38,7 +37,7 @@ export default function DashboardLayout() {
 					<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "settings" : "settings-outline"} />
 				)
 			}} />
-			<Tabs.Screen
+			{/* <Tabs.Screen
 				name="game"
 				options={{
 					tabBarStyle: { display: "none" }, // Hides the whole bar when on this screen
@@ -51,7 +50,7 @@ export default function DashboardLayout() {
 					tabBarStyle: { display: "none" }, // Hides the whole bar when on this screen
 					tabBarButton: (props) => null, // Excludes this specific button from the bar
 				}}
-			/>
+			/> */}
 		</Tabs>
 	);
 }

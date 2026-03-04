@@ -33,6 +33,7 @@ import {
 	playerStatConverter,
 	mergeStats
 } from "../utils/helpers";
+import { logStats } from "../utils/loggers";
 interface UserContextProps {
 	user: User | null;
 	signInWithGoogle: () => Promise<void>;
@@ -40,6 +41,7 @@ interface UserContextProps {
 	logout: () => Promise<void>;
 	authChecked: boolean;
 	playerStats: PlayerStats | null;
+
 	updatePlayerStats: (updates: Partial<PlayerStats>) => Promise<void>;
 }
 export const UserContext = createContext<UserContextProps | null>(null);
@@ -215,11 +217,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			}
 		} else {
 			const playerOb: PlayerStats = JSON.parse(playerJson);
-			setPlayerStats(playerOb);
+			const newPlayerOb:PlayerStats = playerOb.dateJoined ? playerOb : {...playerOb, dateJoined: new Date()}
+			setPlayerStats(newPlayerOb);
 		}
 	}
 	useEffect(() => {
-		console.log("player stats: ", playerStats);
+		logStats(playerStats)
 	}, [playerStats]);
 
 	const makeOrGetDoc = async () => {

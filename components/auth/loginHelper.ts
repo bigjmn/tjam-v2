@@ -11,6 +11,7 @@ function isAlreadyInUseError(e: any) {
 
 export async function linkOrSignIn(credential: AuthCredential) {
   const user: User | null = auth.currentUser;
+  console.log("starting linking/signing")
 
   if (user?.isAnonymous) {
     try {
@@ -19,6 +20,7 @@ export async function linkOrSignIn(credential: AuthCredential) {
       return uCred.user
     } catch (e: any) {
       if (isAlreadyInUseError(e)) {
+        console.log("already in use")
         // Provider account already belongs to another Firebase user → sign in instead.
         const uCred =  await signInWithCredential(auth, credential);
         return uCred.user
@@ -32,6 +34,7 @@ export async function linkOrSignIn(credential: AuthCredential) {
       throw e;
     }
   }
+  console.log("should not be reached")
 
   // If not anonymous, just sign in (or you might want to link depending on your UX)
   const uCred = await signInWithCredential(auth, credential);

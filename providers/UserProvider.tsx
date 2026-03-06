@@ -52,11 +52,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
 
 	const signInWithApple = async () => {
+		console.log("starting apple sign in")
 		try {
 			if (playerStats === null) {
+				console.log("no stats!")
 				throw "No stats, something's wrong!";
 			}
 			const { credential, profile } = await getAppleCredential()
+
 			const appleUserData = await linkOrSignIn(credential);
 
     // Email may be null if user hides it; Firebase user.email may be relay or null too.
@@ -201,6 +204,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 	async function logout() {
 		await signOut(auth);
+		await signInAnonymously(auth)
 	}
 
 	async function getUserInfo() {

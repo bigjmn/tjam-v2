@@ -20,10 +20,7 @@ export const useLeaderboard = () => {
 	const [boardErr, setBoardErr] = useState<Error | null>(null);
 
 	const [boardScope, setBoardScope] = useState<BoardScope>("global");
-    useEffect(() => {
-        console.log('globalLeaders', globalLeaders)
-    }, [globalLeaders])
-
+    
 	const getLeaders = async () => {
 		const leadersRef = collection(firestore, "users").withConverter(
 			playerStatConverter,
@@ -38,7 +35,6 @@ export const useLeaderboard = () => {
 					.filter((d) => d.username !== null)
 					.map((d) => playerToLeader(d));
 			});
-            console.log('PLAYER RANKS', playerRanks)
 			const globalList: GlobalLeader[] = [...playerRanks]
 				.sort((a, b) => b.bestAllTime - a.bestAllTime)
 				.map((pRank, i) => ({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import ThemedText from '../ui/ThemedText';
-
+import { useTheme } from '../../hooks/useTheme';
 interface StatItemProps {
 	value: string | number;
 	label: string;
@@ -17,7 +17,7 @@ const StatItem: React.FC<StatItemProps> = ({ value, label, valueSize = 'large' }
 					valueSize === 'small' && styles.statValueSmall
 				]}
 			>
-				{value}
+				{value === -1 ? "--" : value}
 			</ThemedText>
 			<ThemedText style={styles.statLabel}>
 				{label}
@@ -36,8 +36,9 @@ export const StatBox: React.FC<StatBoxProps> = ({
 	level,
 	title,
 }) => {
+    const { colors } = useTheme()
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, {backgroundColor: colors.primary}]}>
 			{/* Top Row */}
 			<View style={styles.row}>
 				<StatItem value={highScore} label="High Score" />
@@ -57,7 +58,6 @@ export const StatBox: React.FC<StatBoxProps> = ({
 
 const styles = StyleSheet.create({
 	container: {
-		backgroundColor: '#ff6b6b',
 		borderRadius: 18,
 		paddingVertical: 16,
 		paddingHorizontal: 12,

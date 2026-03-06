@@ -17,3 +17,7 @@ export const logStats = (playerstats:PlayerStats|null, includeGameHistory:boolea
         console.log(playerstats.gameHist.map((game) => `Score: ${game.score} | Abandoned: ${game.abandoned} | Timestamp: ${moment(game.timestamp).format("M/DD/YYYY h:mm A")}`).join("\n"))
     }
 }
+
+export const turnLog = (gameTurn:TurnInfo) => {
+    console.log(`${gameTurn.givenWord}\t${gameTurn.boardState}`)
+}

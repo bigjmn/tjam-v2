@@ -31,12 +31,18 @@ export default function DashboardLayout() {
 			<Tabs.Screen name="stats" options={{ title: "Achievements", tabBarIcon: ({focused}) => (
 				<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "person-circle" : "person-circle-outline"} />
 			) }} />
-			<Tabs.Screen name="settings" options={{
-				title: "Settings",
+			<Tabs.Screen name="about" options={{
+				title: "About",
 				tabBarIcon: ({ focused }) => (
-					<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "settings" : "settings-outline"} />
+					<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "information-circle" : "information-circle-outline"} />
 				)
 			}} />
+			{/* <Tabs.Screen
+				name="settings"
+				options={{
+					tabBarButton: () => null, // Hide from tab bar
+				}}
+			/> */}
 			{/* <Tabs.Screen
 				name="game"
 				options={{

@@ -8,7 +8,9 @@ export default function AuthLayout() {
 			<Stack screenOptions={{ headerShown: false, animation: "none" }}>
 				<Stack.Screen name="login" />
 				<Stack.Screen name="game" />
+				<Stack.Screen name="fourgame" />
 				<Stack.Screen name="results" />
+				<Stack.Screen name="variantresults" />
 			</Stack>
 		</>
 	);

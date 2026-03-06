@@ -32,6 +32,7 @@ export const NextGoalsPage: React.FC = () => {
 				<ScrollView
 					style={styles.scrollView}
 					showsVerticalScrollIndicator={true}
+					nestedScrollEnabled={true}
 					contentContainerStyle={styles.scrollContent}
 				>
 					{scoring && (
@@ -64,10 +65,12 @@ export const NextGoalsPage: React.FC = () => {
 const styles = StyleSheet.create({
 	pageContainer: {
 		width: SCREEN_WIDTH,
-		height: "100%",
+		flex: 1,
 	},
 	content: {
-		padding: 16,
+		paddingHorizontal: 16,
+		paddingTop: 4,
+		paddingBottom: 16,
 		flex: 1,
 	},
 	header: {
@@ -81,6 +84,7 @@ const styles = StyleSheet.create({
 	},
 	tile: {
 		marginVertical: 8,
+		marginRight:16
 	},
 	centered: {
 		justifyContent: "center",

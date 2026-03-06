@@ -4,10 +4,12 @@ import { shuffle, boardSquares } from "../../utils/helpers";
 import { useAchievements } from "../../hooks/useAchievements";
 import { useRouter } from "expo-router";
 import { useSfx } from "../../hooks/useSfx";
-export const useGame = () => {
+import { turnLog } from "../../utils/loggers";
+import { threeLetterWords } from "../../assets/scrabbleWordList";
+export const useGame = (vKey?:VariantKey) => {
 	const { wooshSound, gearloadSound } = useSfx()
 	const [tiles, setTiles] = useState<Tile[]>([]);
-	const [wordList, setWordList] = useState(shuffle(wordlist));
+	const [wordList, setWordList] = useState(!vKey? shuffle(wordlist) : vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist));
 	const [inMotion, setInMotion] = useState<string | null>(null);
 	const [takenSpots, setTakenSpots] = useState<string[]>([]);
 
@@ -166,6 +168,7 @@ export const useGame = () => {
 			];
 			const stringBoard = getBoardstate(newboard);
 			const turnInfo: TurnInfo = {
+				givenWord: wordList[wordNum],
 				turnNo: wordNum,
 				wordsMade: validWords,
 				lettersCleared: clearedLets,
@@ -173,6 +176,7 @@ export const useGame = () => {
 			};
 
 			setGameTurns((gt) => [...gt, turnInfo]);
+			turnLog(turnInfo)
 			setTiles(newboard);
 
 			if (newboard.length >= 11) {
@@ -217,6 +221,23 @@ export const useGame = () => {
 		}, 950);
 	};
 
+	const endGame = () => {
+		if (!vKey){
+			handleGameEnd()
+		} else {
+			handleScrabbleVariantEnd()
+		}
+	}
+
+	const handleScrabbleVariantEnd = () => {
+		setGameActive(false)
+		const newScore = gameTurns.length 
+		router.push({
+			pathname: "/scrabbleresults",
+			params: { newScore }
+		})
+	}
+
 	const handleGameEnd = () => {
 		setGameActive(false)
 		const newAchievements = achieve!.gameAchievements(gameTurns);
@@ -236,7 +257,7 @@ export const useGame = () => {
 	const startGame = () => {
 		setTiles([])
 		setGameActive(true)
-		setWordList(shuffle(wordlist));
+		setWordList(vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist));
 		setWordNum(0);
 		setGameTurns([]);
 	};

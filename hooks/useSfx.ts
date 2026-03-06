@@ -1,43 +1,51 @@
 import { useAudioPlayer } from "expo-audio";
 import { useTheme } from "./useTheme";
+import { useRef } from "react";
+
 const popSource = require("../assets/sfx/popeffect.mp3");
 const achieveSource = require("../assets/sfx/achieve.wav");
 const poofSource = require("../assets/sfx/poof.wav");
 const gearload = require("../assets/sfx/gearload.mp3");
-const telewoosh = require("../assets/sfx/telewoosh.mp3")
+const telewoosh = require("../assets/sfx/telewoosh.mp3");
+
 export const useSfx = () => {
 	const { sfxOn } = useTheme();
 	const popPlayer = useAudioPlayer(popSource);
 	const achievePlayer = useAudioPlayer(achieveSource);
 	const poofPlayer = useAudioPlayer(poofSource);
-    const gearPlayer = useAudioPlayer(gearload)
-    const wooshPlayer = useAudioPlayer(telewoosh)
+	const gearPlayer = useAudioPlayer(gearload);
+	const wooshPlayer = useAudioPlayer(telewoosh);
+
+	// Safe play helper
+	const safePlay = (player: any, seekPosition: number = 0) => {
+		try {
+			if (!sfxOn || !player) return;
+			player.seekTo(seekPosition);
+			player.play();
+		} catch (error) {
+			console.warn("Audio playback failed:", error);
+		}
+	};
 
 	const popSound = () => {
-		if (!sfxOn) return;
-		popPlayer.seekTo(0);
-		popPlayer.play();
+		safePlay(popPlayer, 0);
 	};
+
 	const achieveSound = () => {
-		if (!sfxOn) return;
-		achievePlayer.seekTo(0);
-		achievePlayer.play();
+		safePlay(achievePlayer, 0);
 	};
+
 	const poofSound = () => {
-		if (!sfxOn) return;
-		poofPlayer.seekTo(0);
-		poofPlayer.play();
+		safePlay(poofPlayer, 0);
 	};
-    const gearloadSound = () => {
-        if (!sfxOn) return;
-        gearPlayer.seekTo(.75)
-        gearPlayer.play()
-    }
-    const wooshSound = () => {
-        if (!sfxOn) return 
-        wooshPlayer.seekTo(.2)
-        wooshPlayer.play()
-    }
+
+	const gearloadSound = () => {
+		safePlay(gearPlayer, 0.75);
+	};
+
+	const wooshSound = () => {
+		safePlay(wooshPlayer, 0.2);
+	};
 
 	return { popSound, achieveSound, poofSound, gearloadSound, wooshSound };
 };

@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Dimensions, StyleSheet, Pressable, ScrollView } from "react-native";
+import React, { useRef, useState } from "react";
+import { Dimensions, StyleSheet, Pressable, View } from "react-native";
 import Animated, {
 	useAnimatedScrollHandler,
 	runOnJS,
@@ -35,7 +35,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 	currentPage,
 	onPageChange,
 }) => {
-	const scrollViewRef = useRef<ScrollView>(null);
+	const scrollViewRef = useRef<Animated.ScrollView>(null);
 	const { colors } = useTheme();
 
 	const scrollHandler = useAnimatedScrollHandler({
@@ -57,13 +57,9 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 	};
 
 	return (
-		<ThemedView style={styles.container}>
+		<View style={styles.container}>
 			{/* Navigation Chips */}
-			<ScrollView
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={styles.chipsContainer}
-			>
+			<View style={styles.chipsContainer}>
 				{PAGE_LABELS.map((page) => {
 					const isActive = currentPage === page.id;
 					return (
@@ -94,7 +90,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 						</Pressable>
 					);
 				})}
-			</ScrollView>
+			</View>
 
 			{/* Carousel Content */}
 			<Animated.ScrollView
@@ -104,15 +100,20 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 				showsHorizontalScrollIndicator={false}
 				scrollEventThrottle={16}
 				decelerationRate="fast"
+				directionalLockEnabled={true}
+				scrollEnabled={true}
+				disableIntervalMomentum={true}
+				snapToInterval={SCREEN_WIDTH}
+				snapToAlignment="start"
 				onScroll={scrollHandler}
-				contentContainerStyle={styles.scrollContent}
+				style={styles.carousel}
 			>
 				<NextGoalsPage />
 				<LegendaryPage />
 				<SecretPage />
 				<AllEarnedPage />
 			</Animated.ScrollView>
-		</ThemedView>
+		</View>
 	);
 };
 
@@ -132,15 +133,17 @@ const styles = StyleSheet.create({
 	},
 	chipsContainer: {
 		flexDirection: "row",
-		paddingHorizontal: 16,
-		paddingVertical: 12,
+		paddingHorizontal: 12,
+		paddingTop: 8,
+		paddingBottom: 8,
 		gap: 8,
+		maxHeight: 60,
 	},
 	chip: {
-		paddingHorizontal: 16,
+		paddingHorizontal: 4,
 		paddingVertical: 8,
 		borderRadius: 20,
-		minWidth: 80,
+		minWidth: 40,
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: "500",
 	},
-	scrollContent: {
-		flexDirection: "row",
+	carousel: {
+		flex: 1,
 	},
 });

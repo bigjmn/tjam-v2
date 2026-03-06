@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		flex: 1,
-		maxWidth: 300,
+		maxWidth: 180,
 	},
 	disabled: {
 		opacity: 0.5,

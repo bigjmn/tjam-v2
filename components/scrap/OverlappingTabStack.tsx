@@ -6,14 +6,26 @@ import {
   StyleSheet,
   ViewStyle,
   ScrollView,
+  Dimensions
 } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import ThemedText from "../ui/ThemedText";
 import { FullCarousel } from "../stats/CarouselCard";
-type Stat = { label: string; value: string };
+import WodCard from "../profile/WodCard";
+import VariantBox from "../profile/VariantBox";
+export type Stat = { label: string; value: string };
+
+
+const testStats = [
+        { value: "7", label: "Puzzles Played" },
+        { value: "100%", label: "Win Rate" },
+        { value: "0", label: "Current Streak" },
+        { value: "3", label: "Max Streak" },
+      ]
 export type DeckCard = {
   key: string;
   title: string;
@@ -21,17 +33,19 @@ export type DeckCard = {
   backgroundColor: string;
   headerTextColor?: string;
   bodyTextColor?: string;
-  stats: Stat[];
+  stats?: Stat[];
+  description?:string;
   renderExpanded?: () => React.ReactNode;
 };
 
 export function OverlappingTabsDeck({
   cards,
   height,
-  peekHeight = 160,
+  peekHeight = 120,
   deckPaddingHorizontal = 16,
   gap = 30,
   fadedOpacity = 0, // ✅ how faded non-active cards get
+  tabBarHeight = 80,
   style,
 }: {
   cards: DeckCard[];
@@ -40,6 +54,7 @@ export function OverlappingTabsDeck({
   deckPaddingHorizontal?: number;
   gap?: number;
   fadedOpacity?: number;
+  tabBarHeight?: number;
   style?: ViewStyle;
 }) {
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -49,10 +64,11 @@ export function OverlappingTabsDeck({
 
   // no useMemo
   const step = peekHeight - gap;
-  const baseYs = cards.map((_, i) => i * step);
+  const baseYs = cards.map((_, i) => -(cards.length - 1 - i) * step);
+  const screenWidth = Dimensions.get('screen').width
 
   return (
-    <View style={[{ width: "100%", height, overflow: "visible" }, style]}>
+    <View style={[{ width: screenWidth, height, overflow: "visible" }, style]}>
       {cards.map((card, i) => (
         <DeckStackCard
           key={card.key}
@@ -64,6 +80,7 @@ export function OverlappingTabsDeck({
           expandedHeight={expandedHeight}
           deckPaddingHorizontal={deckPaddingHorizontal}
           fadedOpacity={fadedOpacity}
+          tabBarHeight={tabBarHeight}
           card={card}
         />
       ))}
@@ -71,6 +88,23 @@ export function OverlappingTabsDeck({
   );
 }
 
+export function CardStats({stats, bodyColor}:{stats:Stat[], bodyColor?:string}){
+    return (
+        <View style={styles.statsRow}>
+            {stats.map((s, idx) => (
+              <View key={idx} style={styles.statCell}>
+                <Text style={[styles.statValue, { color: bodyColor ?? "#111" }]}>
+                  {s.value}
+                </Text>
+                <Text style={[styles.statLabel, { color: (bodyColor ?? "#111") + "AA" }]}>
+                  {s.label}
+                </Text>
+              </View>
+            )
+    )}
+    </View>
+    )
+}
 function DeckStackCard({
   index,
   activeIndex,
@@ -80,6 +114,7 @@ function DeckStackCard({
   expandedHeight,
   deckPaddingHorizontal,
   fadedOpacity,
+  tabBarHeight,
   card,
 }: {
   index: number;
@@ -90,6 +125,7 @@ function DeckStackCard({
   expandedHeight: number;
   deckPaddingHorizontal: number;
   fadedOpacity: number;
+  tabBarHeight: number;
   card: DeckCard;
 }) {
   const isActive = activeIndex === index;
@@ -148,6 +184,7 @@ function DeckStackCard({
         {
           left: deckPaddingHorizontal,
           right: deckPaddingHorizontal,
+          bottom: tabBarHeight,
           backgroundColor: card.backgroundColor,
 
           // ✅ keep active on top when expanded
@@ -156,24 +193,35 @@ function DeckStackCard({
         animatedContainerStyle,
       ]}
     >
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [
-          styles.cardPressable,
-          pressed && { opacity: 0.96 },
-        ]}
-      >
-        <View style={styles.headerRow}>
-          <Text
+      {isActive ? (
+        <View style={styles.cardPressable}>
+          <View style={styles.headerRow}>
+          <ThemedText
             style={[styles.title, { color: card.headerTextColor ?? "#111" }]}
             numberOfLines={1}
           >
             {card.title}
-          </Text>
-          <View style={styles.rightIconWrap}>{card.rightIcon}</View>
+          </ThemedText>
+          <View style={styles.rightIconWrap}>
+            {isActive && (
+              <Pressable
+                onPress={onPress}
+                style={({ pressed }) => [
+                  styles.closeButton,
+                  pressed && { opacity: 0.6 }
+                ]}
+                hitSlop={8}
+              >
+                <Text style={[styles.closeIcon, { color: card.headerTextColor ?? "#111" }]}>
+                  ✕
+                </Text>
+              </Pressable>
+            )}
+            {!isActive && card.rightIcon}
+          </View>
         </View>
 
-        <View style={styles.statsRow}>
+        {card.stats && (<View style={styles.statsRow}>
           {card.stats.map((s, idx) => (
             <View key={idx} style={styles.statCell}>
               <Text style={[styles.statValue, { color: card.bodyTextColor ?? "#111" }]}>
@@ -183,22 +231,67 @@ function DeckStackCard({
                 {s.label}
               </Text>
             </View>
+          
           ))}
-        </View>
+        </View>)}
+        {card.description && (
+            <View style={styles.cardDescription}>
+                <ThemedText>{card.description}</ThemedText>
+            </View>
+        )}
 
         <Animated.View style={[styles.expandedArea, animatedInnerStyle]}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 18 }}
-          >
-            {card.renderExpanded?.() ?? (
+          {card.renderExpanded?.() ?? (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 18 }}
+            >
               <Text style={[styles.placeholder, { color: card.bodyTextColor ?? "#111" }]}>
                 Put your expanded content here…
               </Text>
-            )}
-          </ScrollView>
+            </ScrollView>
+          )}
         </Animated.View>
-      </Pressable>
+        </View>
+      ) : (
+        <Pressable
+          onPress={onPress}
+          style={({ pressed }) => [
+            styles.cardPressable,
+            pressed && { opacity: 0.96 },
+          ]}
+        >
+          <View style={styles.headerRow}>
+            <Text
+              style={[styles.title, { color: card.headerTextColor ?? "#111" }]}
+              numberOfLines={1}
+            >
+              {card.title}
+            </Text>
+            <View style={styles.rightIconWrap}>
+              {card.rightIcon}
+            </View>
+          </View>
+
+          {card.stats && (<View style={styles.statsRow}>
+            {card.stats.map((s, idx) => (
+              <View key={idx} style={styles.statCell}>
+                <Text style={[styles.statValue, { color: card.bodyTextColor ?? "#111" }]}>
+                  {s.value}
+                </Text>
+                <Text style={[styles.statLabel, { color: (card.bodyTextColor ?? "#111") + "AA" }]}>
+                  {s.label}
+                </Text>
+              </View>
+            ))}
+          </View>)}
+          {card.description && (
+            <View style={styles.cardDescription}>
+              <ThemedText>{card.description}</ThemedText>
+            </View>
+          )}
+        </Pressable>
+      )}
     </Animated.View>
   );
 }
@@ -242,6 +335,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  cardDescription: {
+    marginTop:6
+  },
   statCell: {
     flex: 1,
     alignItems: "center",
@@ -258,6 +354,7 @@ const styles = StyleSheet.create({
   expandedArea: {
     flex: 1,
     marginTop: 14,
+    marginHorizontal: -18,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(0,0,0,0.12)",
     paddingTop: 12,
@@ -267,49 +364,51 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     opacity: 0.9,
   },
+  closeButton: {
+    width: 34,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeIcon: {
+    fontSize: 24,
+    fontWeight: "600",
+    opacity: 0.8,
+  },
 });
 
 export const testCards = [
     {
-      key: "crossword",
-      title: "The Crossword",
-      backgroundColor: "#6E93D6",
-      stats: [
-        { value: "878", label: "Puzzles Solved" },
-        { value: "47%", label: "Solve Rate" },
-        { value: "0", label: "Current Streak" },
-        { value: "19", label: "Longest Streak" },
-      ],
+      key: "variants",
+      title: "Variant Scores",
+      backgroundColor: "#6D26D9",
+      
       renderExpanded: () => (
-        <Text style={{ fontSize: 16, lineHeight: 22 }}>
-          Expanded details here…
-        </Text>
+        <VariantBox />
       ),
     },
     {
       key: "bee",
-      title: "Spelling Bee",
-      backgroundColor: "#F3D21B",
-      stats: [
-        { value: "10", label: "Puzzles Played" },
-        { value: "43", label: "Words" },
-        { value: "11", label: "Pangrams" },
-        { value: "0", label: "Geniuses" },
-      ],
+      title: "Achievements",
+      backgroundColor: "#D96D26",
+      description: "View your goals and progress",
       renderExpanded: () => (
         <FullCarousel />
       )
     },
     {
-      key: "wordle",
-      title: "Wordle",
-      backgroundColor: "#D9DCE1",
-      stats: [
-        { value: "7", label: "Puzzles Played" },
-        { value: "100%", label: "Win Rate" },
-        { value: "0", label: "Current Streak" },
-        { value: "3", label: "Max Streak" },
-      ],
+      key: "wordofday",
+      title: "Word Of the Day",
+      backgroundColor: "#26D96D",
+    //   stats: [
+    //     { value: "7", label: "Puzzles Played" },
+    //     { value: "100%", label: "Win Rate" },
+    //     { value: "0", label: "Current Streak" },
+    //     { value: "3", label: "Max Streak" },
+    //   ],
+    renderExpanded:()=> (
+        <WodCard />
+    )
     },
   ]
 

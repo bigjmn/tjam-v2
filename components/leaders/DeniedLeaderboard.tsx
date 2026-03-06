@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import ThemedText from '../ui/ThemedText'
 import ThemedView from '../ui/ThemedView'
+import { LoginZone } from '../auth/LoginZone'
 const DeniedLeaderboard = () => {
   return (
     <ThemedView style={styles.container}>
@@ -8,6 +9,7 @@ const DeniedLeaderboard = () => {
       <ThemedText variant="strong">
         Your high score, achievements, etc. will all carry over. 
       </ThemedText>
+      <LoginZone />
     </ThemedView>
   )
 }

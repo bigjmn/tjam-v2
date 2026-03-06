@@ -216,7 +216,6 @@ export const weekBest = (pstat: PlayerStats) => {
 			return gameDate.isAfter(cutoff) && !gr.abandoned;
 		})
 		.sort((a, b) => b.score - a.score);
-	console.log('Cutoff:', cutoff.format(), 'Possible games:', possibleGames)
 	return possibleGames.length === 0 ? 0 : possibleGames[0].score;
 };
 

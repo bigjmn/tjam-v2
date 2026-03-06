@@ -45,6 +45,7 @@ export const AllEarnedPage: React.FC = () => {
 						data={earnedAchievements}
 						keyExtractor={(item) => item.key}
 						showsVerticalScrollIndicator={true}
+						nestedScrollEnabled={true}
 						contentContainerStyle={styles.scrollContent}
 						renderItem={({ item }) => (
 							<AchievementTile
@@ -58,6 +59,7 @@ export const AllEarnedPage: React.FC = () => {
 					<ScrollView
 						style={styles.scrollView}
 						showsVerticalScrollIndicator={true}
+						nestedScrollEnabled={true}
 						contentContainerStyle={styles.scrollContent}
 					>
 						{earnedAchievements.map((achievement) => (
@@ -78,10 +80,12 @@ export const AllEarnedPage: React.FC = () => {
 const styles = StyleSheet.create({
 	pageContainer: {
 		width: SCREEN_WIDTH,
-		height: "100%",
+		flex: 1,
 	},
 	content: {
-		padding: 16,
+		paddingHorizontal: 16,
+		paddingTop: 4,
+		paddingBottom: 16,
 		flex: 1,
 	},
 	header: {

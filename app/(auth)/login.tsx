@@ -5,7 +5,7 @@ import Spacer from "../../components/ui/Spacer";
 export default function Login(){
 
     return (
-        <ThemedView>
+        <ThemedView style={{flex:1}}>
             <Spacer height={60} />
         <TabStackTest/>
         </ThemedView>

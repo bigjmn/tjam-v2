@@ -112,6 +112,7 @@ type Achievement =
 	| SecretAchievement;
 
 interface TurnInfo {
+	givenWord: string;
 	turnNo: number;
 	wordsMade: string[];
 	lettersCleared: string[];
@@ -190,7 +191,10 @@ interface VariantBests {
 	fiveline: number
 }
 
+type VariantKey = "scrabble"|"fours"|"fiveline"
+
 interface GameVariant {
+	key: VariantKey;
 	name: string; 
 	rules: string; 
 	unlockLevel: number; 
@@ -200,4 +204,9 @@ interface WordOfDayStats {
 	longestStreak:number;
 	currentStreak:number;
 	wodRate:number;
+}
+
+interface VariantScore {
+	variant:VariantKey;
+	score:number;
 }

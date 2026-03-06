@@ -13,13 +13,15 @@ const Home = () => {
 		<ThemedView style={styles.container}>
 			<ThemedText>Home</ThemedText>
 
-			<TabStackTest
-			   />
+			
 			<Link href="/home">
 				<ThemedText>To page</ThemedText>
 			</Link>
 			<Link href="/login">
 				<ThemedText>To login</ThemedText>
+			</Link>
+			<Link href="/fourgame">
+			<ThemedText>To fourgame</ThemedText>
 			</Link>
 
 		</ThemedView>

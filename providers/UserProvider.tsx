@@ -1,313 +1,313 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
 import { auth } from "../lib/firebase";
 import {
-	signInWithEmailAndPassword,
-	createUserWithEmailAndPassword,
-	onAuthStateChanged,
-	signOut,
-	User,
-	updateProfile,
-	FacebookAuthProvider,
-	signInWithCredential,
-	linkWithCredential,
-	OAuthProvider,
-	signInAnonymously,
+  onAuthStateChanged,
+  signOut,
+  User,
+  signInAnonymously,
 } from "firebase/auth";
 import { getAppleCredential } from "../utils/authHelpers/appleAuth";
-// import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth"
 import { firestore } from "../lib/firebase";
-import { ensureUserDocAndUsername } from "../utils/authHelpers/ensureUserDoc";
-import { doc, collection, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import {
-	googleGetCred,
-	getGoogleName,
+  googleGetCred,
+  getGoogleName,
 } from "../components/auth/GoogleLoginButton";
 import { usernameNumberTail } from "../utils/helpers";
 import { linkOrSignIn } from "../components/auth/loginHelper";
-import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-	convertOldPlayerOb,
-	createPlayer,
-	converter,
-	playerStatConverter,
-	mergeStats
+  convertOldPlayerOb,
+  createPlayer,
+  playerStatConverter,
+  mergeStats,
 } from "../utils/helpers";
 import { logStats } from "../utils/loggers";
 interface UserContextProps {
-	user: User | null;
-	signInWithGoogle: () => Promise<void>;
-	signInWithApple: () => Promise<void>;
-	logout: () => Promise<void>;
-	authChecked: boolean;
-	playerStats: PlayerStats | null;
+  user: User | null;
+  signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
+  logout: () => Promise<void>;
+  authChecked: boolean;
+  playerStats: PlayerStats | null;
 
-	updatePlayerStats: (updates: Partial<PlayerStats>) => Promise<void>;
+  updatePlayerStats: (updates: Partial<PlayerStats>) => Promise<void>;
 }
 export const UserContext = createContext<UserContextProps | null>(null);
 
+const PLAYER_V2_KEY = "playerv2";
+const PLAYER_V1_KEY = "player";
+
 export function UserProvider({ children }: { children: React.ReactNode }) {
-	const [user, setUser] = useState<User | null>(null);
-	const [authChecked, setAuthChecked] = useState<boolean>(false);
-	const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState<boolean>(false);
+  const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
+  const [statsHydrated, setStatsHydrated] = useState(false);
+  const anonSignInRef = useRef<Promise<User | null> | null>(null);
 
-	const signInWithApple = async () => {
-		console.log("starting apple sign in")
-		try {
-			if (playerStats === null) {
-				console.log("no stats!")
-				throw "No stats, something's wrong!";
-			}
-			const { credential, profile } = await getAppleCredential()
+  const signInWithApple = async () => {
+    console.log("starting apple sign in");
+    try {
+      if (playerStats === null) {
+        throw new Error("No stats, something's wrong!");
+      }
+      const { credential, profile } = await getAppleCredential();
 
-			const appleUserData = await linkOrSignIn(credential);
+      const appleUserData = await linkOrSignIn(credential);
 
-    // Email may be null if user hides it; Firebase user.email may be relay or null too.
-    		const email = profile.email ?? appleUserData.email ?? undefined;
-			const uid = appleUserData.uid 
-			let newUsername =
-					profile.givenName || profile.familyName || email?.split('@')[0] || `user${uid.slice(0, 6)}`
-			
-			const udocRef = doc(firestore, "users", uid).withConverter(
-				playerStatConverter,
-			);
-			const uDoc = await getDoc(udocRef);
-			if (!uDoc.exists()) {
-				
-					
-				const uNameDocRef = doc(firestore, "usernames", newUsername);
-				const uNameDoc = await getDoc(uNameDocRef);
-				if (uNameDoc.exists()) {
-					newUsername += usernameNumberTail();
-				}
-				await setDoc(udocRef, {
-					...playerStats,
-					email: email,
-					username: newUsername,
-				});
-				await setDoc(doc(firestore, "usernames", newUsername), {
-					userid: uid,
-				});
-			} else {
-				const playstats = uDoc.data()
-				let uEmail = playstats.email ?? email
-				let username = playstats.username ?? newUsername
+      const email = profile.email ?? appleUserData.email ?? undefined;
+      const uid = appleUserData.uid;
+      let newUsername =
+        profile.displayName ||
+        profile.givenName ||
+        profile.familyName ||
+        email?.split("@")[0] ||
+        `user${uid.slice(0, 6)}`;
 
-				const uNameDocRef = doc(firestore, "usernames", username);
-				const uNameDoc = await getDoc(uNameDocRef);
-				if (
-					uNameDoc.exists() &&
-					uNameDoc.data().userid !== uid
-				) {
-					username += usernameNumberTail();
-				}
-				const pstats = {
-					...playstats,
-					email: uEmail,
-					username: username,
-				};
-				setPlayerStats(pstats);
-				await setDoc(udocRef, {
-					...pstats,
+      const udocRef = doc(firestore, "users", uid).withConverter(
+        playerStatConverter,
+      );
+      const uDoc = await getDoc(udocRef);
+      if (!uDoc.exists()) {
+        const uNameDocRef = doc(firestore, "usernames", newUsername);
+        const uNameDoc = await getDoc(uNameDocRef);
+        if (uNameDoc.exists() && uNameDoc.data().userid !== uid) {
+          newUsername += usernameNumberTail();
+        }
+        const nextStats = {
+          ...playerStats,
+          email: email,
+          username: newUsername,
+        };
+        setPlayerStats(nextStats);
+        await setDoc(udocRef, nextStats);
+        await setDoc(doc(firestore, "usernames", newUsername), {
+          userid: uid,
+        });
+      } else {
+        const playstats = uDoc.data();
+        const mergedStats = mergeStats(playerStats, playstats);
+        const uEmail = mergedStats.email ?? email;
+        const username = mergedStats.username ?? newUsername;
 
-					email: uEmail,
-					username: newUsername,
-				});
-				await setDoc(doc(firestore, "usernames", newUsername), {
-					userid: uid,
-				});
-			}
+        const uNameDocRef = doc(firestore, "usernames", username);
+        const uNameDoc = await getDoc(uNameDocRef);
+        const finalUsername =
+          uNameDoc.exists() && uNameDoc.data().userid !== uid
+            ? `${username}${usernameNumberTail()}`
+            : username;
 
-		} catch (e){
-			console.log(e)
-		}
-	}
+        const pstats = {
+          ...mergedStats,
+          email: uEmail,
+          username: finalUsername,
+        };
+        setPlayerStats(pstats);
+        await setDoc(udocRef, pstats);
+        await setDoc(doc(firestore, "usernames", finalUsername), {
+          userid: uid,
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-	
+  const signInWithGoogle = async () => {
+    try {
+      if (playerStats === null) {
+        throw new Error("No stats, something's wrong!");
+      }
+      const googleCred = await googleGetCred();
+      if (!googleCred) {
+        throw new Error("something went wrong!");
+      }
+      const googleUserData = await linkOrSignIn(googleCred);
+      const uid = googleUserData.uid;
+      const udocRef = doc(firestore, "users", uid).withConverter(
+        playerStatConverter,
+      );
+      const uDoc = await getDoc(udocRef);
+      if (!uDoc.exists()) {
+        const userEmail = googleUserData.email!;
+        let newUsername =
+          getGoogleName() ||
+          googleUserData.displayName ||
+          userEmail.split("@")[0];
+        const uNameDocRef = doc(firestore, "usernames", newUsername);
+        const uNameDoc = await getDoc(uNameDocRef);
+        if (uNameDoc.exists() && uNameDoc.data().userid !== uid) {
+          newUsername += usernameNumberTail();
+        }
+        const nextStats = {
+          ...playerStats,
+          id: uid,
+          email: userEmail,
+          username: newUsername,
+        };
+        setPlayerStats(nextStats);
+        await setDoc(udocRef, nextStats);
+        await setDoc(doc(firestore, "usernames", newUsername), {
+          userid: googleUserData.uid,
+        });
+      } else {
+        const docStats = uDoc.data();
+        const mergedStats = mergeStats(playerStats, docStats);
+        const userEmail = googleUserData.email!;
+        const computedUsername =
+          getGoogleName() ??
+          googleUserData.displayName ??
+          userEmail.split("@")[0] ??
+          `user${uid.slice(0, 6)}`;
 
-	const signInWithGoogle = async () => {
-		try {
-			if (playerStats === null) {
-				throw "No stats, something's wrong!";
-			}
-			const googleCred = await googleGetCred();
-			if (!googleCred) {
-				throw "something went wrong!";
-			}
-			if (!user) {
-				throw "no user, something wrong!";
-			}
-			// const googleUser = await linkWithCredential(user, googleCred);
-			// const googleUserData = googleUser.user;
-			const googleUserData = await linkOrSignIn(googleCred);
-			const uid = googleUserData.uid;
-			const udocRef = doc(firestore, "users", uid).withConverter(
-				playerStatConverter,
-			);
-			const uDoc = await getDoc(udocRef);
-			if (!uDoc.exists()) {
-				const userEmail = googleUserData.email!;
-				let newUsername =
-					getGoogleName() ||
-					googleUserData.displayName ||
-					userEmail.split("@")[0];
-				const uNameDocRef = doc(firestore, "usernames", newUsername);
-				const uNameDoc = await getDoc(uNameDocRef);
-				if (uNameDoc.exists()) {
-					newUsername += usernameNumberTail();
-				}
-				await setDoc(udocRef, {
-					...playerStats,
-					id: uid,
-					email: userEmail,
-					username: newUsername,
-				});
-				await setDoc(doc(firestore, "usernames", newUsername), {
-					userid: googleUserData.uid,
-				});
-			} else {
-				const docStats = uDoc.data();
-				const mergedStats = mergeStats(playerStats, docStats)
-				const userEmail = googleUserData.email!;
-				let newUsername = getGoogleName() ?? userEmail.split("@")[0] ?? `user${uid.slice(0, 6)}`;
+        const preferredUsername = mergedStats.username ?? computedUsername;
+        const uNameDocRef = doc(firestore, "usernames", preferredUsername);
+        const uNameDoc = await getDoc(uNameDocRef);
+        const finalUsername =
+          uNameDoc.exists() && uNameDoc.data().userid !== googleUserData.uid
+            ? `${preferredUsername}${usernameNumberTail()}`
+            : preferredUsername;
 
-				const uNameDocRef = doc(firestore, "usernames", newUsername);
-				const uNameDoc = await getDoc(uNameDocRef);
-				if (
-					uNameDoc.exists() &&
-					uNameDoc.data().userid !== googleUserData.uid
-				) {
-					newUsername += usernameNumberTail();
-				}
+        const pstats = {
+          ...mergedStats,
+          email: mergedStats.email ?? userEmail,
+          username: finalUsername,
+        };
+        setPlayerStats(pstats);
+        await setDoc(udocRef, pstats);
+        await setDoc(doc(firestore, "usernames", finalUsername), {
+          userid: googleUserData.uid,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-				const pstats = {
-					...mergedStats,
-					email: mergedStats.email ?? userEmail,
-					username: mergedStats.username ?? newUsername,
-				};
-				setPlayerStats(pstats);
-				await setDoc(udocRef, pstats)
-				// await setDoc(udocRef, {
-				// 	...pstats,
+  async function logout() {
+    await signOut(auth);
+    await signInAnonymously(auth);
+  }
 
-				// 	email: userEmail,
-				// 	username: newUsername,
-				// });
-				await setDoc(doc(firestore, "usernames", newUsername), {
-					userid: googleUserData.uid,
-				});
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	};
+  async function getUserInfo() {
+    const playerJson = await AsyncStorage.getItem(PLAYER_V2_KEY);
+    if (playerJson !== null) {
+      const playerOb: PlayerStats = JSON.parse(playerJson);
+      const newPlayerOb: PlayerStats = playerOb.dateJoined
+        ? { ...playerOb, dateJoined: new Date(playerOb.dateJoined) }
+        : { ...playerOb, dateJoined: new Date() };
+      setPlayerStats(newPlayerOb);
+      setStatsHydrated(true);
+      return;
+    }
 
-	async function logout() {
-		await signOut(auth);
-		await signInAnonymously(auth)
-	}
+    const oldPlayerJson = await AsyncStorage.getItem(PLAYER_V1_KEY);
+    if (oldPlayerJson !== null) {
+      const oldPlayerOb = JSON.parse(oldPlayerJson);
+      const convertedPlayer = convertOldPlayerOb(oldPlayerOb);
+      setPlayerStats(convertedPlayer);
+      await AsyncStorage.setItem(
+        PLAYER_V2_KEY,
+        JSON.stringify(convertedPlayer),
+      );
+      setStatsHydrated(true);
+      return;
+    }
 
-	async function getUserInfo() {
-		const playerJson = await AsyncStorage.getItem("playerv2");
-		if (playerJson === null) {
-			const oldPlayerJson = await AsyncStorage.getItem("player");
-			if (oldPlayerJson === null) {
-				const playerOb: PlayerStats = createPlayer();
-				setPlayerStats(playerOb);
-			} else {
-				const oldPlayerOb = JSON.parse(oldPlayerJson);
-				const playerOb = convertOldPlayerOb(oldPlayerOb);
-				setPlayerStats(playerOb);
-			}
-		} else {
-			const playerOb: PlayerStats = JSON.parse(playerJson);
-			const newPlayerOb:PlayerStats = playerOb.dateJoined ? playerOb : {...playerOb, dateJoined: new Date()}
-			setPlayerStats(newPlayerOb);
-		}
-	}
-	useEffect(() => {
-		logStats(playerStats)
-	}, [playerStats]);
+    const playerOb: PlayerStats = createPlayer();
+    setPlayerStats(playerOb);
+    await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(playerOb));
+    setStatsHydrated(true);
+  }
+  useEffect(() => {
+    logStats(playerStats);
+  }, [playerStats]);
 
-	const makeOrGetDoc = async () => {
-		if (!user) {
-			return;
-		}
-		const udocRef = doc(firestore, "users", user.uid).withConverter(
-			playerStatConverter,
-		);
-		const uDoc = await getDoc(udocRef);
-		if (!uDoc.exists()) {
-			console.log("making doc");
-			await setDoc(udocRef, playerStats);
-		}
-	};
+  const makeOrGetDoc = async () => {
+    if (!user || !playerStats || user.isAnonymous) {
+      return;
+    }
+    const udocRef = doc(firestore, "users", user.uid).withConverter(
+      playerStatConverter,
+    );
+    const uDoc = await getDoc(udocRef);
+    if (!uDoc.exists()) {
+      console.log("making doc");
+      await setDoc(udocRef, playerStats);
+    }
+  };
 
-	useEffect(() => {
-		if (!user || !playerStats) return;
-		makeOrGetDoc();
-	}, [user, playerStats]);
-	const anonSignIn = async () => {
-		try {
-			if (auth.currentUser) return auth.currentUser;
-			const uanon = await signInAnonymously(auth);
-			return uanon.user;
-		} catch (e) {
-			console.log(e);
-			return null;
-		}
-	};
+  useEffect(() => {
+    if (!user || !playerStats) return;
+    makeOrGetDoc();
+  }, [user, playerStats]);
 
-	async function updatePlayerStats(updates: Partial<PlayerStats>) {
-		if (!playerStats) return;
+  const anonSignIn = async () => {
+    if (auth.currentUser) return auth.currentUser;
+    if (!anonSignInRef.current) {
+      anonSignInRef.current = signInAnonymously(auth)
+        .then((uanon) => uanon.user)
+        .catch((e) => {
+          console.log(e);
+          return null;
+        })
+        .finally(() => {
+          anonSignInRef.current = null;
+        });
+    }
+    return anonSignInRef.current;
+  };
 
-		const updatedStats = { ...playerStats, ...updates };
-		setPlayerStats(updatedStats);
+  async function updatePlayerStats(updates: Partial<PlayerStats>) {
+    if (!playerStats) return;
 
-		// Save to AsyncStorage
-		await AsyncStorage.setItem("playerv2", JSON.stringify(updatedStats));
+    const updatedStats = { ...playerStats, ...updates };
+    setPlayerStats(updatedStats);
 
-		// Save to Firestore if user is logged in
-		if (user) {
-			const userDocRef = doc(firestore, "users", user.uid).withConverter(
-				playerStatConverter,
-			);
-			await setDoc(userDocRef, updatedStats, { merge: true });
-		}
-	}
-	// useEffect(() => {
-	// 	getUserInfo();
-	// }, []);
+    await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(updatedStats));
 
-	useEffect(() => {
-		getUserInfo();
-		const unsubscribe = onAuthStateChanged(auth, async (u) => {
-			if (u) {
-				setUser(u);
-			} else {
-				const anon = await anonSignIn();
-				if (anon) setUser(anon);
-			}
-			setAuthChecked(true);
-		});
-		return () => {
-			unsubscribe();
-		};
-	}, []);
+    if (user && !user.isAnonymous) {
+      const userDocRef = doc(firestore, "users", user.uid).withConverter(
+        playerStatConverter,
+      );
+      await setDoc(userDocRef, updatedStats, { merge: true });
+    }
+  }
 
-	return (
-		<UserContext.Provider
-			value={{
-				user,
-				signInWithGoogle,
-				signInWithApple,
-				logout,
-				authChecked,
-				playerStats,
-				updatePlayerStats,
-			}}
-		>
-			{children}
-		</UserContext.Provider>
-	);
+  useEffect(() => {
+    getUserInfo();
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      if (u) {
+        setUser(u);
+      } else {
+        const anon = await anonSignIn();
+        if (anon) setUser(anon);
+      }
+      setAuthChecked(true);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!statsHydrated || !playerStats) return;
+    AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(playerStats));
+  }, [playerStats, statsHydrated]);
+
+  return (
+    <UserContext.Provider
+      value={{
+        user,
+        signInWithGoogle,
+        signInWithApple,
+        logout,
+        authChecked,
+        playerStats,
+        updatePlayerStats,
+      }}
+    >
+      {children}
+    </UserContext.Provider>
+  );
 }

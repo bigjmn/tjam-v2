@@ -44,8 +44,8 @@ function Tile({
 	const isPressed = useSharedValue(false);
 	const offsetX = useSharedValue(0);
 	const offsetY = useSharedValue(0);
-	const targetX = startx * 90 + 3;
-	const targetY = starty * 90 + 3;
+	const targetX = startx * 70 + 3;
+	const targetY = starty * 70 + 3;
 	const translateX = useSharedValue(isNew ? targetX + 380 : targetX);
 	const translateY = useSharedValue(targetY);
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
@@ -338,8 +338,8 @@ export default function FivelineGame() {
 
 const toPosition = ({ x, y }: { x: number; y: number }) => {
 	"worklet";
-	const row = Math.round(x / 90);
-	const col = Math.round(y / 90);
+	const row = Math.round(x / 70);
+	const col = Math.round(y / 70);
 	return row.toString() + col.toString();
 };
 
@@ -348,7 +348,7 @@ const toTranslation = (p: string) => {
 	const pos = p.split("");
 	const xp = parseInt(pos[0]);
 	const yp = parseInt(pos[1]);
-	return { x: xp * 90 + 3, y: yp * 90 + 3 };
+	return { x: xp * 70 + 3, y: yp * 70 + 3 };
 };
 
 const allSquares = () => {
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
 		padding: 12,
 	},
 	gameWrapper: {
-		width: 450,
+		width: 300,
 		display: "flex",
 		flexDirection: "column",
 		justifyContent: "center",
@@ -403,8 +403,8 @@ const styles = StyleSheet.create({
 		fontSize: 22,
 	},
 	baseTile: {
-		width: 84,
-		height: 84,
+		width: 64,
+		height: 64,
 		borderRadius: 12,
 		position: "absolute",
 		display: "flex",
@@ -415,8 +415,8 @@ const styles = StyleSheet.create({
 		borderColor: "black",
 	},
 	underlay: {
-		width: 84,
-		height: 84,
+		width: 64,
+		height: 64,
 		borderRadius: 12,
 		position: "absolute",
 	},

@@ -1,10 +1,8 @@
 import { Image } from "expo-image";
 
 import ThemedCard from "../ui/ThemedCard";
-import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 
-import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { getDailyWord } from "../../utils/helpers";
 import { useTheme } from "../../hooks/useTheme";

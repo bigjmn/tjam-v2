@@ -18,6 +18,53 @@ import { useStats } from "../../hooks/useStats";
 const unlockedImage = require("../../assets/trioicon.png");
 const lockedImage = require("../../assets/trioicon copy.png");
 
+const lockedScrabbleSrc = require("../../assets/lockedscrabble.png")
+const lockedScrabbleDarkSrc = require("../../assets/lockedscrabbledark.png")
+const scrabbleSrc = require("../../assets/scrabble.png")
+const scrabbleDarkSrc = require("../../assets/scrabbledark.png")
+
+const lockedFoursSrc = require("../../assets/lockedfours.png")
+const lockedFoursDarkSrc = require("../../assets/lockedfoursdark.png")
+const foursSrc = require("../../assets/fours.png")
+const foursDarkSrc = require("../../assets/foursdark.png")
+
+const lockedFivelineSrc = require("../../assets/lockedfiveline.png")
+const lockedFivelineDarkSrc = require("../../assets/lockedfivelinedark.png")
+const fivelineSrc = require("../../assets/fiveline.png")
+const fivelineDarkSrc = require("../../assets/fivelinedark.png")
+
+const imDict = {
+	"scrabble": {
+		"dark": {
+			"unlocked": scrabbleDarkSrc,
+			"locked": lockedScrabbleDarkSrc
+		},
+		"light": {
+			"unlocked": scrabbleSrc,
+			"locked": lockedScrabbleSrc
+		}
+	},
+	"fours": {
+		"dark": {
+			"unlocked": foursDarkSrc,
+			"locked": lockedFoursDarkSrc
+		},
+		"light": {
+			"unlocked": foursSrc,
+			"locked": lockedFoursSrc
+		}
+	},
+	"fiveline": {
+		"dark": {
+			"unlocked": fivelineDarkSrc,
+			"locked": lockedFivelineDarkSrc
+		},
+		"light": {
+			"unlocked": fivelineSrc,
+			"locked": lockedFivelineSrc
+		}
+	},
+}
 type VariantCardConfig = {
 	key: VariantKey;
 	name: string;
@@ -57,7 +104,7 @@ const VARIANTS: VariantCardConfig[] = [
 
 export const VariantCards = () => {
 	const router = useRouter();
-	const { colors } = useTheme();
+	const { colors, theme } = useTheme();
 	const stats = useStats();
 	const [selectedVariant, setSelectedVariant] =
 		useState<VariantCardConfig | null>(null);
@@ -100,7 +147,7 @@ export const VariantCards = () => {
 								>
 									<ThemedText variant="header2">{variant.name}</ThemedText>
 									<Image
-										source={isUnlocked ? unlockedImage : lockedImage}
+										source={isUnlocked ? imDict[variant.key][theme]["unlocked"] : imDict[variant.key][theme]["locked"]}
 										contentFit="cover"
 										style={styles.cardImage}
 									/>

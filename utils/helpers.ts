@@ -359,5 +359,6 @@ export const wodPct = (startDate: Date, achievements: string[]) => {
   if (totalDays <= 0) {
     return 0;
   }
+  console.log(totalDays)
   return 100 * (dates.length / totalDays);
 };

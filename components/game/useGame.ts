@@ -6,8 +6,10 @@ import { useRouter } from "expo-router";
 import { useSfx } from "../../hooks/useSfx";
 import { turnLog } from "../../utils/loggers";
 import { threeLetterWords } from "../../assets/scrabbleWordList";
+import { useUser } from "../../hooks/useUser";
 export const useGame = (vKey?:VariantKey) => {
 	const { wooshSound, gearloadSound } = useSfx()
+	const { playerStats, updatePlayerStats } = useUser();
 	const [tiles, setTiles] = useState<Tile[]>([]);
 	const [wordList, setWordList] = useState(!vKey? shuffle(wordlist) : vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist));
 	const [inMotion, setInMotion] = useState<string | null>(null);
@@ -238,14 +240,37 @@ export const useGame = (vKey?:VariantKey) => {
 		})
 	}
 
-	const handleGameEnd = () => {
+	const handleGameEnd = async () => {
 		setGameActive(false)
 		const newAchievements = achieve!.gameAchievements(gameTurns);
+
+		// Capture old top score before updating
+		const oldTopScore = playerStats?.topScore ?? 0;
+
+		// Update game stats immediately (but NOT achievements - those update after animations)
+		if (playerStats && updatePlayerStats) {
+			const gameScore = gameTurns.length;
+			const gameRecord: GameRecord = {
+				timestamp: new Date(),
+				score: gameScore,
+				abandoned: false,
+			};
+			const newGameHist = [...playerStats.gameHist, gameRecord];
+			const newTopScore = Math.max(playerStats.topScore, gameScore);
+
+			await updatePlayerStats({
+				gameHist: newGameHist,
+				topScore: newTopScore,
+				numGames: playerStats.numGames + 1,
+			});
+		}
+
 		router.push({
 			pathname: "/results",
 			params: {
 				achievedJson: JSON.stringify({ achieved: newAchievements }),
 				gameTurnsJson: JSON.stringify(gameTurns),
+				oldTopScore: oldTopScore.toString(),
 			},
 		});
 	};

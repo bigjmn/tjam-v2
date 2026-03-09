@@ -13,7 +13,7 @@ const WodCard = () => {
     const { wodStats } = stats 
     const { wodRate, longestStreak, currentStreak } = wodStats()
     const wodStatVals:Stat[] = [
-        {value: `${wodRate}`, label: "Success Rate"},
+        {value: `${wodRate}%`, label: "Success Rate"},
         {value: `${longestStreak}`, label: "Longest Streak"},
         {value: `${currentStreak}`, label:"Current Streak"}
     ]

@@ -10,6 +10,7 @@ export default function AuthLayout() {
 				<Stack.Screen name="game" />
 				<Stack.Screen name="fourgame" />
 				<Stack.Screen name="fiveline" />
+				<Stack.Screen name="scrabble" />
 				<Stack.Screen name="results" />
 				<Stack.Screen name="variantresults" />
 			</Stack>

@@ -15,14 +15,24 @@ import ThemedView from "../ui/ThemedView";
 import ThemedButton from "../ui/ThemedButton";
 interface AchievementsScreenProps {
 	earnedKeys: string[];
-	onComplete: () => void;
+	onPlayAgain: () => void;
+	onGoHome: () => void;
+	onAnimationsComplete?: () => void;
+	gameScore: number;
+	personalBest: number;
+	oldTopScore: number;
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	earnedKeys,
-	onComplete,
+	onPlayAgain,
+	onGoHome,
+	onAnimationsComplete,
+	gameScore,
+	personalBest,
+	oldTopScore,
 }) => {
 	const achievements = useAchievements();
 	const { playerStats } = useUser();
@@ -68,7 +78,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 		// Track simulated state as we process achievements
 		// For scoring achievements, we need to track the highest threshold earned to determine next goals
-		let simulatedTopScore = playerStats.topScore;
+		// Use oldTopScore (before this game) for proper animation simulation
+		let simulatedTopScore = oldTopScore;
 		let simulatedAchievements = [...playerStats.achievementsWon];
 
 		// Find the highest scoring achievement threshold in earned keys to use as simulated top score
@@ -451,6 +462,12 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		console.log('[ACHIEVEMENTS] Animation queue complete');
 		setPhase("complete");
 		setIsProcessing(false);
+
+		// Auto-update achievements after animations complete
+		if (onAnimationsComplete) {
+			await onAnimationsComplete();
+		}
+
 		console.log('[ACHIEVEMENTS] ========== ANIMATION QUEUE FINISHED ==========');
 	};
 
@@ -523,14 +540,26 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				)}
 			</ThemedView>
 
-			{/* Complete button - fixed at bottom */}
+			{/* Scores and action buttons - fixed at bottom */}
 			{!isProcessing && (
 				<ThemedView style={styles.completeContainer}>
+					<ThemedText variant="header2" style={styles.scoreText}>
+						Score: {gameScore}
+					</ThemedText>
+					<ThemedText variant="medium" style={styles.bestText}>
+						Personal Best: {personalBest}
+					</ThemedText>
 					<ThemedButton
 						style={styles.completeButton}
-						onPress={onComplete}
+						onPress={onPlayAgain}
 					>
 						<ThemedText variant="strong">Play Again</ThemedText>
+					</ThemedButton>
+					<ThemedButton
+						style={styles.completeButton}
+						onPress={onGoHome}
+					>
+						<ThemedText variant="strong">Go Home</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 			)}
@@ -561,9 +590,17 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 0,
 		right: 0,
-		padding: 16,
+		padding: 20,
 		alignItems: "center",
+		gap: 12,
 		zIndex: 2,
+	},
+	scoreText: {
+		marginBottom: 4,
+	},
+	bestText: {
+		marginBottom: 12,
+		opacity: 0.8,
 	},
 	completeButton: {
 		paddingHorizontal: 32,

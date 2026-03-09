@@ -73,7 +73,7 @@ function Tile({
 
 	// Entrance animation for new home row tiles
 	useEffect(() => {
-		gearloadSound()
+		
 		if (isNew && starty === 0) {
 			const delay = 400
 			// const delay = startx * STAGGER;
@@ -335,7 +335,7 @@ function Tile({
 	);
 }
 
-export default function Game() {
+export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 	const {
 		tiles,
 		inMotion,
@@ -354,7 +354,7 @@ export default function Game() {
 		isAnimating,
 		flippingTileIds,
 		pinwheelingTileIds,
-	} = useGame();
+	} = useGame(vKey);
 
 	const { playerStats, updatePlayerStats } = useUser();
 	const [showExitModal, setShowExitModal] = useState(false);

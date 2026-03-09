@@ -44,7 +44,7 @@ export const Leaderboard = () => {
 					<FlatList
 						data={globalLeaders.filter(
 							(gr) =>
-								gr.globalRank <= 5 || gr.id === playerStats.id,
+								gr.globalRank <= 10 || gr.id === playerStats.id,
 						)}
 						keyExtractor={(item) => item.id}
 						renderItem={({ item }) => <ResultBar result={item} />}
@@ -119,7 +119,7 @@ function ResultBar({ result }: { result: Leader }) {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, alignItems: "center" },
+	container: { flex: 1, alignItems: "center", paddingTop:24 },
 	resBar: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "center",
 		alignItems: "center",
+		marginVertical:12
 	},
     refreshWrapper: {
         flexDirection:'row',

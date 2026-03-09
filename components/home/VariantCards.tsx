@@ -9,12 +9,11 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
-import ThemedCard from "../ui/ThemedCard";
 import ThemedText from "../ui/ThemedText";
 import ThemedButton from "../ui/ThemedButton";
 import { useTheme } from "../../hooks/useTheme";
 import { useStats } from "../../hooks/useStats";
-
+import ThemedView from "../ui/ThemedView";
 const unlockedImage = require("../../assets/trioicon.png");
 const lockedImage = require("../../assets/trioicon copy.png");
 
@@ -79,25 +78,25 @@ const VARIANTS: VariantCardConfig[] = [
 		key: "scrabble",
 		name: "Scrabble",
 		rules:
-			"Play Trio Jam with the official Scrabble 3-letter word list. Clear words exactly as in the base game.",
-		unlockLevel: 5,
-		playPath: "/game",
-		playParams: { vKey: "scrabble" },
+			"If you've been cursing me for my word list, curse no longer. This version has a word list suspiciously similar to one owned by Hasbro, and has all the archaic words you can hope for.",
+		unlockLevel: 3,
+		playPath: "/scrabble",
+		
 	},
 	{
 		key: "fiveline",
-		name: "Five Line",
+		name: "1D-o Jam",
 		rules:
-			"Build words on a five-tile line. Keep clearing to survive as long as possible and set your best score.",
-		unlockLevel: 3,
+			"Same rules, fewer dimensions baby",
+		unlockLevel: 5,
 		playPath: "/fiveline",
 	},
 	{
 		key: "fours",
-		name: "Fours",
+		name: "QuatroJam",
 		rules:
-			"A four-letter challenge mode with a larger board flow and a different rhythm from Trio Jam.",
-		unlockLevel: 2,
+			"This 4x4 version is less fun than you think!",
+		unlockLevel: 10,
 		playPath: "/fourgame",
 	},
 ];
@@ -133,32 +132,24 @@ export const VariantCards = () => {
 				{VARIANTS.map((variant) => {
 					const isUnlocked = level >= variant.unlockLevel;
 					return (
-						<View key={variant.key} style={styles.cardContainer}>
-							<TouchableOpacity
-								disabled={!isUnlocked}
-								onPress={() => setSelectedVariant(variant)}
-								activeOpacity={0.8}
-							>
-								<ThemedCard
-									style={[
-										styles.variantCard,
-										{ backgroundColor: colors.elevatedCard },
-									]}
-								>
-									<ThemedText variant="header2">{variant.name}</ThemedText>
-									<Image
-										source={isUnlocked ? imDict[variant.key][theme]["unlocked"] : imDict[variant.key][theme]["locked"]}
-										contentFit="cover"
-										style={styles.cardImage}
-									/>
-								</ThemedCard>
-							</TouchableOpacity>
-							{!isUnlocked ? (
-								<ThemedText style={styles.unlockText}>
-									unlocks at level {variant.unlockLevel}
-								</ThemedText>
-							) : null}
-						</View>
+						<TouchableOpacity
+							key={variant.key}
+							onPress={() => setSelectedVariant(variant)}
+							activeOpacity={0.8}
+						>
+							<ThemedView style={styles.variantCard}>
+								<Image
+									source={isUnlocked ? imDict[variant.key][theme]["unlocked"] : imDict[variant.key][theme]["locked"]}
+									contentFit="cover"
+									style={styles.cardImage}
+								/>
+								<View style={styles.nameOverlay}>
+									<ThemedText variant="header2" style={styles.nameText}>
+										{variant.name}
+									</ThemedText>
+								</View>
+							</ThemedView>
+						</TouchableOpacity>
 					);
 				})}
 			</View>
@@ -173,21 +164,49 @@ export const VariantCards = () => {
 					style={styles.modalBackdrop}
 					onPress={() => setSelectedVariant(null)}
 				>
-					<Pressable
-						style={[
-							styles.modalCard,
-							{ backgroundColor: colors.elevatedCard },
-						]}
-						onPress={(e) => e.stopPropagation()}
-					>
-						<ThemedText variant="title">{selectedVariant?.name}</ThemedText>
-						<ThemedText style={styles.rulesText}>
-							{selectedVariant?.rules}
-						</ThemedText>
-						<ThemedButton style={styles.playButton} onPress={handlePlay}>
-							<ThemedText>Play</ThemedText>
-						</ThemedButton>
-					</Pressable>
+					{selectedVariant && (() => {
+						const isUnlocked = level >= selectedVariant.unlockLevel;
+						return (
+							<Pressable
+								style={[
+									styles.modalCard,
+									{ backgroundColor: colors.elevatedCard },
+								]}
+								onPress={(e) => e.stopPropagation()}
+							>
+								{/* Title */}
+								<ThemedText variant="header" style={styles.modalTitle}>
+									{selectedVariant.name}
+								</ThemedText>
+
+								{/* Rules and Image Row */}
+								<View style={styles.contentRow}>
+									{/* Rules on left */}
+									<ThemedText style={styles.rulesText}>
+										{selectedVariant.rules}
+									</ThemedText>
+
+									{/* Image on right */}
+									<Image
+										source={isUnlocked ? imDict[selectedVariant.key][theme]["unlocked"] : imDict[selectedVariant.key][theme]["locked"]}
+										contentFit="cover"
+										style={styles.modalImage}
+									/>
+								</View>
+
+								{/* Button */}
+								<ThemedButton
+									style={styles.playButton}
+									onPress={handlePlay}
+									disabled={!isUnlocked}
+								>
+									<ThemedText variant="strong">
+										{isUnlocked ? "Play" : `Unlocks at level ${selectedVariant.unlockLevel}`}
+									</ThemedText>
+								</ThemedButton>
+							</Pressable>
+						);
+					})()}
 				</Pressable>
 			</Modal>
 		</>
@@ -197,26 +216,38 @@ export const VariantCards = () => {
 const styles = StyleSheet.create({
 	wrapper: {
 		width: "100%",
+		flexDirection: "row",
+		flexWrap: "wrap",
 		gap: 12,
-	},
-	cardContainer: {
-		alignItems: "center",
-		gap: 6,
+		justifyContent: "center",
 	},
 	variantCard: {
-		width: 300,
-		padding: 12,
+		width: 120,
+		height: 120,
 		borderRadius: 12,
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
+		overflow: "hidden",
+		position: "relative",
 	},
 	cardImage: {
-		width: 70,
-		height: 70,
+		width: "100%",
+		height: "100%",
+		position: "absolute",
+		top: 0,
+		left: 0,
 	},
-	unlockText: {
-		fontSize: 12,
+	nameOverlay: {
+		position: "absolute",
+		bottom: 0,
+		left: 0,
+		right: 0,
+		backgroundColor: "rgba(0, 0, 0, 0.6)",
+		paddingVertical: 6,
+		paddingHorizontal: 8,
+	},
+	nameText: {
+		color: "#ffffff",
+		fontSize: 15,
+		textAlign: "center",
 	},
 	modalBackdrop: {
 		flex: 1,
@@ -227,15 +258,31 @@ const styles = StyleSheet.create({
 	},
 	modalCard: {
 		width: "100%",
-		maxWidth: 340,
+		maxWidth: 400,
 		borderRadius: 12,
-		padding: 16,
-		gap: 12,
+		padding: 20,
+		gap: 16,
+	},
+	modalTitle: {
+		textAlign: "center",
+	},
+	contentRow: {
+		flexDirection: "row",
+		gap: 16,
+		alignItems: "flex-start",
 	},
 	rulesText: {
+		flex: 1,
 		lineHeight: 20,
+		fontSize: 15,
+	},
+	modalImage: {
+		width: 100,
+		height: 100,
+		borderRadius: 8,
 	},
 	playButton: {
-		alignSelf: "flex-start",
+		alignSelf: "stretch",
+		alignItems: "center",
 	},
 });

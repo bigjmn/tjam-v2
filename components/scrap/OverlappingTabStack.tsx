@@ -93,12 +93,12 @@ export function CardStats({stats, bodyColor}:{stats:Stat[], bodyColor?:string}){
         <View style={styles.statsRow}>
             {stats.map((s, idx) => (
               <View key={idx} style={styles.statCell}>
-                <Text style={[styles.statValue, { color: bodyColor ?? "#111" }]}>
+                <ThemedText style={[styles.statValue]}>
                   {s.value}
-                </Text>
-                <Text style={[styles.statLabel, { color: (bodyColor ?? "#111") + "AA" }]}>
+                </ThemedText>
+                <ThemedText style={[styles.statLabel]}>
                   {s.label}
-                </Text>
+                </ThemedText>
               </View>
             )
     )}

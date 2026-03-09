@@ -2,8 +2,8 @@ import { Image } from "expo-image";
 
 import ThemedCard from "../ui/ThemedCard";
 import ThemedText from "../ui/ThemedText";
-
-import { StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { getDailyWord } from "../../utils/helpers";
 import { useTheme } from "../../hooks/useTheme";
 const trioImage = require("../../assets/trioicon.png");
@@ -11,7 +11,12 @@ const trioImage = require("../../assets/trioicon.png");
 export const PlayCard = () => {
     const { colors } = useTheme()
     const dailyWord = getDailyWord()
+	const router = useRouter()
+	const startGame = () => {
+		router.replace({pathname: "/game"})
+	}
 	return (
+		<TouchableOpacity onPress={startGame}>
 		<ThemedCard style={[styles.container, {backgroundColor: colors.elevatedCard}]}>
 			<View style={styles.cardRow}>
 				
@@ -29,6 +34,7 @@ export const PlayCard = () => {
 				<ThemedText>Word of the Day: {dailyWord}</ThemedText>
 			</View>
 		</ThemedCard>
+		</TouchableOpacity>
 	);
 };
 

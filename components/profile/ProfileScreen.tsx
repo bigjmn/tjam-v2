@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Dimensions, Pressable } from 'react-native'
 import { useState } from 'react'
 import ThemedView from '../ui/ThemedView'
 import ThemedText from '../ui/ThemedText'
-import TabStackTest from '../scrap/OverlappingTabStack'
+import ProfileTabs from './ProfileTabs'
 import UsernamePicker from '../settings/UsernamePicker'
 import { useStats } from '../../hooks/useStats'
 import StatBox from '../stats/StatBox'
@@ -43,9 +43,10 @@ const ProfileScreen = () => {
       <UsernamePicker />
 
       <StatBox highScore={highScore} globalRank={globalRank} dateJoined={dateJoined} points={points} level={level} title={title} />
-      {/* <ThemedView style={{position:'absolute', bottom:10}}> */}
-      <TabStackTest />
-      {/* </ThemedView> */}
+
+      <View style={styles.tabsContainer}>
+        <ProfileTabs />
+      </View>
 
       {/* Settings Modal */}
       <SettingsModal
@@ -70,5 +71,10 @@ const styles = StyleSheet.create({
         right: 20,
         zIndex: 10,
         padding: 8,
+    },
+    tabsContainer: {
+        flex: 1,
+        width: "100%",
+        marginTop: 16,
     },
 })

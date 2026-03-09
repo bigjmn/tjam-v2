@@ -266,7 +266,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(updatedStats));
 
-    if (user && !user.isAnonymous) {
+    if (user) {
       const userDocRef = doc(firestore, "users", user.uid).withConverter(
         playerStatConverter,
       );

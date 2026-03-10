@@ -337,3 +337,34 @@ export const ranksList: Rank[] = [
 	{ name: "International Master", starsToFill: 8 },
 	{ name: "Grandmaster", starsToFill: 9 },
 ].map((rk, i) => ({...rk, level: i+1}));
+
+/**
+ * Calculate streak progress for a given threshold
+ * @param gameHist - Player's game history
+ * @param threshold - Minimum score required for streak
+ * @returns Number of consecutive qualifying games from the end (0-3)
+ */
+export function calculateStreakProgress(
+	gameHist: GameRecord[],
+	threshold: number
+): number {
+	if (gameHist.length === 0) return 0;
+
+	// Get last 3 games (or fewer if not enough history)
+	const recentGames = gameHist
+		.slice(-3)
+		.map(gr => gr.abandoned ? 0 : gr.score);
+
+	// Count consecutive qualifying games from the END
+	let progress = 0;
+	for (let i = recentGames.length - 1; i >= 0; i--) {
+		if (recentGames[i] >= threshold) {
+			progress++;
+		} else {
+			break; // Streak broken
+		}
+	}
+	console.log(progress, threshold)
+
+	return Math.min(progress, 3); // Cap at 3
+}

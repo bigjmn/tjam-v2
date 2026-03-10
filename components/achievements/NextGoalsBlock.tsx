@@ -5,13 +5,14 @@ import Animated, {
 	useAnimatedStyle,
 	withTiming,
 	withSequence,
-	withDelay,
 	Easing,
 	runOnJS,
 } from "react-native-reanimated";
 import { AchievementTile } from "./AchievementTile";
 import ThemedText from "../ui/ThemedText";
 import { useSfx } from "../../hooks/useSfx";
+import { calculateStreakProgress } from "../../utils/achievements";
+import { useUser } from "../../hooks/useUser";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -39,6 +40,7 @@ export const NextGoalsBlock = forwardRef<
 	NextGoalsBlockProps
 >(({ scoringAchievement, streakingAchievement, noveltyAchievement, dailyWordAchievement, dailyWordWon }, ref) => {
 	const { achieveSound } = useSfx();
+	const { playerStats } = useUser();
 	const [scoring, setScoring] = useState(scoringAchievement);
 	const [streaking, setStreaking] = useState(streakingAchievement);
 	const [novelty, setNovelty] = useState(noveltyAchievement);
@@ -46,6 +48,13 @@ export const NextGoalsBlock = forwardRef<
 	const [scoringWon, setScoringWon] = useState(false);
 	const [streakingWon, setStreakingWon] = useState(false);
 	const [noveltyWon, setNoveltyWon] = useState(false);
+
+	// Calculate streak progress for current streaking goal
+	const streakProgress = React.useMemo(() => {
+		if (!playerStats || !streaking) return 0;
+		const achievement = streaking as StreakingAchievement;
+		return calculateStreakProgress(playerStats.gameHist, achievement.streakScore);
+	}, [playerStats, streaking]);
 
 	const scoringTranslateX = useSharedValue(0);
 	const streakingTranslateX = useSharedValue(0);
@@ -278,7 +287,11 @@ export const NextGoalsBlock = forwardRef<
 			</Animated.View>
 
 			<Animated.View style={[styles.tileWrapper, streakingAnimatedStyle]}>
-				<AchievementTile achievement={streaking} isWon={streakingWon} />
+				<AchievementTile
+				achievement={streaking}
+				isWon={streakingWon}
+				streakProgress={streakProgress}
+			/>
 			</Animated.View>
 
 			<Animated.View style={[styles.tileWrapper, noveltyAnimatedStyle]}>

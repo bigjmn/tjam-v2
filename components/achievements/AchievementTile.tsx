@@ -7,6 +7,7 @@ import { StarIconGroup } from "./StarIcon";
 import { useTheme } from "../../hooks/useTheme";
 import moment from "moment";
 import { getDailyWord } from "../../utils/helpers";
+import { StreakProgressIndicator } from "./StreakProgressIndicator";
 
 interface AchievementTileProps {
 	achievement: Achievement;
@@ -14,6 +15,7 @@ interface AchievementTileProps {
 	isWon?: boolean;
 	style?: ViewStyle;
 	showDate?: boolean;
+	streakProgress?: number; // 0-3 for streaking achievements
 }
 
 export const AchievementTile: React.FC<AchievementTileProps> = ({
@@ -22,6 +24,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 	isWon = false,
 	style,
 	showDate = false,
+	streakProgress,
 }) => {
 	const { colors } = useTheme();
 	const borderColor = isWon ? colors.primary : colors.borderSubtle;
@@ -51,12 +54,19 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 				)}
 
 				<ThemedView style={[styles.contentArea, { backgroundColor }]}>
-					<ThemedText
-						variant="strong"
-						
-					>
-						{title}
-					</ThemedText>
+					<View style={styles.titleRow}>
+						<ThemedText
+							variant="strong"
+
+						>
+							{title}
+						</ThemedText>
+
+						{/* Show streak progress for streaking achievements */}
+						{achievement.type === "streaking" && streakProgress !== undefined && (
+							<StreakProgressIndicator progress={streakProgress} />
+						)}
+					</View>
 					<ThemedText
 						variant="soft"
 						style={
@@ -112,6 +122,11 @@ const styles = StyleSheet.create({
 	contentArea: {
 		flex: 1,
 		justifyContent: "center",
+	},
+	titleRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 6,
 	},
 	explainer: {
 		marginTop: 4,

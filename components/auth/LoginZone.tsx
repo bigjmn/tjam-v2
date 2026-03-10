@@ -63,6 +63,7 @@ export const LoginZone = () => {
 const styles = StyleSheet.create({
     container: {
         flex:1,
-        alignItems: "center"
+        alignItems: "center",
+        maxHeight:150
     }
 })

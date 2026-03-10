@@ -4,11 +4,14 @@ import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import { AchievementTile } from "../achievements/AchievementTile";
 import { useAchievements } from "../../hooks/useAchievements";
+import { calculateStreakProgress } from "../../utils/achievements";
+import { useUser } from "../../hooks/useUser";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export const NextGoalsPage: React.FC = () => {
 	const achievements = useAchievements();
+	const { playerStats } = useUser();
 	const nextAchievements = achievements?.getNextAchievements();
 
 	if (!nextAchievements) {
@@ -22,6 +25,13 @@ export const NextGoalsPage: React.FC = () => {
 	}
 
 	const { scoring, streaking, novelty } = nextAchievements;
+
+	// Calculate streak progress for current streaking goal
+	const streakProgress = React.useMemo(() => {
+		if (!playerStats || !streaking) return 0;
+		const achievement = streaking as StreakingAchievement;
+		return calculateStreakProgress(playerStats.gameHist, achievement.streakScore);
+	}, [playerStats, streaking]);
 
 	return (
 		<ThemedView style={styles.pageContainer}>
@@ -47,6 +57,7 @@ export const NextGoalsPage: React.FC = () => {
 							achievement={streaking}
 							isWon={false}
 							style={styles.tile}
+							streakProgress={streakProgress}
 						/>
 					)}
 					{novelty && (
@@ -84,7 +95,7 @@ const styles = StyleSheet.create({
 	},
 	tile: {
 		marginVertical: 8,
-		marginRight:16
+		marginRight: 16,
 	},
 	centered: {
 		justifyContent: "center",

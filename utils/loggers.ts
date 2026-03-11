@@ -5,6 +5,7 @@ export const logStats = (playerstats:PlayerStats|null, includeGameHistory:boolea
         return
     }
     const playerSummary = `
+    ID: ${playerstats.id}
     Player: ${playerstats.username}
     Date Joined: ${moment(playerstats.dateJoined).format("M/DD/YYYY")}
     Total Games: ${playerstats.numGames}

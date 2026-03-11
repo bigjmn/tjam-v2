@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	scrollContent: {
-		paddingBottom: 16,
+		paddingBottom: 80,
 	},
 	tile: {
 		marginVertical: 8,

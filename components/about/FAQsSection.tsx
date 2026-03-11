@@ -28,12 +28,9 @@ const faqs = [
 	},
 	{
 		question: "Why do I suck at this?",
-		answer: "It's a hard game! My advice is to think in terms of favorable/unfavorable ROWS, not TILES. For example, the J may seem scary, but J_G will clear with almost any vowel."
+		answer: "It's a hard game! Check out the tips in the support section for some hints on how to improve your scores."
 	},
-	{
-		question: "How can I reach you with my questions/ideas/feedback?",
-		answer: "You can email me (see the support section) with anything. We never talk anymore!"
-	},
+	
 	{
 		question: "Is this game like WORDLE?",
 		answer: "Yes, it's the exact same as WORDLE."

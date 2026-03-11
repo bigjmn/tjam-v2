@@ -27,17 +27,15 @@ export const SupportSection: React.FC = () => {
 			>
 				<View style={styles.section}>
 					<ThemedText variant="header2" style={styles.sectionTitle}>
-						Need Help?
+						Contact
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						If you have questions or need assistance, we're here to help!
+						If you have questions about the game, ideas for features, or general feedback, please reach out - we never talk anymore!
 					</ThemedText>
 				</View>
 
 				<View style={styles.section}>
-					<ThemedText variant="header3" style={styles.subsectionTitle}>
-						Contact Us
-					</ThemedText>
+					
 					<Pressable
 						onPress={handleEmailPress}
 						style={({ pressed }) => [
@@ -49,12 +47,12 @@ export const SupportSection: React.FC = () => {
 						]}
 					>
 						<ThemedText style={[styles.linkText, { color: colors.primary }]}>
-							📧 support@triojam.com
+							📧 jesse.a.nicholas@gmail.com
 						</ThemedText>
 					</Pressable>
 				</View>
 
-				<View style={styles.section}>
+				{/* <View style={styles.section}>
 					<ThemedText variant="header3" style={styles.subsectionTitle}>
 						Website
 					</ThemedText>
@@ -72,10 +70,10 @@ export const SupportSection: React.FC = () => {
 							🌐 triojam.com
 						</ThemedText>
 					</Pressable>
-				</View>
+				</View> */}
 
 				<View style={styles.section}>
-					<ThemedText variant="header3" style={styles.subsectionTitle}>
+					<ThemedText variant="header2" style={styles.subsectionTitle}>
 						Report a Bug
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
@@ -92,7 +90,7 @@ export const SupportSection: React.FC = () => {
 					</ThemedText>
 				</View>
 
-				<View style={styles.section}>
+				{/* <View style={styles.section}>
 					<ThemedText variant="header3" style={styles.subsectionTitle}>
 						Feedback
 					</ThemedText>
@@ -106,7 +104,7 @@ export const SupportSection: React.FC = () => {
 					<ThemedText variant="soft" style={styles.version}>
 						Version 1.0.0
 					</ThemedText>
-				</View>
+				</View> */}
 			</ScrollView>
 		</ThemedView>
 	);

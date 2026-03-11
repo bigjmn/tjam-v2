@@ -15,13 +15,14 @@ const dimheight = Dimensions.get('screen').height
 const ProfileScreen = () => {
     const [settingsVisible, setSettingsVisible] = useState(false)
     const { colors } = useTheme()
-    const stats = useStats()
-    if (!stats){
+    const statsOb = useStats()
+    if (!statsOb){
         return
     }
-    const { getStats } = stats
+    const { stats } = statsOb
+    if (!stats) return 
 
-    const {highScore, globalRank, dateJoined, points, level, title} = getStats()
+    const {highScore, globalRank, dateJoined, points, level, title} = stats
   return (
     <ThemedView style={styles.container}>
       {/* Settings Button */}

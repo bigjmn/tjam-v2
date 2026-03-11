@@ -13,6 +13,7 @@ interface Tab {
 	key: TabKey;
 	title: string;
 	renderContent: () => React.ReactNode;
+	needsScroll?: boolean; // Whether this tab needs to be wrapped in ScrollView
 }
 
 const TABS: Tab[] = [
@@ -20,16 +21,19 @@ const TABS: Tab[] = [
 		key: "variants",
 		title: "Variants",
 		renderContent: () => <VariantBox />,
+		needsScroll: true,
 	},
 	{
 		key: "achievements",
 		title: "Achievements",
 		renderContent: () => <FullCarousel />,
+		needsScroll: false, // Carousel handles its own scrolling
 	},
 	{
 		key: "wordofday",
 		title: "Word of Day",
 		renderContent: () => <WodCard />,
+		needsScroll: true,
 	},
 ];
 
@@ -74,13 +78,19 @@ export default function ProfileTabs() {
 			</View>
 
 			{/* Tab Content */}
-			<ScrollView
-				style={styles.contentContainer}
-				contentContainerStyle={styles.contentInner}
-				showsVerticalScrollIndicator={false}
-			>
-				{activeTabData?.renderContent()}
-			</ScrollView>
+			{activeTabData?.needsScroll ? (
+				<ScrollView
+					style={styles.contentContainer}
+					contentContainerStyle={styles.contentInner}
+					showsVerticalScrollIndicator={false}
+				>
+					{activeTabData.renderContent()}
+				</ScrollView>
+			) : (
+				<View style={styles.contentContainer}>
+					{activeTabData?.renderContent()}
+				</View>
+			)}
 		</ThemedView>
 	);
 }

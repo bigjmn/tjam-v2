@@ -109,7 +109,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch (e) {
-      console.log(e);
+      console.error("Apple Sign-In Error:", e);
+      if (e instanceof Error) {
+        console.error("Error message:", e.message);
+        console.error("Error stack:", e.stack);
+      }
+      // TODO: Show user-friendly error message
+      throw e; // Re-throw to see the error in dev
     }
   };
 
@@ -186,6 +192,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   async function logout() {
     await signOut(auth);
+
+    // Clear username and email from local playerStats when becoming anonymous
+    if (playerStats) {
+      const { username, email, ...statsWithoutAuth } = playerStats;
+      const anonStats = statsWithoutAuth;
+      setPlayerStats(anonStats);
+      await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(anonStats));
+    }
+
     await signInAnonymously(auth);
   }
 
@@ -221,6 +236,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
   useEffect(() => {
     logStats(playerStats);
+    if (user){
+      console.log(user.uid)
+      console.log(`is anonymous: ${user.isAnonymous}`)
+    }
   }, [playerStats]);
 
   const makeOrGetDoc = async () => {
@@ -257,6 +276,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
     return anonSignInRef.current;
   };
+  const anonPstats = () => {
+    if (!playerStats) return 
+    const { username, email, ...remainingStats} = playerStats 
+    setPlayerStats(remainingStats)
+  }
 
   async function updatePlayerStats(updates: Partial<PlayerStats>) {
     if (!playerStats) return;
@@ -266,7 +290,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(updatedStats));
 
-    if (user) {
+    // Only write to Firestore for authenticated (non-anonymous) users
+    if (user && !user.isAnonymous) {
       const userDocRef = doc(firestore, "users", user.uid).withConverter(
         playerStatConverter,
       );
@@ -277,8 +302,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     getUserInfo();
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      console.log("auth state changing")
       if (u) {
         setUser(u);
+        if (u.isAnonymous){
+          console.log('removing uname')
+          anonPstats()
+        }
       } else {
         const anon = await anonSignIn();
         if (anon) setUser(anon);

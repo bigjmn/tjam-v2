@@ -19,34 +19,18 @@ export const RulesSection: React.FC = () => {
 						How to Play
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						Create words by dragging and dropping letter tiles onto the board.
-						Connect adjacent tiles to form valid words.
+						Every turn, you are given 3 new letters. You must take exactly two of them and place them on the board. If you form a valid word (either across or down) the tiles in that word that were already on the board will disappear. 
 					</ThemedText>
 				</View>
 
-				<View style={styles.section}>
-					<ThemedText variant="header2" style={styles.sectionTitle}>
-						Scoring
-					</ThemedText>
-					<ThemedText variant="regular" style={styles.paragraph}>
-						• Each letter has a point value
-					</ThemedText>
-					<ThemedText variant="regular" style={styles.paragraph}>
-						• Longer words earn more points
-					</ThemedText>
-					<ThemedText variant="regular" style={styles.paragraph}>
-						• Valid words are highlighted in green
-					</ThemedText>
-				</View>
+				
 
 				<View style={styles.section}>
 					<ThemedText variant="header2" style={styles.sectionTitle}>
 						Achievements
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						Earn achievements by reaching score milestones, maintaining streaks,
-						and discovering secret words. Check the Achievements tab to track
-						your progress!
+						Level up by scoring achievements. Higher levels unlock variants and (possibly in the future) new themes! 
 					</ThemedText>
 				</View>
 
@@ -55,13 +39,13 @@ export const RulesSection: React.FC = () => {
 						Tips
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						• Plan ahead - think about future moves
+						• Think in terms of easy-to-clear rows and columns, not individual letters
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						• Look for word patterns and combinations
+						• Try to put consonants in the corners and vowels in between
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						• Try to clear the board efficiently
+						• The center square can be a useful place to put a troublesome V or K
 					</ThemedText>
 				</View>
 			</ScrollView>

@@ -4,11 +4,18 @@ import { useAchievements } from "./useAchievements";
 import moment from "moment";
 import { wodPct, getLongestStreakFromAchievements } from "../utils/helpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { useState, useEffect } from "react";
 export const useStats = () => {
     const { playerStats } = useUser()
     const { globalLeaders } = useLeaderboard()
+    const [stats, setStats] = useState<StatBoxProps|null>(null)
     const achieve = useAchievements()
+
+    useEffect(() => {
+        const sts = getStats()
+        setStats(sts)
+
+    }, [playerStats])
     if (!achieve || ! playerStats){
         return null
     }
@@ -63,5 +70,5 @@ export const useStats = () => {
 
     }
 
-    return { getStats, wodStats, getVariantBests }
+    return { getStats, wodStats, getVariantBests, stats }
 }

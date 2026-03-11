@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { StyleSheet, TextInput } from "react-native";
+import { StyleSheet, TextInput, View, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../../hooks/useUser";
 import { useTheme } from "../../hooks/useTheme";
 import { firestore } from "../../lib/firebase";
@@ -9,7 +10,6 @@ import { isProfane } from "no-profanity";
 import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import ThemedTextInput from "../ui/ThemedTextInput";
-import IconButton from "../ui/IconButton";
 import { getGoogleName } from "../auth/GoogleLoginButton";
 
 export default function UsernamePicker() {
@@ -24,6 +24,11 @@ export default function UsernamePicker() {
 	const { colors } = useTheme();
 
 	const getDefaultUsername = () => {
+		// If user is anonymous, return "None"
+		if (user?.isAnonymous) {
+			return "None";
+		}
+
 		// Priority: current username > Google displayName > Google name > email prefix > random
 		if (playerStats?.username) {
 			return playerStats.username;
@@ -179,14 +184,15 @@ export default function UsernamePicker() {
 		await updateUsername(inputValue);
 	};
 
-	const handleBlur = () => {
-		if (!isEditing) return;
-
-		// Reset to current username
+	const handleCancel = () => {
 		setInputValue(playerStats?.username || getDefaultUsername());
 		setError(null);
 		setSuccess(false);
 		setIsEditing(false);
+	};
+
+	const handleBlur = () => {
+		// Don't auto-cancel on blur - let user explicitly cancel
 	};
 
 	const handleInputChange = (text: string) => {
@@ -198,105 +204,330 @@ export default function UsernamePicker() {
 	const hasChanged =
 		inputValue.trim() !== (playerStats?.username || getDefaultUsername());
 	const isDisabled = user?.isAnonymous || isLoading;
+	const characterCount = inputValue.length;
+	const isOverLimit = characterCount > 20;
 
 	return (
-		<ThemedView style={[styles.container]}>
-			<ThemedText variant="medium" style={styles.label}>
-				Username
-			</ThemedText>
+		<ThemedView style={styles.outerContainer}>
+			{/* Card container */}
+			<ThemedView
+				style={[
+					styles.card,
+					{
+						backgroundColor: colors.uiBackground,
+						borderColor: error
+							? "#ff4444"
+							: success
+								? "#4ade80"
+								: isEditing
+									? colors.primary
+									: colors.borderSubtle,
+					},
+				]}
+			>
+				{/* Header with icon */}
+				<View style={styles.header}>
+					<View
+						style={[
+							styles.iconCircle,
+							{
+								backgroundColor: user?.isAnonymous
+									? colors.mutedText + "20"
+									: colors.primary + "20",
+							},
+						]}
+					>
+						<Ionicons
+							name={user?.isAnonymous ? "person-outline" : "person"}
+							size={24}
+							color={user?.isAnonymous ? colors.mutedText : colors.primary}
+						/>
+					</View>
+					<View style={styles.headerText}>
+						<ThemedText variant="medium" style={styles.label}>
+							Username
+						</ThemedText>
+						<ThemedText variant="soft" style={styles.subtitle}>
+							{user?.isAnonymous
+								? "Sign in to customize"
+								: "Visible to other players"}
+						</ThemedText>
+					</View>
+				</View>
 
-			<ThemedView style={styles.inputContainer}>
-				<ThemedTextInput
-					ref={inputRef}
-					value={inputValue}
-					onChangeText={handleInputChange}
-					onBlur={handleBlur}
-					editable={!isDisabled}
-					style={[styles.input, { backgroundColor: colors.uiBackground, borderColor: colors.primary }, isDisabled && styles.disabled]}
-					placeholder="Enter username"
-				/>
+				{/* Input area */}
+				<View style={styles.inputWrapper}>
+					<View
+						style={[
+							styles.inputContainer,
+							{
+								borderColor: error
+									? "#ff4444"
+									: isEditing
+										? colors.primary
+										: colors.borderSubtle,
+								backgroundColor: colors.background,
+							},
+							isDisabled && styles.inputDisabled,
+						]}
+					>
+						<ThemedTextInput
+							ref={inputRef}
+							value={inputValue}
+							onChangeText={handleInputChange}
+							onBlur={handleBlur}
+							editable={!isDisabled && isEditing}
+							style={[
+								styles.input,
+								// { color: colors.text },
+								isDisabled && { color: colors.mutedText },
+							]}
+							placeholder="Enter username"
+							placeholderTextColor={colors.mutedText}
+							maxLength={25}
+							autoCapitalize="none"
+							autoCorrect={false}
+						/>
 
-				<IconButton
-					name={hasChanged && !isDisabled ? "checkmark" : "pencil"}
-					onPress={
-						hasChanged && !isDisabled ? handleSubmit : handleEdit
-					}
-					disabled={isDisabled}
-					size={20}
-					style={styles.iconButton}
-				/>
+						{/* Right side actions */}
+						<View style={styles.actionButtons}>
+							{isLoading ? (
+								<ActivityIndicator size="small" color={colors.primary} />
+							) : isEditing && hasChanged ? (
+								<>
+									<View
+										style={[
+											styles.actionButton,
+											{
+												backgroundColor: "#ff444420",
+											},
+										]}
+									>
+										<Ionicons
+											name="close"
+											size={20}
+											color="#ff4444"
+											onPress={handleCancel}
+										/>
+									</View>
+									<View
+										style={[
+											styles.actionButton,
+											{
+												backgroundColor: colors.primary + "20",
+											},
+										]}
+									>
+										<Ionicons
+											name="checkmark"
+											size={20}
+											color={colors.primary}
+											onPress={handleSubmit}
+										/>
+									</View>
+								</>
+							) : (
+								<View
+									style={[
+										styles.actionButton,
+										{
+											backgroundColor: isDisabled
+												? colors.mutedText + "20"
+												: colors.primary + "20",
+										},
+									]}
+								>
+									<Ionicons
+										name="pencil"
+										size={18}
+										color={isDisabled ? colors.mutedText : colors.primary}
+										onPress={isDisabled ? undefined : handleEdit}
+									/>
+								</View>
+							)}
+						</View>
+					</View>
+
+					{/* Character count */}
+					{isEditing && !isDisabled && (
+						<ThemedText
+							variant="soft"
+							style={[
+								styles.characterCount,
+								isOverLimit && { color: "#ff4444" },
+							]}
+						>
+							{characterCount}/20
+						</ThemedText>
+					)}
+				</View>
+
+				{/* Status messages */}
+				{isLoading && (
+					<View style={[styles.messageContainer, styles.loadingContainer]}>
+						<ThemedText variant="soft" style={styles.messageText}>
+							Updating username...
+						</ThemedText>
+					</View>
+				)}
+
+				{success && (
+					<View
+						style={[
+							styles.messageContainer,
+							{ backgroundColor: "#4ade8015" },
+						]}
+					>
+						<Ionicons name="checkmark-circle" size={16} color="#4ade80" />
+						<ThemedText
+							variant="soft"
+							style={[styles.messageText, { color: "#4ade80" }]}
+						>
+							Username updated successfully!
+						</ThemedText>
+					</View>
+				)}
+
+				{error && (
+					<View
+						style={[styles.messageContainer, { backgroundColor: "#ff444415" }]}
+					>
+						<Ionicons name="alert-circle" size={16} color="#ff4444" />
+						<ThemedText
+							variant="soft"
+							style={[styles.messageText, { color: "#ff4444" }]}
+						>
+							{error}
+						</ThemedText>
+					</View>
+				)}
+
+				{/* Helper text for anonymous users */}
+				{user?.isAnonymous && !error && !success && (
+					<View style={styles.helperContainer}>
+						<Ionicons
+							name="information-circle-outline"
+							size={16}
+							color={colors.mutedText}
+						/>
+						<ThemedText variant="soft" style={styles.helperText}>
+							Sign in with Google or Apple to set a custom username
+						</ThemedText>
+					</View>
+				)}
 			</ThemedView>
-
-			{/* Loading indicator */}
-			{isLoading && (
-				<ThemedText variant="soft" style={styles.message}>
-					Updating...
-				</ThemedText>
-			)}
-
-			{/* Success message */}
-			{success && (
-				<ThemedText
-					variant="soft"
-					style={[styles.message, { color: "#4ade80" }]}
-				>
-					✓ Username updated successfully!
-				</ThemedText>
-			)}
-
-			{/* Error message */}
-			{error && (
-				<ThemedText
-					variant="soft"
-					style={[styles.message, { color: "#ff4444" }]}
-				>
-					{error}
-				</ThemedText>
-			)}
-
-			{/* Helper text for anonymous users */}
-			{user?.isAnonymous && (
-				<ThemedText variant="italic" style={styles.helperText}>
-					Sign in with Google to set a username
-				</ThemedText>
-			)}
 		</ThemedView>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: {
-		alignItems: "center",
+	outerContainer: {
 		width: "100%",
 		paddingHorizontal: 20,
+		marginVertical: 12,
+	},
+	card: {
+		borderRadius: 16,
+		borderWidth: 2,
+		padding: 20,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 8,
+		elevation: 3,
+	},
+	header: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 16,
+	},
+	iconCircle: {
+		width: 48,
+		height: 48,
+		borderRadius: 24,
+		alignItems: "center",
+		justifyContent: "center",
+		marginRight: 12,
+	},
+	headerText: {
+		flex: 1,
 	},
 	label: {
-		marginBottom: 10,
+		fontSize: 16,
+		marginBottom: 2,
+	},
+	subtitle: {
+		fontSize: 13,
+		opacity: 0.7,
+	},
+	inputWrapper: {
+		marginBottom: 4,
 	},
 	inputContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "center",
-		width: "100%",
+		borderWidth: 2,
+		borderRadius: 12,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		minHeight: 52,
+	},
+	inputDisabled: {
+		opacity: 0.6,
 	},
 	input: {
 		flex: 1,
-		maxWidth: 180,
+		fontSize: 16,
+		fontWeight: "600",
+		padding: 0,
 	},
-	disabled: {
-		opacity: 0.5,
+	actionButtons: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
 	},
-	iconButton: {
-		marginLeft: 10,
-		padding: 10,
+	actionButton: {
+		width: 32,
+		height: 32,
+		borderRadius: 16,
+		alignItems: "center",
+		justifyContent: "center",
 	},
-	message: {
-		marginTop: 8,
-		fontSize: 14,
+	characterCount: {
+		fontSize: 12,
+		textAlign: "right",
+		marginTop: 4,
+		marginRight: 4,
+	},
+	messageContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		paddingVertical: 10,
+		paddingHorizontal: 12,
+		borderRadius: 8,
+		marginTop: 12,
+		gap: 8,
+	},
+	loadingContainer: {
+		backgroundColor: "transparent",
+	},
+	messageText: {
+		fontSize: 13,
+		flex: 1,
+	},
+	helperContainer: {
+		flexDirection: "row",
+		alignItems: "flex-start",
+		marginTop: 12,
+		gap: 6,
+		paddingTop: 12,
+		borderTopWidth: 1,
+		borderTopColor: "rgba(128, 128, 128, 0.2)",
 	},
 	helperText: {
-		marginTop: 8,
 		fontSize: 13,
-		opacity: 0.7,
+		flex: 1,
+		lineHeight: 18,
+		opacity: 0.8,
 	},
 });

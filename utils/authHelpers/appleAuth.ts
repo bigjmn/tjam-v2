@@ -32,12 +32,33 @@ export async function getAppleCredential(): Promise<{
     rawNonce
   );
 
-  const apple = await AppleAuthentication.signInAsync({
-    requestedScopes: [
-      AppleAuthentication.AppleAuthenticationScope.EMAIL,
-      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-    ],
-    nonce: hashedNonce,
+  console.log("Initiating Apple Sign-In with nonce hash...");
+
+  let apple;
+  try {
+    apple = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+      ],
+      nonce: hashedNonce,
+    });
+  } catch (error) {
+    console.error("Apple Sign-In SDK Error:", error);
+    if (error instanceof Error) {
+      console.error("Error code:", (error as any).code);
+      console.error("Error message:", error.message);
+    }
+    throw new Error(
+      `Apple Sign-In failed at SDK level: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+
+  console.log("Apple Sign-In response received:", {
+    hasIdentityToken: !!apple.identityToken,
+    hasEmail: !!apple.email,
+    hasFullName: !!apple.fullName,
+    user: apple.user,
   });
 
   if (!apple.identityToken) {

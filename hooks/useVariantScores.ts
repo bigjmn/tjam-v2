@@ -17,7 +17,7 @@ const variantList:GameVariant[] = [
     },
     {
         key: "fours",
-        name: "Quad Jam",
+        name: "Quad Jam     ",
         rules: "This 4x4 version is less fun than you think!",
         unlockLevel:10
     }

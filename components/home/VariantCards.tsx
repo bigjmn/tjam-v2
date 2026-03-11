@@ -8,6 +8,7 @@ import {
 	View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import ThemedText from "../ui/ThemedText";
 import ThemedButton from "../ui/ThemedButton";
@@ -17,51 +18,27 @@ import ThemedView from "../ui/ThemedView";
 const unlockedImage = require("../../assets/trioicon.png");
 const lockedImage = require("../../assets/trioicon copy.png");
 
-const lockedScrabbleSrc = require("../../assets/lockedscrabble.png")
-const lockedScrabbleDarkSrc = require("../../assets/lockedscrabbledark.png")
 const scrabbleSrc = require("../../assets/scrabble.png")
 const scrabbleDarkSrc = require("../../assets/scrabbledark.png")
 
-const lockedFoursSrc = require("../../assets/lockedfours.png")
-const lockedFoursDarkSrc = require("../../assets/lockedfoursdark.png")
 const foursSrc = require("../../assets/fours.png")
 const foursDarkSrc = require("../../assets/foursdark.png")
 
-const lockedFivelineSrc = require("../../assets/lockedfiveline.png")
-const lockedFivelineDarkSrc = require("../../assets/lockedfivelinedark.png")
 const fivelineSrc = require("../../assets/fiveline.png")
 const fivelineDarkSrc = require("../../assets/fivelinedark.png")
 
 const imDict = {
 	"scrabble": {
-		"dark": {
-			"unlocked": scrabbleDarkSrc,
-			"locked": lockedScrabbleDarkSrc
-		},
-		"light": {
-			"unlocked": scrabbleSrc,
-			"locked": lockedScrabbleSrc
-		}
+		"dark": scrabbleDarkSrc,
+		"light": scrabbleSrc,
 	},
 	"fours": {
-		"dark": {
-			"unlocked": foursDarkSrc,
-			"locked": lockedFoursDarkSrc
-		},
-		"light": {
-			"unlocked": foursSrc,
-			"locked": lockedFoursSrc
-		}
+		"dark": foursDarkSrc,
+		"light": foursSrc,
 	},
 	"fiveline": {
-		"dark": {
-			"unlocked": fivelineDarkSrc,
-			"locked": lockedFivelineDarkSrc
-		},
-		"light": {
-			"unlocked": fivelineSrc,
-			"locked": lockedFivelineSrc
-		}
+		"dark": fivelineDarkSrc,
+		"light": fivelineSrc,
 	},
 }
 type VariantCardConfig = {
@@ -139,10 +116,15 @@ export const VariantCards = () => {
 						>
 							<ThemedView style={styles.variantCard}>
 								<Image
-									source={isUnlocked ? imDict[variant.key][theme]["unlocked"] : imDict[variant.key][theme]["locked"]}
+									source={imDict[variant.key][theme]}
 									contentFit="cover"
 									style={styles.cardImage}
 								/>
+								{!isUnlocked && (
+									<View style={styles.lockBadge}>
+										<Ionicons name="lock-closed" size={16} color="#ffffff" />
+									</View>
+								)}
 								<View style={styles.nameOverlay}>
 									<ThemedText variant="header2" style={styles.nameText}>
 										{variant.name}
@@ -187,11 +169,18 @@ export const VariantCards = () => {
 									</ThemedText>
 
 									{/* Image on right */}
-									<Image
-										source={isUnlocked ? imDict[selectedVariant.key][theme]["unlocked"] : imDict[selectedVariant.key][theme]["locked"]}
-										contentFit="cover"
-										style={styles.modalImage}
-									/>
+									<View style={styles.modalImageContainer}>
+										<Image
+											source={imDict[selectedVariant.key][theme]}
+											contentFit="cover"
+											style={styles.modalImage}
+										/>
+										{!isUnlocked && (
+											<View style={styles.modalLockBadge}>
+												<Ionicons name="lock-closed" size={20} color="#ffffff" />
+											</View>
+										)}
+									</View>
 								</View>
 
 								{/* Button */}
@@ -235,6 +224,22 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 0,
 	},
+	lockBadge: {
+		position: "absolute",
+		top: 8,
+		right: 8,
+		backgroundColor: "rgba(0, 0, 0, 0.75)",
+		borderRadius: 12,
+		width: 28,
+		height: 28,
+		alignItems: "center",
+		justifyContent: "center",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 4,
+		elevation: 4,
+	},
 	nameOverlay: {
 		position: "absolute",
 		bottom: 0,
@@ -276,10 +281,31 @@ const styles = StyleSheet.create({
 		lineHeight: 20,
 		fontSize: 15,
 	},
+	modalImageContainer: {
+		position: "relative",
+		width: 100,
+		height: 100,
+	},
 	modalImage: {
 		width: 100,
 		height: 100,
 		borderRadius: 8,
+	},
+	modalLockBadge: {
+		position: "absolute",
+		top: 6,
+		right: 6,
+		backgroundColor: "rgba(0, 0, 0, 0.75)",
+		borderRadius: 16,
+		width: 36,
+		height: 36,
+		alignItems: "center",
+		justifyContent: "center",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 4,
+		elevation: 4,
 	},
 	playButton: {
 		alignSelf: "stretch",

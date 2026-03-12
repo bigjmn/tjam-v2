@@ -1,21 +1,21 @@
 {
 	"expo": {
 		"scheme": "triojamapp",
-		"name": "triojam-v2",
+		"name": "triojam",
 		"slug": "triojam-v2",
 		"version": "1.0.0",
 		"orientation": "portrait",
-		"icon": "./assets/icon.png",
+		"icon": "./assets/trioicon.png",
 		"userInterfaceStyle": "light",
 		"newArchEnabled": true,
 		"splash": {
-			"image": "./assets/splash-icon.png",
+			"image": "./assets/trioicon.png",
 			"resizeMode": "contain",
 			"backgroundColor": "#ffffff"
 		},
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.triojam.app",
+			"bundleIdentifier": "com.JNicks.TrioJam",
 			"usesAppleSignIn": true,
 			"infoPlist": {
 				"ITSAppUsesNonExemptEncryption": false,
@@ -44,7 +44,7 @@
 		"extra": {
 			"router": {},
 			"eas": {
-				"projectId": "309daaf6-9b18-4965-b660-b01021c38be0"
+				"projectId": "9770b0c7-3e80-4abc-bd19-63f2b94ff94d"
 			}
 		}
 	}

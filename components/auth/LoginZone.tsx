@@ -55,7 +55,7 @@ export const LoginZone = () => {
             <GoogleButton />
             <Spacer height={10} />
 
-            <AppleLoginButton />
+            {/* <AppleLoginButton /> */}
         </ThemedView>
     )
 }

@@ -3,7 +3,8 @@ import { useTheme } from "../hooks/useTheme";
 import ThemedView from "../components/ui/ThemedView";
 import { ThemeProvider } from "../providers/ThemeProvider";
 import { Stack } from "expo-router";
-import { UserProvider } from "../providers/UserProvider";
+// import { UserProvider } from "../providers/UserProvider";
+import { UserProvider } from "../providers/UserProviderFixed";
 import "react-native-reanimated";
 import {
   configureReanimatedLogger,

@@ -77,25 +77,44 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		let starCounter = 0;
 
 		// Track simulated state as we process achievements
-		// For scoring achievements, we need to track the highest threshold earned to determine next goals
-		// Use oldTopScore (before this game) for proper animation simulation
+		// IMPORTANT: We update simulatedTopScore INCREMENTALLY as we process scoring achievements
+		// This ensures the "next goal" animation shows the correct progression
+		// Example: score 45 earns doubledigits→dirty30 (NOT nifty50 twice!)
 		let simulatedTopScore = oldTopScore;
 		let simulatedAchievements = [...playerStats.achievementsWon];
 
-		// Find the highest scoring achievement threshold in earned keys to use as simulated top score
-		const earnedScoringAchievements = nextGoals
-			.map((key) => allAchievements.find((a) => a.key === key))
-			.filter((a): a is ScoringAchievement => a?.type === "scoring");
+		console.log('[ACHIEVEMENTS] Starting simulation:', {
+			oldTopScore,
+			earnedKeys: nextGoals,
+			currentAchievements: simulatedAchievements.length,
+		});
 
-		if (earnedScoringAchievements.length > 0) {
-			const highestThreshold = Math.max(
-				...earnedScoringAchievements.map((a) => a.scoreThreshhold),
-			);
-			simulatedTopScore = Math.max(simulatedTopScore, highestThreshold);
-		}
+		// Sort nextGoals achievements by their thresholds to ensure correct progression
+		// This is CRITICAL: scoring achievements must animate from lowest → highest
+		// Example: doubledigits (10) → dirty30 (30) → nifty50 (50)
+		const sortedNextGoals = [...nextGoals].sort((a, b) => {
+			const achA = allAchievements.find((ach) => ach.key === a);
+			const achB = allAchievements.find((ach) => ach.key === b);
+			if (!achA || !achB) return 0;
+
+			// Sort scoring achievements by scoreThreshhold
+			if (achA.type === "scoring" && achB.type === "scoring") {
+				return (achA as ScoringAchievement).scoreThreshhold - (achB as ScoringAchievement).scoreThreshhold;
+			}
+
+			// Sort streaking achievements by streakScore
+			if (achA.type === "streaking" && achB.type === "streaking") {
+				return (achA as StreakingAchievement).streakScore - (achB as StreakingAchievement).streakScore;
+			}
+
+			// Keep original order for other types
+			return 0;
+		});
+
+		console.log('[ACHIEVEMENTS] Sorted achievement order:', sortedNextGoals);
 
 		// Process Next Goals achievements
-		for (const key of nextGoals) {
+		for (const key of sortedNextGoals) {
 			const achievement = allAchievements.find((a) => a.key === key);
 			if (!achievement) continue;
 
@@ -103,6 +122,12 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			let category: "scoring" | "streaking" | "novelty" = "scoring";
 			if (achievement.type === "streaking") category = "streaking";
 			else if (achievement.type === "novelty") category = "novelty";
+
+			console.log(`[ACHIEVEMENTS] Processing ${category} achievement:`, {
+				key,
+				simulatedTopScore,
+				threshold: achievement.type === "scoring" ? (achievement as ScoringAchievement).scoreThreshhold : 'N/A',
+			});
 
 			// Mark achievement as won BEFORE filling stars
 			queue.push({
@@ -134,6 +159,14 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 			// Update simulated state
 			simulatedAchievements.push(key);
+
+			// FIX: Update simulatedTopScore for scoring achievements
+			// This ensures next goal calculation uses the correct progression
+			if (achievement.type === "scoring") {
+				const scoringAch = achievement as ScoringAchievement;
+				simulatedTopScore = Math.max(simulatedTopScore, scoringAch.scoreThreshhold);
+				console.log(`[ACHIEVEMENTS] Updated simulatedTopScore to ${simulatedTopScore}`);
+			}
 
 			// Check if this achievement progresses to a new goal
 			const nextGoalsAfterThis = achievements.getNextAchievements(

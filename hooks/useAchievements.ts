@@ -14,7 +14,7 @@ import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const DEBUG_SET = ["zootrip", "drdoubleword"]
+const DEBUG_SET:string[] = []
 export const useAchievements = () => {
 	const { playerStats } = useUser();
 	if (playerStats === null) return;

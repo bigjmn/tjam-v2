@@ -115,7 +115,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
 					{/* Content */}
 					<View style={styles.content}>
-						<UsernamePicker />
+						
 						<OptionsSwitches />
 						{!user?.isAnonymous && <ThemedButton style={{backgroundColor: colors.danger}} onPress={logout}>
 							<ThemedText style={{color:"white"}}>Log Out</ThemedText>

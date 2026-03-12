@@ -586,13 +586,13 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 						style={styles.completeButton}
 						onPress={onPlayAgain}
 					>
-						<ThemedText variant="strong">Play Again</ThemedText>
+						<ThemedText style={{color:"white"}} variant="strong">Play Again</ThemedText>
 					</ThemedButton>
 					<ThemedButton
 						style={styles.completeButton}
 						onPress={onGoHome}
 					>
-						<ThemedText variant="strong">Go Home</ThemedText>
+						<ThemedText style={{color:"white"}} variant="strong">Go Home</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 			)}
@@ -641,5 +641,6 @@ const styles = StyleSheet.create({
 		borderRadius: 12,
 		minWidth: 200,
 		alignItems: "center",
+		
 	},
 });

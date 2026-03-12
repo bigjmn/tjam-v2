@@ -16,7 +16,6 @@
 		"ios": {
 			"supportsTablet": true,
 			"bundleIdentifier": "com.JNicks.TrioJam",
-			"buildNumber": "3.1.0",
 			"usesAppleSignIn": true,
 			"infoPlist": {
 				"ITSAppUsesNonExemptEncryption": false,

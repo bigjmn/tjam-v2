@@ -19,7 +19,7 @@ const ProfileScreen = () => {
     if (!statsOb){
         return
     }
-    const { stats } = statsOb
+    const stats = statsOb.getStats()
     if (!stats) return 
 
     const {highScore, globalRank, dateJoined, points, level, title} = stats

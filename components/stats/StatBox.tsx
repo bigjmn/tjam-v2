@@ -72,7 +72,8 @@ const styles = StyleSheet.create({
 	statItem: {
 		flex: 1,
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'flex-end', // Align items to bottom of container
+		paddingBottom: 4, // Small padding for consistent spacing
 	},
 	statValue: {
 		color: '#ffffff',
@@ -82,8 +83,9 @@ const styles = StyleSheet.create({
 		marginBottom: 2,
 	},
 	statValueSmall: {
-		fontSize: 12,
+		fontSize: 15, // Increased from 12 to make it a bit bigger
 		fontWeight: '500',
+		marginBottom: 2, // Match the margin of regular values for alignment
 	},
 	statLabel: {
 		color: '#ffffff',

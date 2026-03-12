@@ -11,11 +11,7 @@ export const useStats = () => {
     const [stats, setStats] = useState<StatBoxProps|null>(null)
     const achieve = useAchievements()
 
-    useEffect(() => {
-        const sts = getStats()
-        setStats(sts)
-
-    }, [playerStats])
+    
     if (!achieve || ! playerStats){
         return null
     }

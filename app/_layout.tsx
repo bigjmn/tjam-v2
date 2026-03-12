@@ -31,18 +31,16 @@ const RootLayout = () => {
 						}}
 					>
 						<Stack.Screen
-							name="(auth)"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
 							name="(dashboard)"
 							options={{ headerShown: false }}
 						/>
-
 						<Stack.Screen
-							name="index"
-							options={{ title: "RootHome" }}
+							name="(auth)"
+							options={{ headerShown: false }}
 						/>
+						
+
+						
 					</Stack>
 				</ThemedView>
 			</UserProvider>

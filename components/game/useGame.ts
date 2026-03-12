@@ -7,6 +7,7 @@ import { useSfx } from "../../hooks/useSfx";
 import { turnLog } from "../../utils/loggers";
 import { threeLetterWords } from "../../assets/scrabbleWordList";
 import { useUser } from "../../hooks/useUser";
+import { useFirestore } from "../../hooks/useFirestore";
 export const useGame = (vKey?:VariantKey) => {
 	const { wooshSound, gearloadSound } = useSfx()
 	const { playerStats, updatePlayerStats } = useUser();
@@ -33,6 +34,7 @@ export const useGame = (vKey?:VariantKey) => {
 	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(new Set());
 
 	const router = useRouter();
+	const firehook = useFirestore()
 
 	const achieve = useAchievements();
 
@@ -263,6 +265,9 @@ export const useGame = (vKey?:VariantKey) => {
 				topScore: newTopScore,
 				numGames: playerStats.numGames + 1,
 			});
+			if (firehook){
+				firehook.addGame(gameTurns)
+			}
 		}
 
 		router.push({

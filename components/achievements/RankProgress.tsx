@@ -147,7 +147,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 				]}>
 					{/* Current Rank */}
 					<View style={styles.rankView}>
-						<ThemedText variant="header">{currentRank.name}</ThemedText>
+						<ThemedText variant="header" style={styles.rankName}>{currentRank.name}</ThemedText>
 						<DividerWithText text={`Level ${currentRank.level}`} />
 						<View style={styles.starsContainer}>
 							{starProgress.slice(0, totalStars).map((progress, index) => (
@@ -159,7 +159,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 					{/* Next Rank (visible during transition) */}
 					{nextRank && (
 						<View style={styles.rankView}>
-							<ThemedText variant="header">{nextRank.name}</ThemedText>
+							<ThemedText variant="header" style={styles.rankName}>{nextRank.name}</ThemedText>
 							<DividerWithText text={`Level ${nextRank.level}`} />
 							<View style={styles.starsContainer}>
 								{newRankStarProgress.slice(0, nextRank.starsToFill).map((progress, index) => (
@@ -221,6 +221,9 @@ const styles = StyleSheet.create({
 		width: SCREEN_WIDTH,
 		alignItems: "center",
 		paddingHorizontal: 16,
+	},
+	rankName: {
+		fontWeight: "700", // Make rank name bolder for better visibility
 	},
 	starsContainer: {
 		flexDirection: "row",

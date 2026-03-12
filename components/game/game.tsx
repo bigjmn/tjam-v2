@@ -448,7 +448,7 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 							onPress={handleCommitMove}
 							hitSlop={10}
 						>
-							<ThemedText variant="strong">Commit Move</ThemedText>
+							<ThemedText style={{color:"white"}} variant="strong">Commit Move</ThemedText>
 						</ThemedButton>
 						{/* <Pressable
 						disabled={!validBoard || !!inMotion}

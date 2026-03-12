@@ -19,7 +19,7 @@ export default function DashboardLayout() {
 				tabBarInactiveTintColor: colors.iconColor,
 			}}
 		>
-			<Tabs.Screen name="home" options={{ title: "Home", tabBarIcon: ({ focused }) => (
+			<Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ focused }) => (
 				<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "home" : "home-outline"} />
 			) }} />
 			<Tabs.Screen

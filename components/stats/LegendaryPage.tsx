@@ -26,7 +26,7 @@ export const LegendaryPage: React.FC = () => {
 					Legendary Achievements
 				</ThemedText>
 				<ThemedText variant="soft" style={styles.subtitle}>
-					{earnedCount}/4 earned
+					{earnedCount}/{legendaryAchievements.length} earned
 				</ThemedText>
 				<ScrollView
 					style={styles.scrollView}

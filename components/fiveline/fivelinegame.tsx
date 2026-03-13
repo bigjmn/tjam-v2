@@ -145,7 +145,7 @@ function Tile({
 			transform: transforms,
 			zIndex: isPressed.value ? 100 : 10,
 			backgroundColor: canMove
-				? colors.tileMovable
+				? "#85F2EB"
 				: partValid.includes(sitsOn.value)
 					? colors.tileValid
 					: colors.tileFrozen,
@@ -263,25 +263,14 @@ export default function FivelineGame() {
 
 	const confirmExit = async () => {
 		setShowExitModal(false);
-		if (playerStats) {
-			const gameRecord: GameRecord = {
-				timestamp: new Date(),
-				score: wordNum || 0,
-				abandoned: true,
-			};
-			const newGameHist = [...playerStats.gameHist, gameRecord];
-			await updatePlayerStats({
-				gameHist: newGameHist,
-				numGames: playerStats.numGames + 1,
-			});
-		}
+		// Variant games don't add to gameHist
 		handleAbandonGame();
 	};
 
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
-				<GameHeader onExitPress={() => setShowExitModal(true)} />
+				<GameHeader onExitPress={() => setShowExitModal(true)} headerName="1D-o Jam" />
 				<ExitConfirmModal
 					visible={showExitModal}
 					onCancel={() => setShowExitModal(false)}

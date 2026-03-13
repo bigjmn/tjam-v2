@@ -42,7 +42,8 @@ function Tile({
 	isHomeRowExiting,
 	shouldFlip,
 	shouldPinwheel,
-}: TileProps) {
+	movableTileColor,
+}: TileProps & { movableTileColor: string }) {
 	//active is tile is being moved
 	const isPressed = useSharedValue(false);
 	//tracking changed x, y for given move.
@@ -192,7 +193,7 @@ function Tile({
 			zIndex: isPressed.value ? 100 : 10,
 			//moveable tiles always tan. parts of word green, otherwise gray
 			backgroundColor: canMove
-				? colors.tileMovable
+				? movableTileColor
 				: partValid.includes(sitsOn.value)
 					? colors.tileValid
 					: colors.tileFrozen,
@@ -358,6 +359,10 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 
 	const { playerStats, updatePlayerStats } = useUser();
 	const [showExitModal, setShowExitModal] = useState(false);
+	const { colors } = useTheme();
+
+	// Determine tile color based on variant
+	const movableTileColor = vKey === "scrabble" ? "#F285D1" : colors.tileMovable;
 
 	useFocusEffect(
 		useCallback(() => {
@@ -376,8 +381,8 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 	const confirmExit = async () => {
 		setShowExitModal(false);
 
-		// Save abandoned game record
-		if (playerStats) {
+		// Only add to gameHist for classic games (not variants)
+		if (playerStats && !vKey) {
 			const gameRecord: GameRecord = {
 				timestamp: new Date(),
 				score: wordNum || 0,
@@ -392,13 +397,13 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 			});
 		}
 
-		handleAbandonGame();
+		await handleAbandonGame();
 	};
 
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
-				<GameHeader onExitPress={openExitModal} />
+				<GameHeader onExitPress={openExitModal} headerName={vKey === "scrabble" ? "ScrabWord Jam" : "Trio Jam"} />
 				<ExitConfirmModal
 					visible={showExitModal}
 					onCancel={closeExitModal}
@@ -431,6 +436,7 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 										isHomeRowExiting={tile.isHomeRowExiting}
 										shouldFlip={flippingTileIds.has(tile.id)}
 										shouldPinwheel={pinwheelingTileIds.has(tile.id)}
+										movableTileColor={movableTileColor}
 									/>
 								))}
 						</ThemedView>

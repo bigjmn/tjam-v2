@@ -53,10 +53,10 @@ type VariantCardConfig = {
 const VARIANTS: VariantCardConfig[] = [
 	{
 		key: "scrabble",
-		name: "Scrabble",
+		name: "ScrabWord Jam",
 		rules:
 			"If you've been cursing me for my word list, curse no longer. This version has a word list suspiciously similar to one owned by Hasbro, and has all the archaic words you can hope for.",
-		unlockLevel: 3,
+		unlockLevel: 5,
 		playPath: "/scrabble",
 		
 	},
@@ -65,7 +65,7 @@ const VARIANTS: VariantCardConfig[] = [
 		name: "1D-o Jam",
 		rules:
 			"Same rules, fewer dimensions baby",
-		unlockLevel: 5,
+		unlockLevel: 7,
 		playPath: "/fiveline",
 	},
 	{
@@ -189,7 +189,7 @@ export const VariantCards = () => {
 									onPress={handlePlay}
 									disabled={!isUnlocked}
 								>
-									<ThemedText variant="strong">
+									<ThemedText variant="strong" style={{ color: '#ffffff' }}>
 										{isUnlocked ? "Play" : `Unlocks at level ${selectedVariant.unlockLevel}`}
 									</ThemedText>
 								</ThemedButton>

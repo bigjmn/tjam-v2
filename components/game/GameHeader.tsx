@@ -5,13 +5,14 @@ import { StyleSheet } from "react-native";
 
 interface GameHeaderProps {
 	onExitPress: () => void;
+	headerName:string;
 }
 
-export const GameHeader = ({ onExitPress }: GameHeaderProps) => {
+export const GameHeader = ({ onExitPress, headerName }: GameHeaderProps) => {
 	return (
 		<ThemedView style={styles.gameHeader}>
 			<ThemedView />
-			<ThemedText variant="header">Trio Jam</ThemedText>
+			<ThemedText variant="header">{headerName}</ThemedText>
 			<MenuTest onExitPress={onExitPress} />
 		</ThemedView>
 	);

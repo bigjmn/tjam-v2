@@ -10,9 +10,10 @@ export const useFirestore = () => {
         const uid = user.uid 
         const docref = collection(firestore, "games", uid, "history")
         try {
-            addDoc(docref, {gameTurns:gameTurns, dateAdded:(new Date().toTimeString())})
+            await addDoc(docref, {gameTurns:gameTurns, dateAdded:(new Date().toTimeString())})
+            console.log("🔥 [Firestore] ✓ Game saved successfully")
         } catch (e){
-            console.log(e)
+            console.log("🔥 [Firestore] ❌ Failed to save game:", e)
         }
 
     }

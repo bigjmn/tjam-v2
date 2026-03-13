@@ -20,7 +20,11 @@
     },
     "production": {
       "environment": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_WEB_ID": "69866138009-h77bgl4en8rqo6b7f2ieiv0hhuf4sbsi.apps.googleusercontent.com",
+        "EXPO_PUBLIC_IOS_ID": "69866138009-ife8ui5n34uhgur4mqcsmjeol5s4o9nl.apps.googleusercontent.com"
+      }
     }
   },
   "submit": {

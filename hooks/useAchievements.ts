@@ -9,7 +9,7 @@ import {
 	ranksList,
 } from "../utils/achievements";
 import { animals, bodyParts } from "../constants/SpecialWords";
-import { groupFreq, bareBilly, getDailyWord, luckyThirteen } from "../utils/helpers";
+import { groupFreq, bareBilly, getDailyWord, luckyThirteen, halfLooper, adults, papaya, doubleTake, tripleTake } from "../utils/helpers";
 import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -108,6 +108,18 @@ export const useAchievements = () => {
 		}
 		if (bodyParts.filter(b => allWordsMade.includes(b)).length >= 5){
 			allAchievements.push('bodyshop')
+		}
+		if (halfLooper(turns)){
+			allAchievements.push('halflooper')
+		}
+		if (papaya(turns)){
+			allAchievements.push('papaya')
+		}
+		if (doubleTake(turns)){
+			allAchievements.push('doubletake')
+		}
+		if (tripleTake(turns)){
+			allAchievements.push('tripletake')
 		}
 
 
@@ -216,14 +228,15 @@ export const useAchievements = () => {
 			(na) => !wonAchievements.includes(na.key),
 		)[0];
 
-		if (!nextScoringGoal || !nextStreakingGoal || !nextNoveltyGoal) {
+		// Return null only if ALL categories are complete
+		if (!nextScoringGoal && !nextStreakingGoal && !nextNoveltyGoal) {
 			return null;
 		}
 
 		return {
-			scoring: nextScoringGoal,
-			streaking: nextStreakingGoal,
-			novelty: nextNoveltyGoal,
+			scoring: nextScoringGoal || undefined,
+			streaking: nextStreakingGoal || undefined,
+			novelty: nextNoveltyGoal || undefined,
 		};
 	};
 

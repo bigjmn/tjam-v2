@@ -17,9 +17,9 @@ import { useUser } from "../../hooks/useUser";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface NextGoalsBlockProps {
-	scoringAchievement: Achievement;
-	streakingAchievement: Achievement;
-	noveltyAchievement: Achievement;
+	scoringAchievement?: Achievement;
+	streakingAchievement?: Achievement;
+	noveltyAchievement?: Achievement;
 	dailyWordAchievement?: DailyWordAchievement;
 	dailyWordWon?: boolean;
 }
@@ -282,21 +282,27 @@ export const NextGoalsBlock = forwardRef<
 				Next Goals
 			</ThemedText>
 
-			<Animated.View style={[styles.tileWrapper, scoringAnimatedStyle]}>
-				<AchievementTile achievement={scoring} isWon={scoringWon} />
-			</Animated.View>
+			{scoring && (
+				<Animated.View style={[styles.tileWrapper, scoringAnimatedStyle]}>
+					<AchievementTile achievement={scoring} isWon={scoringWon} />
+				</Animated.View>
+			)}
 
-			<Animated.View style={[styles.tileWrapper, streakingAnimatedStyle]}>
-				<AchievementTile
-				achievement={streaking}
-				isWon={streakingWon}
-				streakProgress={streakProgress}
-			/>
-			</Animated.View>
+			{streaking && (
+				<Animated.View style={[styles.tileWrapper, streakingAnimatedStyle]}>
+					<AchievementTile
+					achievement={streaking}
+					isWon={streakingWon}
+					streakProgress={streakProgress}
+				/>
+				</Animated.View>
+			)}
 
-			<Animated.View style={[styles.tileWrapper, noveltyAnimatedStyle]}>
-				<AchievementTile achievement={novelty} isWon={noveltyWon} />
-			</Animated.View>
+			{novelty && (
+				<Animated.View style={[styles.tileWrapper, noveltyAnimatedStyle]}>
+					<AchievementTile achievement={novelty} isWon={noveltyWon} />
+				</Animated.View>
+			)}
 
 			{dailyWordAchievement && (
 				<View style={styles.tileWrapper}>

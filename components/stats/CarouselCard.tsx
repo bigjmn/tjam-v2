@@ -140,12 +140,21 @@ const styles = StyleSheet.create({
 		maxHeight: 60,
 	},
 	chip: {
-		paddingHorizontal: 4,
-		paddingVertical: 8,
-		borderRadius: 20,
+		paddingHorizontal: 16,
+		paddingVertical: 10,
+		borderRadius: 12,
 		minWidth: 40,
 		alignItems: "center",
 		justifyContent: "center",
+		// Elevation/Shadow
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.15,
+		shadowRadius: 3,
+		elevation: 3,
 	},
 	chipText: {
 		fontSize: 14,

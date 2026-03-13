@@ -179,16 +179,19 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 				if (
 					category === "scoring" &&
+					nextGoalsAfterThis.scoring &&
 					achievement.key !== nextGoalsAfterThis.scoring.key
 				) {
 					newAchievement = nextGoalsAfterThis.scoring;
 				} else if (
 					category === "streaking" &&
+					nextGoalsAfterThis.streaking &&
 					achievement.key !== nextGoalsAfterThis.streaking.key
 				) {
 					newAchievement = nextGoalsAfterThis.streaking;
 				} else if (
 					category === "novelty" &&
+					nextGoalsAfterThis.novelty &&
 					achievement.key !== nextGoalsAfterThis.novelty.key
 				) {
 					newAchievement = nextGoalsAfterThis.novelty;
@@ -412,6 +415,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 			// Exit Next Goals block
 			console.log('[ACHIEVEMENTS] Exiting next goals block');
+			await delay(2000); // 2 second delay before exit
 			setPhase("next-goals-exit");
 			await nextGoalsRef.current?.exit();
 			await delay(200);
@@ -448,6 +452,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			}
 
 			console.log('[ACHIEVEMENTS] Exiting legendary block');
+			await delay(2000); // 2 second delay before exit
 			setPhase("legendary-exit");
 			await legendaryRef.current?.exit();
 			await delay(200);
@@ -487,6 +492,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				}
 			}
 			console.log('[ACHIEVEMENTS] Exiting secret block');
+			await delay(2000); // 2 second delay before exit
 			setPhase("secret-exit");
 			await secretRef.current?.exit();
 			await delay(200);

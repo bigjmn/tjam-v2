@@ -13,11 +13,11 @@ const variantList:GameVariant[] = [
         key: "fiveline",
         name: "1D-o Jam",
         rules: "Same rules, fewer dimensions baby",
-        unlockLevel:5
+        unlockLevel:7
     },
     {
         key: "fours",
-        name: "Quad Jam     ",
+        name: "Quatro Jam ",
         rules: "This 4x4 version is less fun than you think!",
         unlockLevel:10
     }

@@ -26,7 +26,7 @@ export const SecretPage: React.FC = () => {
 					Secret Achievements
 				</ThemedText>
 				<ThemedText variant="soft" style={styles.subtitle}>
-					{earnedCount}/2 discovered
+					{earnedCount}/{secretAchievements.length} discovered
 				</ThemedText>
 				<ScrollView
 					style={styles.scrollView}

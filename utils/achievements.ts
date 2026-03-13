@@ -117,6 +117,111 @@ export const scoringAchievements: ScoringAchievement[] = [
 		scoreThreshhold: 321,
 		reward: 5,
 	},
+	{
+		key: "cooper",
+		name: "Anderson Cooper 360",
+		explainer: "Reach a high score of 360 or above",
+		type: "scoring",
+		scoreThreshhold: 360,
+		reward: 5
+	},
+	{
+		key: "drupetrip",
+		name: "The Ol' Drupe-Trip",
+		explainer: "Reach a high score of 400 or above",
+		type: "scoring",
+		scoreThreshhold: 400,
+		reward: 6
+	},
+	{
+    key: "blazeit",
+    name: "Blaze It",
+    explainer: "Reach a high score of 420 or above",
+    type: "scoring",
+    scoreThreshhold: 420,
+    reward: 6
+  },
+
+  {
+    key: "quinttrip",
+    name: "The Ol' Quint-Trip",
+    explainer: "Reach a high score of 500 or above",
+    type: "scoring",
+    scoreThreshhold: 500,
+    reward: 7
+  },
+
+  {
+    key: "natesilver",
+    name: "Nate Silver",
+    explainer: "Reach a high score of 538 or above",
+    type: "scoring",
+    scoreThreshhold: 538,
+    reward: 7
+  },
+
+  {
+    key: "sextrip",
+    name: "The Ol' Sex-Trip",
+    explainer: "Reach a high score of 600 or above",
+    type: "scoring",
+    scoreThreshhold: 600,
+    reward: 8
+  },
+
+  {
+    key: "bostonstrong",
+    name: "Boston Strong",
+    explainer: "Reach a high score of 617 or above",
+    type: "scoring",
+    scoreThreshhold: 617,
+    reward: 8
+  },
+
+  {
+    key: "numberofthebeast",
+    name: "Number of the Beast",
+    explainer: "Reach a high score of 666 or above",
+    type: "scoring",
+    scoreThreshhold: 666,
+    reward: 9
+  },
+
+  {
+    key: "septtrip",
+    name: "The Ol' Sept-Trip",
+    explainer: "Reach a high score of 700 or above",
+    type: "scoring",
+    scoreThreshhold: 700,
+    reward: 9
+  },
+
+  {
+    key: "tonyhawkproscore",
+    name: "Tony Hawk Pro Score",
+    explainer: "Reach a high score of 720 or above",
+    type: "scoring",
+    scoreThreshhold: 720,
+    reward: 9
+  },
+
+  {
+    key: "jumbojet",
+    name: "Jumbo Jet",
+    explainer: "Reach a high score of 747 or above",
+    type: "scoring",
+    scoreThreshhold: 747,
+    reward: 9
+  },
+
+  {
+    key: "jackpot",
+    name: "Jackpot",
+    explainer: "Reach a high score of 777 or above",
+    type: "scoring",
+    scoreThreshhold: 777,
+    reward: 10
+  }
 ];
 
 export const streakingAchievements: StreakingAchievement[] = [
@@ -196,14 +301,6 @@ export const streakingAchievements: StreakingAchievement[] = [
 
 export const noveltyAchievements: NoveltyAchievement[] = [
 	{
-		key: "drdoubleword",
-		name: "Dr. Doubleword",
-		explainer: "Make the same word two ways in one turn",
-		type: "novelty",
-		reward: 3,
-	},
-
-	{
 		key: "qclear",
 		name: "Q Slayer",
 		explainer: "Clear a Q from the board",
@@ -216,6 +313,13 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		explainer: "Clear 6 tiles in one turn",
 		type: "novelty",
 		reward: 2,
+	},
+	{
+		key: "drdoubleword",
+		name: "Dr. Doubleword",
+		explainer: "Make the same word two ways in one turn",
+		type: "novelty",
+		reward: 3,
 	},
 	{
 		key: "bareboard",
@@ -231,6 +335,34 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		explainer: "Get the words EWE, YOU, and YEW in a single game",
 		type: "novelty",
 		reward: 3,
+	},
+	{
+		key: "doubletake",
+		name: "Double Take",
+		explainer: "Make the same word twice in a row",
+		type: "novelty",
+		reward: 3
+	},
+	{
+		key: "bodyshop",
+		name: "The Body Shop",
+		explainer: "Clear five body parts in one game",
+		type: "novelty",
+		reward: 4
+	},
+	{
+		key: "papaya",
+		name: "No way, a papaya won!",
+		explainer: "Clear 10 palindromes",
+		type: "novelty",
+		reward: 4
+	},
+	{
+		key: "tripletake",
+		name: "Triple Take",
+		explainer: "Make the same word thrice in one game",
+		type: "novelty",
+		reward: 5
 	},
 ];
 
@@ -259,6 +391,14 @@ export const legendaryAchievements: LegendaryAchievement[] = [
 		reward: 20,
 	},
 	{
+		key: "halflooper",
+		name: "Half Looper",
+		explainer: "Make it through half the word list",
+		type: "legendary",
+		reward: 25
+
+	},
+	{
 		key: "looper",
 		name: "Looper",
 		explainer: "Make it through the entire word list",
@@ -267,6 +407,13 @@ export const legendaryAchievements: LegendaryAchievement[] = [
 	},
 ];
 export const secretAchievements: SecretAchievement[] = [
+	{
+		key: "zootrip",
+		name: "Trip to the Zoo",
+		explainer: "Clear three animals in one game",
+		type: "secret",
+		reward: 1,
+	},
 	{
 		key: "allmyletters",
 		name: "All My Letters",
@@ -287,21 +434,13 @@ export const secretAchievements: SecretAchievement[] = [
 		explainer: "Clear numbers adding up to 13",
 		type: "secret",
 		reward: 4
-
 	},
 	{
-		key: "zootrip",
-		name: "Trip to the Zoo",
-		explainer: "Clear three animals in one game",
+		key: "adults",
+		name: "Adults Only",
+		explainer: "Clear 3 X's in one game",
 		type: "secret",
-		reward: 1,
-	},
-	{
-		key: "bodyshop",
-		name: "The Body Shop",
-		explainer: "Clear five body parts in one game",
-		type: "secret",
-		reward: 2
+		reward: 5
 	}
 ];
 

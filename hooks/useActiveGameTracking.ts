@@ -106,23 +106,27 @@ export function useActiveGameTracking() {
           isWordOfDay: activeGame.isWordOfDay,
         });
 
-        // Create abandoned game record
-        const abandonedRecord: GameRecord = {
-          timestamp: new Date(), // Current time, not start time
-          score: 0, // No score for abandoned games
-          abandoned: true,
-        };
+        // Only create abandoned record for classic games (no variant)
+        if (!activeGame.variant) {
+          const abandonedRecord: GameRecord = {
+            timestamp: new Date(), // Current time, not start time
+            score: 0, // No score for abandoned games
+            abandoned: true,
+          };
 
-        const newGameHist = [...playerStats.gameHist, abandonedRecord];
+          const newGameHist = [...playerStats.gameHist, abandonedRecord];
 
-        console.log("🎮 [GameTracking] Creating abandoned game record to break streak");
+          console.log("🎮 [GameTracking] Creating abandoned game record");
 
-        await updatePlayerStats({
-          gameHist: newGameHist,
-          numGames: playerStats.numGames + 1,
-        });
+          await updatePlayerStats({
+            gameHist: newGameHist,
+            numGames: playerStats.numGames + 1,
+          });
+        } else {
+          console.log("🎮 [GameTracking] Skipping abandoned record - was variant:", activeGame.variant);
+        }
 
-        // Clear the orphaned game
+        // Always clear the orphaned game flag
         await AsyncStorage.removeItem(ACTIVE_GAME_KEY);
         console.log("🎮 [GameTracking] ✓ Orphaned game cleared");
       } else {

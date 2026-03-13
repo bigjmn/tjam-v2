@@ -57,7 +57,7 @@ function Tile({
 	// const opacity = useSharedValue(isNew ? 0 : 1);
 	//id of the square the tile is on
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
-	const { popSound, gearloadSound } = useSfx();
+	const { popSound } = useSfx();
 
 	// Animation values for flip and pinwheel
 	const rotateY = useSharedValue(0);
@@ -73,7 +73,7 @@ function Tile({
 
 	// Entrance animation for new home row tiles
 	useEffect(() => {
-		gearloadSound()
+		
 		if (isNew && starty === 0) {
 			const delay = 400
 			// const delay = startx * STAGGER;
@@ -379,30 +379,14 @@ export default function Game() {
 
 	const confirmExit = async () => {
 		setShowExitModal(false);
-
-		// Save abandoned game record
-		if (playerStats) {
-			const gameRecord: GameRecord = {
-				timestamp: new Date(),
-				score: wordNum || 0,
-				abandoned: true,
-			};
-
-			const newGameHist = [...playerStats.gameHist, gameRecord];
-
-			await updatePlayerStats({
-				gameHist: newGameHist,
-				numGames: playerStats.numGames + 1,
-			});
-		}
-
+		// Variant games don't add to gameHist
 		handleAbandonGame();
 	};
 
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
-				<GameHeader onExitPress={openExitModal} />
+				<GameHeader onExitPress={openExitModal} headerName="Quatro Jam" />
 				<ExitConfirmModal
 					visible={showExitModal}
 					onCancel={closeExitModal}

@@ -4,12 +4,26 @@ import {
 	GoogleSigninButton,
 } from "@react-native-google-signin/google-signin";
 import { GoogleAuthProvider } from "firebase/auth";
+
+// Defensive check: Ensure env variables are loaded
+const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_WEB_ID;
+const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_IOS_ID;
+
+if (!WEB_CLIENT_ID || !IOS_CLIENT_ID) {
+	console.error("🔴 [GoogleAuth] CRITICAL: Missing Google OAuth credentials!");
+	console.error("🔴 [GoogleAuth] WEB_CLIENT_ID:", WEB_CLIENT_ID ? "✓" : "❌ MISSING");
+	console.error("🔴 [GoogleAuth] IOS_CLIENT_ID:", IOS_CLIENT_ID ? "✓" : "❌ MISSING");
+	console.error("🔴 [GoogleAuth] App will crash if Google Sign-In is attempted!");
+} else {
+	console.log("✅ [GoogleAuth] Google OAuth credentials loaded successfully");
+}
+
 GoogleSignin.configure({
-	webClientId: process.env.EXPO_PUBLIC_WEB_ID,
+	webClientId: WEB_CLIENT_ID,
 	scopes: ["profile", "email"], // what API you want to access on behalf of the user, default is email and profile
 	offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
 	forceCodeForRefreshToken: false,
-	iosClientId: process.env.EXPO_PUBLIC_IOS_ID,
+	iosClientId: IOS_CLIENT_ID,
 });
 
 const GoogleLogin = async () => {

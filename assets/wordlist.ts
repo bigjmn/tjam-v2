@@ -238,7 +238,7 @@ const wordlist: string[] = [
 	"HIP",
 	"HIS",
 	"HIT",
-	"HMM",
+	
 	"HOB",
 	"HOD",
 	"HOE",
@@ -274,7 +274,6 @@ const wordlist: string[] = [
 	"JAW",
 	"JAY",
 	"JET",
-	"JEW",
 	"JIG",
 	"JOB",
 	"JOG",

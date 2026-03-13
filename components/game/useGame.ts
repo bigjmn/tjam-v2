@@ -8,6 +8,7 @@ import { turnLog } from "../../utils/loggers";
 import { threeLetterWords } from "../../assets/scrabbleWordList";
 import { useUser } from "../../hooks/useUser";
 import { useFirestore } from "../../hooks/useFirestore";
+import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
 export const useGame = (vKey?:VariantKey) => {
 	const { wooshSound, gearloadSound } = useSfx()
 	const { playerStats, updatePlayerStats } = useUser();
@@ -37,6 +38,7 @@ export const useGame = (vKey?:VariantKey) => {
 	const firehook = useFirestore()
 
 	const achieve = useAchievements();
+	const { startTracking, endTracking } = useActiveGameTracking();
 
 	const checkSquareArr = (arr: string[]) => {
 		let rowword = "";
@@ -184,7 +186,7 @@ export const useGame = (vKey?:VariantKey) => {
 			setTiles(newboard);
 
 			if (newboard.length >= 11) {
-				handleGameEnd();
+				endGame();
 			}
 		}, 500); // Wait for staggered exit animations to complete
 	};
@@ -236,14 +238,22 @@ export const useGame = (vKey?:VariantKey) => {
 	const handleScrabbleVariantEnd = () => {
 		setGameActive(false)
 		const newScore = gameTurns.length 
+		const varscore:VariantScore = { score: newScore, variant:"scrabble"}
+		const scoreInfo = JSON.stringify(varscore)
 		router.push({
-			pathname: "/scrabbleresults",
-			params: { newScore }
+			pathname: "/variantresults",
+			params: { scoreJson: scoreInfo }
 		})
 	}
 
 	const handleGameEnd = async () => {
 		setGameActive(false)
+
+		// End tracking for classic games
+		if (!vKey) {
+			await endTracking();
+		}
+
 		const newAchievements = achieve!.gameAchievements(gameTurns);
 
 		// Capture old top score before updating
@@ -266,7 +276,7 @@ export const useGame = (vKey?:VariantKey) => {
 				numGames: playerStats.numGames + 1,
 			});
 			if (firehook){
-				firehook.addGame(gameTurns)
+				firehook.addGame(gameTurns)  // Fire-and-forget, don't block navigation
 			}
 		}
 
@@ -280,7 +290,11 @@ export const useGame = (vKey?:VariantKey) => {
 		});
 	};
 
-	const handleAbandonGame = () => {
+	const handleAbandonGame = async () => {
+		// End tracking when user abandons via menu
+		if (!vKey) {
+			await endTracking();
+		}
 		router.push("/(dashboard)/home");
 	};
 
@@ -290,6 +304,11 @@ export const useGame = (vKey?:VariantKey) => {
 		setWordList(vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist));
 		setWordNum(0);
 		setGameTurns([]);
+
+		// Track game start for crash detection (classic games only)
+		if (!vKey) {
+			startTracking();
+		}
 	};
 
 	const givePos = (id: string, pos: string) => {

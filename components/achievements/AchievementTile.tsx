@@ -57,7 +57,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 					<View style={styles.titleRow}>
 						<ThemedText
 							variant="strong"
-
+							style={isWon ? { color: '#ffffff' } : undefined}
 						>
 							{title}
 						</ThemedText>
@@ -71,7 +71,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 						variant="soft"
 						style={
 							isWon
-								? [styles.explainer, { color: colors.primarySoft }] :
+								? [styles.explainer, { color: 'rgba(255, 255, 255, 0.85)' }] :
 								isPlaceholder ? [styles.explainer, {fontStyle: "italic"}]
 								: styles.explainer
 						}

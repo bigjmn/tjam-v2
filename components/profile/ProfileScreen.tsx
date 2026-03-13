@@ -40,7 +40,7 @@ const ProfileScreen = () => {
         />
       </Pressable>
 
-      <ThemedText variant='header'>ProfileScreen</ThemedText>
+      
       <UsernamePicker />
 
       <StatBox highScore={highScore} globalRank={globalRank} dateJoined={dateJoined} points={points} level={level} title={title} />

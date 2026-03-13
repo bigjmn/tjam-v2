@@ -6,6 +6,7 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import moment from "moment";
+import wordlist from "../assets/wordlist";
 
 const wordDates = require("../assets/wordDates.json");
 //fisher-yates shuffle
@@ -349,7 +350,7 @@ export const wodPct = (startDate: Date, achievements: string[]) => {
   if (dates.length === 0) {
     return 0;
   }
-  const latestDate = dates[-1];
+  const latestDate = dates[dates.length-1];
   const currDate = new Date();
   const todayInclude = moment(currDate).isSame(latestDate);
   let totalDays = moment(currDate).diff(startDate, "days");
@@ -361,4 +362,95 @@ export const wodPct = (startDate: Date, achievements: string[]) => {
   }
   console.log(totalDays)
   return 100 * (dates.length / totalDays);
+};
+
+/**
+ * Check if the same word was made twice in a row (consecutive turns)
+ */
+export const doubleTake = (turns: TurnInfo[]): boolean => {
+  if (turns.length < 2) return false;
+
+  for (let i = 0; i < turns.length - 1; i++) {
+    const currentWords = turns[i].wordsMade;
+    const nextWords = turns[i + 1].wordsMade;
+
+    // Check if any word from current turn appears in next turn
+    for (const word of currentWords) {
+      if (nextWords.includes(word)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Check if the same word was made three times in a single game
+ */
+export const tripleTake = (turns: TurnInfo[]): boolean => {
+  if (turns.length < 3) return false;
+
+  // Collect all words made throughout the game with their counts
+  const wordCounts: Record<string, number> = {};
+
+  for (const turn of turns) {
+    for (const word of turn.wordsMade) {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+      if (wordCounts[word] >= 3) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Check if a word is a palindrome
+ */
+const isPalindrome = (word: string): boolean => {
+  return word === word.split('').reverse().join('');
+};
+
+/**
+ * Check if 10 or more DIFFERENT palindromes were cleared in the game
+ */
+export const papaya = (turns: TurnInfo[]): boolean => {
+  const uniquePalindromes = new Set<string>();
+
+  for (const turn of turns) {
+    for (const word of turn.wordsMade) {
+      if (isPalindrome(word)) {
+        uniquePalindromes.add(word);
+      }
+    }
+  }
+
+  return uniquePalindromes.size >= 10;
+};
+
+/**
+ * Check if the player made it through half of the word list
+ */
+export const halfLooper = (turns: TurnInfo[]): boolean => {
+  const HALF_WORDLIST = Math.floor(wordlist.length / 2);
+  return turns.length >= HALF_WORDLIST;
+};
+
+/**
+ * Check if 3 or more X's were cleared in the game (Adults Only achievement)
+ */
+export const adults = (turns: TurnInfo[]): boolean => {
+  let xCount = 0;
+
+  for (const turn of turns) {
+    for (const letter of turn.lettersCleared) {
+      if (letter === 'X') {
+        xCount++;
+      }
+    }
+  }
+
+  return xCount >= 3;
 };

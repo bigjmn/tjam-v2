@@ -6,7 +6,7 @@
 		"version": "3.1.0",
 		"orientation": "portrait",
 		"icon": "./assets/trioicon.png",
-		"userInterfaceStyle": "light",
+		"userInterfaceStyle": "dark",
 		"newArchEnabled": true,
 		"splash": {
 			"image": "./assets/trioicon.png",

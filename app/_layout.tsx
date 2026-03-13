@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, StatusBar } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import ThemedView from "../components/ui/ThemedView";
 import { ThemeProvider } from "../providers/ThemeProvider";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 // import { UserProvider } from "../providers/UserProvider";
 import { UserProvider } from "../providers/UserProviderFixed";
 import "react-native-reanimated";
@@ -21,7 +22,7 @@ const RootLayout = () => {
 	return (
 		<ThemeProvider>
 			<UserProvider>
-				<StatusBar />
+				<StatusBar style="auto" />
 				<ThemedView safe={true} style={{ flex: 1 }}>
 					<Stack
 						screenOptions={{

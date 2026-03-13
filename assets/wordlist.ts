@@ -737,5 +737,8 @@ const wordlist: string[] = [
 	"ZED",
 	"ZEE",
 	"ZEN",
+	"MEH",
+	"LAT",
+	"HUN",
 ];
 export default wordlist;

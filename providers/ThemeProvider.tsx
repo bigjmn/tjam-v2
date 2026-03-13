@@ -54,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 				setTheme(savedTheme);
 			} else {
 				// Use system theme as default if no saved theme
-				setTheme(systemColorScheme || "light");
+				setTheme(systemColorScheme || "dark");
 			}
 		} catch (error) {
 			console.error("Failed to load theme:", error);

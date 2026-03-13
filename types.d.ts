@@ -25,6 +25,7 @@ interface TileProps {
 	shouldPinwheel: boolean;
 	isNew?: boolean;
 	isHomeRowExiting?: boolean;
+	noFlash?: boolean;
 }
 
 type ThemeStyle = "light" | "dark";

@@ -45,7 +45,7 @@ export default function OptionSwitches() {
 									: colors.background,
 						}}
 					>
-						<ThemedText variant="medium">Light</ThemedText>
+						<ThemedText style={{backgroundColor: theme === "light" ? "white" : colors.text}} variant="medium">Light</ThemedText>
 					</ThemedButton>
 					<ThemedButton
 						onPress={() => toggleTo("dark")}
@@ -62,7 +62,7 @@ export default function OptionSwitches() {
 									: colors.background,
 						}}
 					>
-						<ThemedText variant="medium">Dark</ThemedText>
+						<ThemedText style={{backgroundColor: theme === "dark" ? "white" : colors.text}} variant="medium">Dark</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 				{theme === "light" && (
@@ -91,7 +91,7 @@ export default function OptionSwitches() {
 								: colors.background,
 						}}
 					>
-						<ThemedText variant="medium">On</ThemedText>
+						<ThemedText style={{backgroundColor: sfxOn ? "white" : colors.text}} variant="medium">On</ThemedText>
 					</ThemedButton>
 					<ThemedButton
 						onPress={() => turnOffSound()}
@@ -107,7 +107,7 @@ export default function OptionSwitches() {
 								: colors.primary,
 						}}
 					>
-						<ThemedText variant="medium">Off</ThemedText>
+						<ThemedText style={{backgroundColor: sfxOn ? colors.text : "white"}} variant="medium">Off</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 				{sfxOn && (

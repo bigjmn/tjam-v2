@@ -43,6 +43,7 @@ function Tile({
 	shouldFlip,
 	shouldPinwheel,
 	movableTileColor,
+	noFlash
 }: TileProps & { movableTileColor: string }) {
 	//active is tile is being moved
 	const isPressed = useSharedValue(false);
@@ -192,7 +193,7 @@ function Tile({
 			//moveable tiles always tan. parts of word green, otherwise gray
 			backgroundColor: canMove
 				? movableTileColor
-				: partValid.includes(sitsOn.value)
+				: (partValid.includes(sitsOn.value) && !noFlash)
 					? colors.tileValid
 					: colors.tileFrozen,
 			// opacity: opacity.value,
@@ -437,7 +438,9 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 										canMove={
 											tile.canMove &&
 											tile.id != frozenHome
+											
 										}
+										noFlash={isAnimating}
 										isNew={tile.isNew}
 										isHomeRowExiting={tile.isHomeRowExiting}
 										shouldFlip={flippingTileIds.has(

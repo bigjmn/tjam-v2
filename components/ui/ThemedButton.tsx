@@ -13,12 +13,12 @@ interface UnderlinedButtonProps {
 	[key: string]: any;
 }
 function ThemedButton({ style, ...props }: ThemedButtonProps) {
-	const { colors } = useTheme()
+	const { colors } = useTheme();
 	return (
 		<Pressable
 			style={({ pressed }) => [
 				styles.btn,
-				{backgroundColor: colors.primary},
+				{ backgroundColor: colors.primary },
 				pressed && styles.pressed,
 				style,
 			]}
@@ -57,7 +57,6 @@ export function UnderlinedButton({
 }
 const styles = StyleSheet.create({
 	btn: {
-		
 		padding: 10,
 		borderRadius: 6,
 		marginVertical: 5,

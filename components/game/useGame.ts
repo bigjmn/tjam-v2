@@ -9,11 +9,17 @@ import { threeLetterWords } from "../../assets/scrabbleWordList";
 import { useUser } from "../../hooks/useUser";
 import { useFirestore } from "../../hooks/useFirestore";
 import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
-export const useGame = (vKey?:VariantKey) => {
-	const { wooshSound, gearloadSound } = useSfx()
+export const useGame = (vKey?: VariantKey) => {
+	const { wooshSound, gearloadSound } = useSfx();
 	const { playerStats, updatePlayerStats } = useUser();
 	const [tiles, setTiles] = useState<Tile[]>([]);
-	const [wordList, setWordList] = useState(!vKey? shuffle(wordlist) : vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist));
+	const [wordList, setWordList] = useState(
+		!vKey
+			? shuffle(wordlist)
+			: vKey === "scrabble"
+				? shuffle(threeLetterWords)
+				: shuffle(wordlist),
+	);
 	const [inMotion, setInMotion] = useState<string | null>(null);
 	const [takenSpots, setTakenSpots] = useState<string[]>([]);
 
@@ -29,13 +35,17 @@ export const useGame = (vKey?:VariantKey) => {
 	const [validWords, setValidWords] = useState<string[]>([]);
 	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
 
-	const [gameActive, setGameActive] = useState(false)
+	const [gameActive, setGameActive] = useState(false);
 	const [isAnimating, setIsAnimating] = useState(false);
-	const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(new Set());
-	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(new Set());
+	const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(
+		new Set(),
+	);
+	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(
+		new Set(),
+	);
 
 	const router = useRouter();
-	const firehook = useFirestore()
+	const firehook = useFirestore();
 
 	const achieve = useAchievements();
 	const { startTracking, endTracking } = useActiveGameTracking();
@@ -182,7 +192,7 @@ export const useGame = (vKey?:VariantKey) => {
 			};
 
 			setGameTurns((gt) => [...gt, turnInfo]);
-			turnLog(turnInfo)
+			turnLog(turnInfo);
 			setTiles(newboard);
 
 			if (newboard.length >= 11) {
@@ -195,28 +205,32 @@ export const useGame = (vKey?:VariantKey) => {
 	};
 
 	const handleCommitMove = () => {
-		console.log('ANIMATION START');
+		console.log("ANIMATION START");
 
 		// Capture which tiles should animate RIGHT NOW (before state changes)
 		const tilesToFlip = new Set(
-			tiles.filter(t => (t.canMove && t.id !== frozenHome)).map(t => t.id)
+			tiles
+				.filter((t) => t.canMove && t.id !== frozenHome)
+				.map((t) => t.id),
 		);
 		const tilesToPinwheel = new Set(
-			tiles.filter(t => validRows.includes(t.sitOn) && !t.canMove).map(t => t.id)
+			tiles
+				.filter((t) => validRows.includes(t.sitOn) && !t.canMove)
+				.map((t) => t.id),
 		);
 
 		setFlippingTileIds(tilesToFlip);
 		setPinwheelingTileIds(tilesToPinwheel);
 		setIsAnimating(true);
-		if (tilesToPinwheel.size !== 0){
-			wooshSound()
+		if (tilesToPinwheel.size !== 0) {
+			wooshSound();
 		}
 
 		// Wait for flip animation to complete, then trigger next turn
 		setTimeout(() => {
-			console.log('ANIMATION END');
+			console.log("ANIMATION END");
 			nextTurn();
-			console.log('NEXT TURN TRIGGERED');
+			console.log("NEXT TURN TRIGGERED");
 
 			// Wait for getNextBoard to update tiles (500ms) before clearing animation state
 			setTimeout(() => {
@@ -228,26 +242,26 @@ export const useGame = (vKey?:VariantKey) => {
 	};
 
 	const endGame = () => {
-		if (!vKey){
-			handleGameEnd()
+		if (!vKey) {
+			handleGameEnd();
 		} else {
-			handleScrabbleVariantEnd()
+			handleScrabbleVariantEnd();
 		}
-	}
+	};
 
 	const handleScrabbleVariantEnd = () => {
-		setGameActive(false)
-		const newScore = gameTurns.length 
-		const varscore:VariantScore = { score: newScore, variant:"scrabble"}
-		const scoreInfo = JSON.stringify(varscore)
+		setGameActive(false);
+		const newScore = gameTurns.length;
+		const varscore: VariantScore = { score: newScore, variant: "scrabble" };
+		const scoreInfo = JSON.stringify(varscore);
 		router.push({
 			pathname: "/variantresults",
-			params: { scoreJson: scoreInfo }
-		})
-	}
+			params: { scoreJson: scoreInfo },
+		});
+	};
 
 	const handleGameEnd = async () => {
-		setGameActive(false)
+		setGameActive(false);
 
 		// End tracking for classic games
 		if (!vKey) {
@@ -275,8 +289,8 @@ export const useGame = (vKey?:VariantKey) => {
 				topScore: newTopScore,
 				numGames: playerStats.numGames + 1,
 			});
-			if (firehook){
-				firehook.addGame(gameTurns)  // Fire-and-forget, don't block navigation
+			if (firehook) {
+				firehook.addGame(gameTurns); // Fire-and-forget, don't block navigation
 			}
 		}
 
@@ -299,9 +313,11 @@ export const useGame = (vKey?:VariantKey) => {
 	};
 
 	const startGame = () => {
-		setTiles([])
-		setGameActive(true)
-		setWordList(vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist));
+		setTiles([]);
+		setGameActive(true);
+		setWordList(
+			vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist),
+		);
 		setWordNum(0);
 		setGameTurns([]);
 
@@ -325,8 +341,8 @@ export const useGame = (vKey?:VariantKey) => {
 	};
 
 	useEffect(() => {
-		if (!gameActive){
-			return
+		if (!gameActive) {
+			return;
 		}
 		markTaken();
 		checkValidRows();

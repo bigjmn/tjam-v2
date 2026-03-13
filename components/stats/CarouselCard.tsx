@@ -118,14 +118,9 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 };
 
 export const FullCarousel = () => {
-	const [pageNum, setPageNum] = useState(0)
-	return (
-		<CarouselCard
-			currentPage={pageNum}
-			onPageChange={setPageNum}
-			/>
-	)
-}
+	const [pageNum, setPageNum] = useState(0);
+	return <CarouselCard currentPage={pageNum} onPageChange={setPageNum} />;
+};
 
 const styles = StyleSheet.create({
 	container: {

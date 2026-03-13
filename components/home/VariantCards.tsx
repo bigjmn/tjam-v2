@@ -18,29 +18,29 @@ import ThemedView from "../ui/ThemedView";
 const unlockedImage = require("../../assets/trioicon.png");
 const lockedImage = require("../../assets/trioicon copy.png");
 
-const scrabbleSrc = require("../../assets/scrabble.png")
-const scrabbleDarkSrc = require("../../assets/scrabbledark.png")
+const scrabbleSrc = require("../../assets/scrabble.png");
+const scrabbleDarkSrc = require("../../assets/scrabbledark.png");
 
-const foursSrc = require("../../assets/fours.png")
-const foursDarkSrc = require("../../assets/foursdark.png")
+const foursSrc = require("../../assets/fours.png");
+const foursDarkSrc = require("../../assets/foursdark.png");
 
-const fivelineSrc = require("../../assets/fiveline.png")
-const fivelineDarkSrc = require("../../assets/fivelinedark.png")
+const fivelineSrc = require("../../assets/fiveline.png");
+const fivelineDarkSrc = require("../../assets/fivelinedark.png");
 
 const imDict = {
-	"scrabble": {
-		"dark": scrabbleDarkSrc,
-		"light": scrabbleSrc,
+	scrabble: {
+		dark: scrabbleDarkSrc,
+		light: scrabbleSrc,
 	},
-	"fours": {
-		"dark": foursDarkSrc,
-		"light": foursSrc,
+	fours: {
+		dark: foursDarkSrc,
+		light: foursSrc,
 	},
-	"fiveline": {
-		"dark": fivelineDarkSrc,
-		"light": fivelineSrc,
+	fiveline: {
+		dark: fivelineDarkSrc,
+		light: fivelineSrc,
 	},
-}
+};
 type VariantCardConfig = {
 	key: VariantKey;
 	name: string;
@@ -54,25 +54,21 @@ const VARIANTS: VariantCardConfig[] = [
 	{
 		key: "scrabble",
 		name: "ScrabWord Jam",
-		rules:
-			"If you've been cursing me for my word list, curse no longer. This version has a word list suspiciously similar to one owned by Hasbro, and has all the archaic words you can hope for.",
+		rules: "If you've been cursing me for my word list, curse no longer. This version has a word list suspiciously similar to one owned by Hasbro, and has all the archaic words you can hope for.",
 		unlockLevel: 5,
 		playPath: "/scrabble",
-		
 	},
 	{
 		key: "fiveline",
 		name: "1D-o Jam",
-		rules:
-			"Same rules, fewer dimensions baby",
+		rules: "Same rules, fewer dimensions baby",
 		unlockLevel: 7,
 		playPath: "/fiveline",
 	},
 	{
 		key: "fours",
 		name: "QuatroJam",
-		rules:
-			"This 4x4 version is less fun than you think!",
+		rules: "This 4x4 version is less fun than you think!",
 		unlockLevel: 10,
 		playPath: "/fourgame",
 	},
@@ -122,11 +118,18 @@ export const VariantCards = () => {
 								/>
 								{!isUnlocked && (
 									<View style={styles.lockBadge}>
-										<Ionicons name="lock-closed" size={16} color="#ffffff" />
+										<Ionicons
+											name="lock-closed"
+											size={16}
+											color="#ffffff"
+										/>
 									</View>
 								)}
 								<View style={styles.nameOverlay}>
-									<ThemedText variant="header2" style={styles.nameText}>
+									<ThemedText
+										variant="header2"
+										style={styles.nameText}
+									>
 										{variant.name}
 									</ThemedText>
 								</View>
@@ -146,56 +149,83 @@ export const VariantCards = () => {
 					style={styles.modalBackdrop}
 					onPress={() => setSelectedVariant(null)}
 				>
-					{selectedVariant && (() => {
-						const isUnlocked = level >= selectedVariant.unlockLevel;
-						return (
-							<Pressable
-								style={[
-									styles.modalCard,
-									{ backgroundColor: colors.elevatedCard },
-								]}
-								onPress={(e) => e.stopPropagation()}
-							>
-								{/* Title */}
-								<ThemedText variant="header" style={styles.modalTitle}>
-									{selectedVariant.name}
-								</ThemedText>
-
-								{/* Rules and Image Row */}
-								<View style={styles.contentRow}>
-									{/* Rules on left */}
-									<ThemedText style={styles.rulesText}>
-										{selectedVariant.rules}
-									</ThemedText>
-
-									{/* Image on right */}
-									<View style={styles.modalImageContainer}>
-										<Image
-											source={imDict[selectedVariant.key][theme]}
-											contentFit="cover"
-											style={styles.modalImage}
-										/>
-										{!isUnlocked && (
-											<View style={styles.modalLockBadge}>
-												<Ionicons name="lock-closed" size={20} color="#ffffff" />
-											</View>
-										)}
-									</View>
-								</View>
-
-								{/* Button */}
-								<ThemedButton
-									style={styles.playButton}
-									onPress={handlePlay}
-									disabled={!isUnlocked}
+					{selectedVariant &&
+						(() => {
+							const isUnlocked =
+								level >= selectedVariant.unlockLevel;
+							return (
+								<Pressable
+									style={[
+										styles.modalCard,
+										{
+											backgroundColor:
+												colors.elevatedCard,
+										},
+									]}
+									onPress={(e) => e.stopPropagation()}
 								>
-									<ThemedText variant="strong" style={{ color: '#ffffff' }}>
-										{isUnlocked ? "Play" : `Unlocks at level ${selectedVariant.unlockLevel}`}
+									{/* Title */}
+									<ThemedText
+										variant="header"
+										style={styles.modalTitle}
+									>
+										{selectedVariant.name}
 									</ThemedText>
-								</ThemedButton>
-							</Pressable>
-						);
-					})()}
+
+									{/* Rules and Image Row */}
+									<View style={styles.contentRow}>
+										{/* Rules on left */}
+										<ThemedText style={styles.rulesText}>
+											{selectedVariant.rules}
+										</ThemedText>
+
+										{/* Image on right */}
+										<View
+											style={styles.modalImageContainer}
+										>
+											<Image
+												source={
+													imDict[selectedVariant.key][
+														theme
+													]
+												}
+												contentFit="cover"
+												style={styles.modalImage}
+											/>
+											{!isUnlocked && (
+												<View
+													style={
+														styles.modalLockBadge
+													}
+												>
+													<Ionicons
+														name="lock-closed"
+														size={20}
+														color="#ffffff"
+													/>
+												</View>
+											)}
+										</View>
+									</View>
+
+									{/* Button */}
+									<ThemedButton
+										style={styles.playButton}
+										onPress={handlePlay}
+										disabled={!isUnlocked}
+									>
+										<ThemedText
+											variant="strong"
+											style={{ color: "#ffffff" }}
+										>
+											{isUnlocked
+												? "Play"
+												: `Unlocks at level ${selectedVariant.unlockLevel}`}
+										</ThemedText>
+									</ThemedButton>
+								</Pressable>
+							);
+						})()}
 				</Pressable>
 			</Modal>
 		</>

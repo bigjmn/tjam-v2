@@ -15,15 +15,17 @@ Detects when a user **force quits** or **crashes** mid-game and records an aband
 1. **Game Starts** → Writes `activeGame` flag to AsyncStorage
 2. **Game Ends Normally** → Clears the flag
 3. **App Startup** → Checks for orphaned `activeGame`
-   - If found → User force quit or crashed → Creates abandoned `GameRecord`
+    - If found → User force quit or crashed → Creates abandoned `GameRecord`
 
 **What Counts as Quitting:**
+
 - ✅ Force quit (swipe away from multitasking)
 - ✅ App crash
 - ✅ Phone battery dies
 - ✅ Phone restarts
 
 **What Does NOT Count:**
+
 - ❌ Pressing home button (backgrounding)
 - ❌ Taking a phone call
 - ❌ Switching to another app
@@ -41,28 +43,28 @@ Users can background the app as long as they want - the game continues when they
 import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
 
 export default function Game() {
-  const { startTracking, endTracking } = useActiveGameTracking();
+	const { startTracking, endTracking } = useActiveGameTracking();
 
-  // ✅ When game starts
-  useEffect(() => {
-    if (gameActive) {
-      startTracking({ variant: "classic" });
-    }
-  }, [gameActive]);
+	// ✅ When game starts
+	useEffect(() => {
+		if (gameActive) {
+			startTracking({ variant: "classic" });
+		}
+	}, [gameActive]);
 
-  // ✅ When game ends normally
-  const handleGameEnd = async () => {
-    // ... save game record ...
-    await endTracking(); // ← Add this AFTER saving
-    router.push("/(auth)/results");
-  };
+	// ✅ When game ends normally
+	const handleGameEnd = async () => {
+		// ... save game record ...
+		await endTracking(); // ← Add this AFTER saving
+		router.push("/(auth)/results");
+	};
 
-  // ✅ When user explicitly abandons
-  const confirmExit = async () => {
-    // ... save abandoned game record ...
-    await endTracking(); // ← Add this AFTER saving
-    handleAbandonGame();
-  };
+	// ✅ When user explicitly abandons
+	const confirmExit = async () => {
+		// ... save abandoned game record ...
+		await endTracking(); // ← Add this AFTER saving
+		handleAbandonGame();
+	};
 }
 ```
 
@@ -73,6 +75,7 @@ That's it! No AppState listeners, no timers, no complexity.
 ## Testing
 
 ### Test 1: Force Quit Detection ✅
+
 ```
 1. Start a game
 2. Force quit the app (swipe up from multitasking)
@@ -84,6 +87,7 @@ That's it! No AppState listeners, no timers, no complexity.
 ```
 
 ### Test 2: Backgrounding Does NOT Break Streak ✅
+
 ```
 1. Start a game
 2. Press home button
@@ -95,6 +99,7 @@ That's it! No AppState listeners, no timers, no complexity.
 ```
 
 ### Test 3: Normal Completion ✅
+
 ```
 1. Start a game
 2. Complete it normally
@@ -107,6 +112,7 @@ That's it! No AppState listeners, no timers, no complexity.
 ```
 
 ### Test 4: Explicit Abandon ✅
+
 ```
 1. Start a game
 2. Tap "Abandon Game" button
@@ -141,47 +147,52 @@ So force-quit/crash games automatically break streaks.
 
 ```typescript
 export default function Game() {
-  const { startTracking, endTracking } = useActiveGameTracking();
+	const { startTracking, endTracking } = useActiveGameTracking();
 
-  // Start tracking when game becomes active
-  useEffect(() => {
-    if (gameActive) {
-      console.log("Starting classic game tracking");
-      startTracking({ variant: "classic" });
-    }
-  }, [gameActive]);
+	// Start tracking when game becomes active
+	useEffect(() => {
+		if (gameActive) {
+			console.log("Starting classic game tracking");
+			startTracking({ variant: "classic" });
+		}
+	}, [gameActive]);
 
-  // Existing: When user completes game
-  const navigateToResults = useCallback(async () => {
-    // ... save game record with score ...
+	// Existing: When user completes game
+	const navigateToResults = useCallback(
+		async () => {
+			// ... save game record with score ...
 
-    await endTracking(); // ← ADD THIS
-    router.push("/(auth)/results");
-  }, [/* deps */]);
+			await endTracking(); // ← ADD THIS
+			router.push("/(auth)/results");
+		},
+		[
+			/* deps */
+		],
+	);
 
-  // Existing: When user abandons via menu
-  const confirmExit = async () => {
-    setShowExitModal(false);
+	// Existing: When user abandons via menu
+	const confirmExit = async () => {
+		setShowExitModal(false);
 
-    if (playerStats) {
-      const gameRecord: GameRecord = {
-        timestamp: new Date(),
-        score: wordNum || 0,
-        abandoned: true,
-      };
+		if (playerStats) {
+			const gameRecord: GameRecord = {
+				timestamp: new Date(),
+				score: wordNum || 0,
+				abandoned: true,
+			};
 
-      const newGameHist = [...playerStats.gameHist, gameRecord];
+			const newGameHist = [...playerStats.gameHist, gameRecord];
 
-      await updatePlayerStats({
-        gameHist: newGameHist,
-        numGames: playerStats.numGames + 1,
-      });
-    }
+			await updatePlayerStats({
+				gameHist: newGameHist,
+				numGames: playerStats.numGames + 1,
+			});
+		}
 
-    await endTracking(); // ← ADD THIS
+		await endTracking(); // ← ADD THIS
 
-    handleAbandonGame();
-  };
+		handleAbandonGame();
+	};
 }
 ```
 
@@ -189,8 +200,8 @@ export default function Game() {
 
 ```typescript
 startTracking({
-  variant: "wordofday",
-  isWordOfDay: true, // ← Mark as WOD game
+	variant: "wordofday",
+	isWordOfDay: true, // ← Mark as WOD game
 });
 ```
 
@@ -215,13 +226,13 @@ startTracking({ variant: "fiveline" });
 5. `useActiveGameTracking` runs on mount
 6. Detects orphaned `activeGame` from previous session
 7. Creates abandoned `GameRecord`:
-   ```typescript
-   {
-     timestamp: new Date(), // Current time
-     score: 0,
-     abandoned: true,
-   }
-   ```
+    ```typescript
+    {
+      timestamp: new Date(), // Current time
+      score: 0,
+      abandoned: true,
+    }
+    ```
 8. Adds to `gameHist` and increments `numGames`
 9. Clears the orphaned `activeGame` flag
 10. Streak is broken (because `abandoned: true`)
@@ -230,17 +241,17 @@ startTracking({ variant: "fiveline" });
 
 ## Edge Cases Handled
 
-| Scenario | Detected? | Streak Broken? |
-|----------|-----------|----------------|
-| Force quit mid-game | ✅ Yes | ✅ Yes |
-| App crash | ✅ Yes | ✅ Yes |
-| Battery dies | ✅ Yes | ✅ Yes |
-| Phone restarts | ✅ Yes | ✅ Yes |
-| Background app | ❌ No | ❌ No |
-| Take phone call | ❌ No | ❌ No |
-| Lock phone | ❌ No | ❌ No |
-| Switch apps | ❌ No | ❌ No |
-| Complete game normally | ✅ Tracked | ❌ No (not abandoned) |
+| Scenario                  | Detected?  | Streak Broken?                 |
+| ------------------------- | ---------- | ------------------------------ |
+| Force quit mid-game       | ✅ Yes     | ✅ Yes                         |
+| App crash                 | ✅ Yes     | ✅ Yes                         |
+| Battery dies              | ✅ Yes     | ✅ Yes                         |
+| Phone restarts            | ✅ Yes     | ✅ Yes                         |
+| Background app            | ❌ No      | ❌ No                          |
+| Take phone call           | ❌ No      | ❌ No                          |
+| Lock phone                | ❌ No      | ❌ No                          |
+| Switch apps               | ❌ No      | ❌ No                          |
+| Complete game normally    | ✅ Tracked | ❌ No (not abandoned)          |
 | Explicit abandon via menu | ✅ Tracked | ✅ Yes (you mark as abandoned) |
 
 ---
@@ -254,15 +265,15 @@ If you only want to break streaks for WOD games:
 const activeGame: ActiveGameData = JSON.parse(activeGameJson);
 
 if (activeGame.isWordOfDay) {
-  // Create abandoned record
-  const abandonedRecord: GameRecord = {
-    timestamp: new Date(),
-    score: 0,
-    abandoned: true,
-  };
-  // ... save to gameHist
+	// Create abandoned record
+	const abandonedRecord: GameRecord = {
+		timestamp: new Date(),
+		score: 0,
+		abandoned: true,
+	};
+	// ... save to gameHist
 } else {
-  console.log("🎮 Non-WOD game abandoned - not breaking streak");
+	console.log("🎮 Non-WOD game abandoned - not breaking streak");
 }
 
 // Always clear the flag
@@ -278,21 +289,21 @@ Add logging to track force quit patterns:
 ```typescript
 // In checkForOrphanedGame
 if (activeGameJson) {
-  const activeGame: ActiveGameData = JSON.parse(activeGameJson);
-  const startTime = new Date(activeGame.startTime);
-  const quitDuration = Date.now() - startTime.getTime();
+	const activeGame: ActiveGameData = JSON.parse(activeGameJson);
+	const startTime = new Date(activeGame.startTime);
+	const quitDuration = Date.now() - startTime.getTime();
 
-  console.log("Force quit detected:", {
-    variant: activeGame.variant,
-    timePlayedMinutes: Math.floor(quitDuration / 60000),
-    isWordOfDay: activeGame.isWordOfDay,
-  });
+	console.log("Force quit detected:", {
+		variant: activeGame.variant,
+		timePlayedMinutes: Math.floor(quitDuration / 60000),
+		isWordOfDay: activeGame.isWordOfDay,
+	});
 
-  // Optional: Send to analytics
-  logEvent("game_force_quit", {
-    variant: activeGame.variant,
-    duration_ms: quitDuration,
-  });
+	// Optional: Send to analytics
+	logEvent("game_force_quit", {
+		variant: activeGame.variant,
+		duration_ms: quitDuration,
+	});
 }
 ```
 
@@ -301,18 +312,23 @@ if (activeGameJson) {
 ## FAQ
 
 ### Q: What if AsyncStorage write fails?
+
 **A:** Error is logged but won't crash. Worst case: force quit isn't detected.
 
 ### Q: Can users game the system?
+
 **A:** No - force quitting always leaves the `activeGame` flag, which is detected on next startup.
 
 ### Q: What if I call startTracking() twice?
+
 **A:** Safe - it just overwrites the existing `activeGame` with new timestamp.
 
 ### Q: What if I forget to call endTracking()?
+
 **A:** Next app startup will think the user force quit and create an abandoned record.
 
 ### Q: Does backgrounding write to AsyncStorage?
+
 **A:** No - the `activeGame` flag persists across backgrounding. Only removed on explicit `endTracking()`.
 
 ---

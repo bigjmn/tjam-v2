@@ -29,8 +29,8 @@ export default function SquareLayer() {
 					key={square.id}
 					style={{
 						position: "absolute",
-						top: square.topPos+3,
-						left: square.leftPos+3,
+						top: square.topPos + 3,
+						left: square.leftPos + 3,
 						height: 84,
 						width: 84,
 						borderWidth: 1,

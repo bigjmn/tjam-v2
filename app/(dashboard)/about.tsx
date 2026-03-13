@@ -5,7 +5,7 @@ import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
-	runOnJS
+	runOnJS,
 } from "react-native-reanimated";
 import ThemedView from "../../components/ui/ThemedView";
 import ThemedText from "../../components/ui/ThemedText";
@@ -72,7 +72,9 @@ export default function AboutScreen() {
 								style={[
 									styles.tabText,
 									{
-										color: isActive ? "#ffffff" : colors.text,
+										color: isActive
+											? "#ffffff"
+											: colors.text,
 									},
 								]}
 							>

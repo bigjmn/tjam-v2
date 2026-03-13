@@ -19,24 +19,84 @@ export default function DashboardLayout() {
 				tabBarInactiveTintColor: colors.iconColor,
 			}}
 		>
-			<Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ focused }) => (
-				<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "home" : "home-outline"} />
-			) }} />
+			<Tabs.Screen
+				name="index"
+				options={{
+					title: "Home",
+					tabBarIcon: ({ focused }) => (
+						<Ionicons
+							size={24}
+							color={
+								focused
+									? colors.iconColorFocus
+									: colors.iconColor
+							}
+							name={focused ? "home" : "home-outline"}
+						/>
+					),
+				}}
+			/>
 			<Tabs.Screen
 				name="leaderboard"
-				options={{ title: "Leaderboard", tabBarIcon: ({ focused }) => (
-					<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "stats-chart" : "stats-chart-outline"} />
-				) }}
+				options={{
+					title: "Leaderboard",
+					tabBarIcon: ({ focused }) => (
+						<Ionicons
+							size={24}
+							color={
+								focused
+									? colors.iconColorFocus
+									: colors.iconColor
+							}
+							name={
+								focused ? "stats-chart" : "stats-chart-outline"
+							}
+						/>
+					),
+				}}
 			/>
-			<Tabs.Screen name="stats" options={{ title: "Achievements", tabBarIcon: ({focused}) => (
-				<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "person-circle" : "person-circle-outline"} />
-			) }} />
-			<Tabs.Screen name="about" options={{
-				title: "About",
-				tabBarIcon: ({ focused }) => (
-					<Ionicons size={24} color={focused ? colors.iconColorFocus : colors.iconColor} name={focused ? "information-circle" : "information-circle-outline"} />
-				)
-			}} />
+			<Tabs.Screen
+				name="stats"
+				options={{
+					title: "Achievements",
+					tabBarIcon: ({ focused }) => (
+						<Ionicons
+							size={24}
+							color={
+								focused
+									? colors.iconColorFocus
+									: colors.iconColor
+							}
+							name={
+								focused
+									? "person-circle"
+									: "person-circle-outline"
+							}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="about"
+				options={{
+					title: "About",
+					tabBarIcon: ({ focused }) => (
+						<Ionicons
+							size={24}
+							color={
+								focused
+									? colors.iconColorFocus
+									: colors.iconColor
+							}
+							name={
+								focused
+									? "information-circle"
+									: "information-circle-outline"
+							}
+						/>
+					),
+				}}
+			/>
 			{/* <Tabs.Screen
 				name="settings"
 				options={{

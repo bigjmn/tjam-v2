@@ -28,7 +28,10 @@ export interface RankProgressHandle {
 }
 
 export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
-	({ rank: initialRank, totalStars: initialTotalStars, filledStars }, ref) => {
+	(
+		{ rank: initialRank, totalStars: initialTotalStars, filledStars },
+		ref,
+	) => {
 		const { popSound } = useSfx();
 		const [currentRank, setCurrentRank] = useState(initialRank);
 		const [nextRank, setNextRank] = useState<Rank | null>(null);
@@ -59,21 +62,24 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 
 		const fillNextStar = async (): Promise<void> => {
 			return new Promise((resolve) => {
-				console.log('[RANK] fillNextStar called');
+				console.log("[RANK] fillNextStar called");
 				// Find the next unfilled star
 				const nextStarIndex = starProgress.findIndex(
 					(progress) => progress.value < 1,
 				);
-				console.log('[RANK] Next star index:', nextStarIndex);
+				console.log("[RANK] Next star index:", nextStarIndex);
 				if (nextStarIndex === -1) {
-					console.log('[RANK] No unfilled stars found');
+					console.log("[RANK] No unfilled stars found");
 					resolve();
 					return;
 				}
 
 				// Play pop sound when filling star
 				popSound();
-				console.log('[RANK] Playing pop sound and animating star', nextStarIndex);
+				console.log(
+					"[RANK] Playing pop sound and animating star",
+					nextStarIndex,
+				);
 
 				// Animate the star fill with scale bounce
 				starProgress[nextStarIndex].value = withSequence(
@@ -85,9 +91,14 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 			});
 		};
 
-		const transitionToNewRank = async (newRankToShow: Rank): Promise<void> => {
+		const transitionToNewRank = async (
+			newRankToShow: Rank,
+		): Promise<void> => {
 			return new Promise((resolve) => {
-				console.log('[RANK] transitionToNewRank called for', newRankToShow.name);
+				console.log(
+					"[RANK] transitionToNewRank called for",
+					newRankToShow.name,
+				);
 
 				// Reset new rank stars to empty
 				for (let i = 0; i < maxStars; i++) {
@@ -106,7 +117,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 						easing: Easing.bezier(0.25, 0.1, 0.25, 1),
 					},
 					() => {
-						console.log('[RANK] Transition complete');
+						console.log("[RANK] Transition complete");
 						// Update current rank
 						runOnJS(setCurrentRank)(newRankToShow);
 						runOnJS(setTotalStars)(newRankToShow.starsToFill);
@@ -123,7 +134,7 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 						containerTranslateX.value = 0;
 
 						runOnJS(resolve)();
-					}
+					},
 				);
 			});
 		};
@@ -139,32 +150,45 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 
 		return (
 			<View style={styles.containerWrapper}>
-				<Animated.View style={[
-					styles.slidingContainer,
-					containerStyle,
-					// Ensure proper width during transition
-					isTransitioning && { width: SCREEN_WIDTH * 2 }
-				]}>
+				<Animated.View
+					style={[
+						styles.slidingContainer,
+						containerStyle,
+						// Ensure proper width during transition
+						isTransitioning && { width: SCREEN_WIDTH * 2 },
+					]}
+				>
 					{/* Current Rank */}
 					<View style={styles.rankView}>
-						<ThemedText variant="header" style={styles.rankName}>{currentRank.name}</ThemedText>
+						<ThemedText variant="header" style={styles.rankName}>
+							{currentRank.name}
+						</ThemedText>
 						<DividerWithText text={`Level ${currentRank.level}`} />
 						<View style={styles.starsContainer}>
-							{starProgress.slice(0, totalStars).map((progress, index) => (
-								<Star key={index} progress={progress} />
-							))}
+							{starProgress
+								.slice(0, totalStars)
+								.map((progress, index) => (
+									<Star key={index} progress={progress} />
+								))}
 						</View>
 					</View>
 
 					{/* Next Rank (visible during transition) */}
 					{nextRank && (
 						<View style={styles.rankView}>
-							<ThemedText variant="header" style={styles.rankName}>{nextRank.name}</ThemedText>
+							<ThemedText
+								variant="header"
+								style={styles.rankName}
+							>
+								{nextRank.name}
+							</ThemedText>
 							<DividerWithText text={`Level ${nextRank.level}`} />
 							<View style={styles.starsContainer}>
-								{newRankStarProgress.slice(0, nextRank.starsToFill).map((progress, index) => (
-									<Star key={index} progress={progress} />
-								))}
+								{newRankStarProgress
+									.slice(0, nextRank.starsToFill)
+									.map((progress, index) => (
+										<Star key={index} progress={progress} />
+									))}
 							</View>
 						</View>
 					)}

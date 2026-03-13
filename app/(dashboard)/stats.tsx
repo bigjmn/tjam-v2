@@ -20,7 +20,6 @@
 
 // 	return (
 // 		<ThemedView safe style={styles.container}>
-			
 
 // 			{/* Top Section - Fixed */}
 // 			<View style={styles.topSection}>
@@ -57,14 +56,10 @@
 // });
 import ThemedView from "../../components/ui/ThemedView";
 import ProfileScreen from "../../components/profile/ProfileScreen";
-export default function StatsPage(){
-    return (
-        <ThemedView style={{flex:1}}>
-            <ProfileScreen />
-        </ThemedView>
-
-    )
-    
-    
-
+export default function StatsPage() {
+	return (
+		<ThemedView style={{ flex: 1 }}>
+			<ProfileScreen />
+		</ThemedView>
+	);
 }

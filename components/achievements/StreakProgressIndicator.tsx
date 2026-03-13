@@ -6,7 +6,9 @@ interface StreakProgressIndicatorProps {
 	progress: number; // 0-3
 }
 
-export function StreakProgressIndicator({ progress }: StreakProgressIndicatorProps) {
+export function StreakProgressIndicator({
+	progress,
+}: StreakProgressIndicatorProps) {
 	const { colors } = useTheme();
 
 	return (
@@ -19,7 +21,9 @@ export function StreakProgressIndicator({ progress }: StreakProgressIndicatorPro
 						style={[
 							styles.circle,
 							{
-								backgroundColor: isFilled ? "#7FAA7A" : colors.mutedText,
+								backgroundColor: isFilled
+									? "#7FAA7A"
+									: colors.mutedText,
 								opacity: isFilled ? 1 : 0.3,
 							},
 						]}

@@ -5,6 +5,7 @@
 When a user earned multiple scoring/streaking achievements in one game, the wrong tiles were being cleared and animated.
 
 **Example:**
+
 - User gets score of 45
 - Should see: "doubledigits" cleared → "dirty30" slides in → "dirty30" cleared → "nifty50" slides in
 - **Actually saw:** "nifty50" cleared → "nifty50" slides in → "nifty50" cleared → "nifty50" slides in
@@ -14,35 +15,37 @@ When a user earned multiple scoring/streaking achievements in one game, the wron
 The `buildAnimationQueue` function was setting `simulatedTopScore` to the **highest threshold earned** upfront, instead of updating it incrementally as achievements were processed.
 
 **Before:**
+
 ```typescript
 // Set to HIGHEST threshold immediately
 let simulatedTopScore = oldTopScore;
 const earnedScoringAchievements = nextGoals
-  .map((key) => allAchievements.find((a) => a.key === key))
-  .filter((a): a is ScoringAchievement => a?.type === "scoring");
+	.map((key) => allAchievements.find((a) => a.key === key))
+	.filter((a): a is ScoringAchievement => a?.type === "scoring");
 
 if (earnedScoringAchievements.length > 0) {
-  const highestThreshold = Math.max(
-    ...earnedScoringAchievements.map((a) => a.scoreThreshhold),
-  );
-  simulatedTopScore = Math.max(simulatedTopScore, highestThreshold); // ❌ Set to 50 immediately!
+	const highestThreshold = Math.max(
+		...earnedScoringAchievements.map((a) => a.scoreThreshhold),
+	);
+	simulatedTopScore = Math.max(simulatedTopScore, highestThreshold); // ❌ Set to 50 immediately!
 }
 
 for (const key of nextGoals) {
-  // ...
-  // When we call getNextAchievements(simulatedTopScore, ...), it always sees score = 50
-  // So it always returns "nifty50" as the next goal!
+	// ...
+	// When we call getNextAchievements(simulatedTopScore, ...), it always sees score = 50
+	// So it always returns "nifty50" as the next goal!
 }
 ```
 
 **Timeline for score 45:**
+
 1. `simulatedTopScore` set to 50 (highest threshold earned)
 2. Process "doubledigits" (threshold 10)
-   - Call `getNextAchievements(50, ...)` → returns "nifty50" ❌
-   - Animate: "doubledigits" clears → "nifty50" slides in ❌
+    - Call `getNextAchievements(50, ...)` → returns "nifty50" ❌
+    - Animate: "doubledigits" clears → "nifty50" slides in ❌
 3. Process "dirty30" (threshold 30)
-   - Call `getNextAchievements(50, ...)` → returns "nifty50" ❌
-   - Animate: "dirty30" clears → "nifty50" slides in ❌
+    - Call `getNextAchievements(50, ...)` → returns "nifty50" ❌
+    - Animate: "dirty30" clears → "nifty50" slides in ❌
 
 ## The Fix
 
@@ -55,37 +58,41 @@ Now we update `simulatedTopScore` **AFTER** processing each scoring achievement,
 let simulatedTopScore = oldTopScore;
 
 for (const key of sortedNextGoals) {
-  const achievement = allAchievements.find((a) => a.key === key);
+	const achievement = allAchievements.find((a) => a.key === key);
 
-  // ... mark won, fill stars ...
+	// ... mark won, fill stars ...
 
-  // Update simulated state
-  simulatedAchievements.push(key);
+	// Update simulated state
+	simulatedAchievements.push(key);
 
-  // ✅ FIX: Update simulatedTopScore INCREMENTALLY
-  if (achievement.type === "scoring") {
-    const scoringAch = achievement as ScoringAchievement;
-    simulatedTopScore = Math.max(simulatedTopScore, scoringAch.scoreThreshhold);
-  }
+	// ✅ FIX: Update simulatedTopScore INCREMENTALLY
+	if (achievement.type === "scoring") {
+		const scoringAch = achievement as ScoringAchievement;
+		simulatedTopScore = Math.max(
+			simulatedTopScore,
+			scoringAch.scoreThreshhold,
+		);
+	}
 
-  // NOW call getNextAchievements with the correct simulated score
-  const nextGoalsAfterThis = achievements.getNextAchievements(
-    simulatedTopScore,  // ✅ Correct value for this achievement
-    simulatedAchievements,
-  );
+	// NOW call getNextAchievements with the correct simulated score
+	const nextGoalsAfterThis = achievements.getNextAchievements(
+		simulatedTopScore, // ✅ Correct value for this achievement
+		simulatedAchievements,
+	);
 }
 ```
 
 **Timeline for score 45 (FIXED):**
+
 1. `simulatedTopScore` = 0 (oldTopScore)
 2. Process "doubledigits" (threshold 10)
-   - `simulatedTopScore` updated to 10
-   - Call `getNextAchievements(10, ...)` → returns "dirty30" ✅
-   - Animate: "doubledigits" clears → "dirty30" slides in ✅
+    - `simulatedTopScore` updated to 10
+    - Call `getNextAchievements(10, ...)` → returns "dirty30" ✅
+    - Animate: "doubledigits" clears → "dirty30" slides in ✅
 3. Process "dirty30" (threshold 30)
-   - `simulatedTopScore` updated to 30
-   - Call `getNextAchievements(30, ...)` → returns "nifty50" ✅
-   - Animate: "dirty30" clears → "nifty50" slides in ✅
+    - `simulatedTopScore` updated to 30
+    - Call `getNextAchievements(30, ...)` → returns "nifty50" ✅
+    - Animate: "dirty30" clears → "nifty50" slides in ✅
 
 ### Part 2: Sort Achievements by Threshold
 
@@ -94,21 +101,27 @@ To ensure achievements are always processed in order (lowest → highest), we so
 ```typescript
 // ✅ Sort by threshold to ensure correct progression
 const sortedNextGoals = [...nextGoals].sort((a, b) => {
-  const achA = allAchievements.find((ach) => ach.key === a);
-  const achB = allAchievements.find((ach) => ach.key === b);
-  if (!achA || !achB) return 0;
+	const achA = allAchievements.find((ach) => ach.key === a);
+	const achB = allAchievements.find((ach) => ach.key === b);
+	if (!achA || !achB) return 0;
 
-  // Sort scoring achievements by scoreThreshhold
-  if (achA.type === "scoring" && achB.type === "scoring") {
-    return (achA as ScoringAchievement).scoreThreshhold - (achB as ScoringAchievement).scoreThreshhold;
-  }
+	// Sort scoring achievements by scoreThreshhold
+	if (achA.type === "scoring" && achB.type === "scoring") {
+		return (
+			(achA as ScoringAchievement).scoreThreshhold -
+			(achB as ScoringAchievement).scoreThreshhold
+		);
+	}
 
-  // Sort streaking achievements by streakScore
-  if (achA.type === "streaking" && achB.type === "streaking") {
-    return (achA as StreakingAchievement).streakScore - (achB as StreakingAchievement).streakScore;
-  }
+	// Sort streaking achievements by streakScore
+	if (achA.type === "streaking" && achB.type === "streaking") {
+		return (
+			(achA as StreakingAchievement).streakScore -
+			(achB as StreakingAchievement).streakScore
+		);
+	}
 
-  return 0;
+	return 0;
 });
 ```
 
@@ -126,6 +139,7 @@ This handles edge cases where `gameAchievements()` might return achievements in 
 ## Testing
 
 ### Test Case 1: Multiple Scoring Achievements
+
 ```
 Score: 45
 Expected earned: doubledigits (10), dirty30 (30)
@@ -140,6 +154,7 @@ Expected earned: doubledigits (10), dirty30 (30)
 ```
 
 ### Test Case 2: Multiple Streaking Achievements
+
 ```
 Streak: 3 games of 35+ each
 Expected earned: trip20, trip30
@@ -154,6 +169,7 @@ Expected earned: trip20, trip30
 ```
 
 ### Test Case 3: First Score Ever
+
 ```
 Score: 15 (first game)
 Expected earned: doubledigits (10)
@@ -194,11 +210,13 @@ Check these logs when testing to verify the fix works correctly.
 ## Why This Matters
 
 This bug made achievement animations confusing and incorrect:
+
 - Users couldn't tell which achievement they actually earned
 - The same tile appeared multiple times
 - The progression didn't match their actual score
 
 Now the animations correctly show:
+
 - ✅ The achievement they just earned
 - ✅ The next goal they should work toward
 - ✅ Proper progression from lowest → highest thresholds
@@ -206,6 +224,7 @@ Now the animations correctly show:
 ## Future-Proofing
 
 The fix handles:
+
 - ✅ Scoring achievements (sorted by `scoreThreshhold`)
 - ✅ Streaking achievements (sorted by `streakScore`)
 - ✅ Mixed achievement types in one session

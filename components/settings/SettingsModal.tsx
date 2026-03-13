@@ -35,7 +35,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 	onClose,
 }) => {
 	const { colors } = useTheme();
-	const { logout, user } = useUser()
+	const { logout, user } = useUser();
 	const insets = useSafeAreaInsets();
 	const translateY = useSharedValue(SCREEN_HEIGHT);
 	const opacity = useSharedValue(0);
@@ -115,13 +115,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
 					{/* Content */}
 					<View style={styles.content}>
-						
 						<OptionsSwitches />
-						{!user?.isAnonymous && <ThemedButton style={{backgroundColor: colors.danger}} onPress={logout}>
-							<ThemedText style={{color:"white"}}>Log Out</ThemedText>
-						</ThemedButton>}
+						{!user?.isAnonymous && (
+							<ThemedButton
+								style={{ backgroundColor: colors.danger }}
+								onPress={logout}
+							>
+								<ThemedText style={{ color: "white" }}>
+									Log Out
+								</ThemedText>
+							</ThemedButton>
+						)}
 					</View>
-					
 				</Animated.View>
 			</View>
 		</Modal>

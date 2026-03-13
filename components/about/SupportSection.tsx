@@ -1,5 +1,12 @@
 import React from "react";
-import { ScrollView, StyleSheet, Dimensions, View, Linking, Pressable } from "react-native";
+import {
+	ScrollView,
+	StyleSheet,
+	Dimensions,
+	View,
+	Linking,
+	Pressable,
+} from "react-native";
 import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import { useTheme } from "../../hooks/useTheme";
@@ -30,12 +37,13 @@ export const SupportSection: React.FC = () => {
 						Contact
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						If you have questions about the game, ideas for features, or general feedback, please reach out - we never talk anymore!
+						If you have questions about the game, ideas for
+						features, or general feedback, please reach out - we
+						never talk anymore!
 					</ThemedText>
 				</View>
 
 				<View style={styles.section}>
-					
 					<Pressable
 						onPress={handleEmailPress}
 						style={({ pressed }) => [
@@ -46,7 +54,9 @@ export const SupportSection: React.FC = () => {
 							},
 						]}
 					>
-						<ThemedText style={[styles.linkText, { color: colors.primary }]}>
+						<ThemedText
+							style={[styles.linkText, { color: colors.primary }]}
+						>
 							📧 jesse.a.nicholas@gmail.com
 						</ThemedText>
 					</Pressable>
@@ -73,7 +83,10 @@ export const SupportSection: React.FC = () => {
 				</View> */}
 
 				<View style={styles.section}>
-					<ThemedText variant="header2" style={styles.subsectionTitle}>
+					<ThemedText
+						variant="header2"
+						style={styles.subsectionTitle}
+					>
 						Report a Bug
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>

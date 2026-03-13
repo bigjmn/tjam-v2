@@ -12,7 +12,6 @@ import Animated, {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../hooks/useTheme";
 
-
 interface FloatingActionProps {
 	isExpanded: SharedValue<boolean>;
 	index: number;
@@ -35,7 +34,7 @@ const FloatingActionButton = ({
 	iconName,
 	pressFn,
 }: FloatingActionProps) => {
-  const { colors } = useTheme()
+	const { colors } = useTheme();
 	const animatedStyles = useAnimatedStyle(() => {
 		// highlight-next-line
 		const moveValue = isExpanded.value ? OFFSET * index : 0;
@@ -58,10 +57,24 @@ const FloatingActionButton = ({
 	return (
 		<AnimatedPressable
 			onPress={pressFn}
-			style={[animatedStyles, styles.shadow, styles.button, {backgroundColor: colors.uiBackground}]}
+			style={[
+				animatedStyles,
+				styles.shadow,
+				styles.button,
+				{ backgroundColor: colors.uiBackground },
+			]}
 		>
 			<Animated.View>
-				<Ionicons size={16} style={styles.content} name={iconName as any} color={iconName === "exit-outline" ? colors.danger : colors.text} />
+				<Ionicons
+					size={16}
+					style={styles.content}
+					name={iconName as any}
+					color={
+						iconName === "exit-outline"
+							? colors.danger
+							: colors.text
+					}
+				/>
 			</Animated.View>
 		</AnimatedPressable>
 	);
@@ -73,7 +86,8 @@ interface MenuTestProps {
 
 export default function MenuTest({ onExitPress }: MenuTestProps) {
 	const isExpanded = useSharedValue(false);
-	const { theme, sfxOn, turnOffSound, turnOnSound, toggleTheme, colors } = useTheme();
+	const { theme, sfxOn, turnOffSound, turnOnSound, toggleTheme, colors } =
+		useTheme();
 
 	const handlePress = () => {
 		isExpanded.value = !isExpanded.value;
@@ -99,10 +113,18 @@ export default function MenuTest({ onExitPress }: MenuTestProps) {
 				<View style={styles.buttonContainer}>
 					<AnimatedPressable
 						onPress={handlePress}
-						style={[styles.shadow, mainButtonStyles.button, {backgroundColor: colors.uiBackground}]}
+						style={[
+							styles.shadow,
+							mainButtonStyles.button,
+							{ backgroundColor: colors.uiBackground },
+						]}
 					>
 						<Animated.View style={[plusIconStyle]}>
-							<Ionicons name="menu" size={18} color={colors.iconColorFocus} />
+							<Ionicons
+								name="menu"
+								size={18}
+								color={colors.iconColorFocus}
+							/>
 						</Animated.View>
 					</AnimatedPressable>
 					<FloatingActionButton
@@ -114,9 +136,7 @@ export default function MenuTest({ onExitPress }: MenuTestProps) {
 					<FloatingActionButton
 						isExpanded={isExpanded}
 						index={2}
-						iconName={
-							theme === "light" ? "sunny" : "moon"
-						}
+						iconName={theme === "light" ? "sunny" : "moon"}
 						pressFn={toggleTheme}
 					/>
 					<FloatingActionButton

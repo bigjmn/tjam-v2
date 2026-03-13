@@ -123,7 +123,7 @@ export const scoringAchievements: ScoringAchievement[] = [
 		explainer: "Reach a high score of 360 or above",
 		type: "scoring",
 		scoreThreshhold: 360,
-		reward: 5
+		reward: 5,
 	},
 	{
 		key: "drupetrip",
@@ -131,97 +131,97 @@ export const scoringAchievements: ScoringAchievement[] = [
 		explainer: "Reach a high score of 400 or above",
 		type: "scoring",
 		scoreThreshhold: 400,
-		reward: 6
+		reward: 6,
 	},
 	{
-    key: "blazeit",
-    name: "Blaze It",
-    explainer: "Reach a high score of 420 or above",
-    type: "scoring",
-    scoreThreshhold: 420,
-    reward: 6
-  },
+		key: "blazeit",
+		name: "Blaze It",
+		explainer: "Reach a high score of 420 or above",
+		type: "scoring",
+		scoreThreshhold: 420,
+		reward: 6,
+	},
 
-  {
-    key: "quinttrip",
-    name: "The Ol' Quint-Trip",
-    explainer: "Reach a high score of 500 or above",
-    type: "scoring",
-    scoreThreshhold: 500,
-    reward: 7
-  },
+	{
+		key: "quinttrip",
+		name: "The Ol' Quint-Trip",
+		explainer: "Reach a high score of 500 or above",
+		type: "scoring",
+		scoreThreshhold: 500,
+		reward: 7,
+	},
 
-  {
-    key: "natesilver",
-    name: "Nate Silver",
-    explainer: "Reach a high score of 538 or above",
-    type: "scoring",
-    scoreThreshhold: 538,
-    reward: 7
-  },
+	{
+		key: "natesilver",
+		name: "Nate Silver",
+		explainer: "Reach a high score of 538 or above",
+		type: "scoring",
+		scoreThreshhold: 538,
+		reward: 7,
+	},
 
-  {
-    key: "sextrip",
-    name: "The Ol' Sex-Trip",
-    explainer: "Reach a high score of 600 or above",
-    type: "scoring",
-    scoreThreshhold: 600,
-    reward: 8
-  },
+	{
+		key: "sextrip",
+		name: "The Ol' Sex-Trip",
+		explainer: "Reach a high score of 600 or above",
+		type: "scoring",
+		scoreThreshhold: 600,
+		reward: 8,
+	},
 
-  {
-    key: "bostonstrong",
-    name: "Boston Strong",
-    explainer: "Reach a high score of 617 or above",
-    type: "scoring",
-    scoreThreshhold: 617,
-    reward: 8
-  },
+	{
+		key: "bostonstrong",
+		name: "Boston Strong",
+		explainer: "Reach a high score of 617 or above",
+		type: "scoring",
+		scoreThreshhold: 617,
+		reward: 8,
+	},
 
-  {
-    key: "numberofthebeast",
-    name: "Number of the Beast",
-    explainer: "Reach a high score of 666 or above",
-    type: "scoring",
-    scoreThreshhold: 666,
-    reward: 9
-  },
+	{
+		key: "numberofthebeast",
+		name: "Number of the Beast",
+		explainer: "Reach a high score of 666 or above",
+		type: "scoring",
+		scoreThreshhold: 666,
+		reward: 9,
+	},
 
-  {
-    key: "septtrip",
-    name: "The Ol' Sept-Trip",
-    explainer: "Reach a high score of 700 or above",
-    type: "scoring",
-    scoreThreshhold: 700,
-    reward: 9
-  },
+	{
+		key: "septtrip",
+		name: "The Ol' Sept-Trip",
+		explainer: "Reach a high score of 700 or above",
+		type: "scoring",
+		scoreThreshhold: 700,
+		reward: 9,
+	},
 
-  {
-    key: "tonyhawkproscore",
-    name: "Tony Hawk Pro Score",
-    explainer: "Reach a high score of 720 or above",
-    type: "scoring",
-    scoreThreshhold: 720,
-    reward: 9
-  },
+	{
+		key: "tonyhawkproscore",
+		name: "Tony Hawk Pro Score",
+		explainer: "Reach a high score of 720 or above",
+		type: "scoring",
+		scoreThreshhold: 720,
+		reward: 9,
+	},
 
-  {
-    key: "jumbojet",
-    name: "Jumbo Jet",
-    explainer: "Reach a high score of 747 or above",
-    type: "scoring",
-    scoreThreshhold: 747,
-    reward: 9
-  },
+	{
+		key: "jumbojet",
+		name: "Jumbo Jet",
+		explainer: "Reach a high score of 747 or above",
+		type: "scoring",
+		scoreThreshhold: 747,
+		reward: 9,
+	},
 
-  {
-    key: "jackpot",
-    name: "Jackpot",
-    explainer: "Reach a high score of 777 or above",
-    type: "scoring",
-    scoreThreshhold: 777,
-    reward: 10
-  }
+	{
+		key: "jackpot",
+		name: "Jackpot",
+		explainer: "Reach a high score of 777 or above",
+		type: "scoring",
+		scoreThreshhold: 777,
+		reward: 10,
+	},
 ];
 
 export const streakingAchievements: StreakingAchievement[] = [
@@ -341,28 +341,28 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		name: "Double Take",
 		explainer: "Make the same word twice in a row",
 		type: "novelty",
-		reward: 3
+		reward: 3,
 	},
 	{
 		key: "bodyshop",
 		name: "The Body Shop",
 		explainer: "Clear five body parts in one game",
 		type: "novelty",
-		reward: 4
+		reward: 4,
 	},
 	{
 		key: "papaya",
 		name: "No way, a papaya won!",
 		explainer: "Clear 10 palindromes",
 		type: "novelty",
-		reward: 4
+		reward: 4,
 	},
 	{
 		key: "tripletake",
 		name: "Triple Take",
 		explainer: "Make the same word thrice in one game",
 		type: "novelty",
-		reward: 5
+		reward: 5,
 	},
 ];
 
@@ -395,8 +395,7 @@ export const legendaryAchievements: LegendaryAchievement[] = [
 		name: "Half Looper",
 		explainer: "Make it through half the word list",
 		type: "legendary",
-		reward: 25
-
+		reward: 25,
 	},
 	{
 		key: "looper",
@@ -433,15 +432,15 @@ export const secretAchievements: SecretAchievement[] = [
 		name: "Lucky Thirteen",
 		explainer: "Clear numbers adding up to 13",
 		type: "secret",
-		reward: 4
+		reward: 4,
 	},
 	{
 		key: "adults",
 		name: "Adults Only",
 		explainer: "Clear 3 X's in one game",
 		type: "secret",
-		reward: 5
-	}
+		reward: 5,
+	},
 ];
 
 export const dailyWordAchievements: DailyWordAchievement[] = [
@@ -475,7 +474,7 @@ export const ranksList: Rank[] = [
 	{ name: "Senior Master", starsToFill: 7 },
 	{ name: "International Master", starsToFill: 8 },
 	{ name: "Grandmaster", starsToFill: 9 },
-].map((rk, i) => ({...rk, level: i+1}));
+].map((rk, i) => ({ ...rk, level: i + 1 }));
 
 /**
  * Calculate streak progress for a given threshold
@@ -485,14 +484,14 @@ export const ranksList: Rank[] = [
  */
 export function calculateStreakProgress(
 	gameHist: GameRecord[],
-	threshold: number
+	threshold: number,
 ): number {
 	if (gameHist.length === 0) return 0;
 
 	// Get last 3 games (or fewer if not enough history)
 	const recentGames = gameHist
 		.slice(-3)
-		.map(gr => gr.abandoned ? 0 : gr.score);
+		.map((gr) => (gr.abandoned ? 0 : gr.score));
 
 	// Count consecutive qualifying games from the END
 	let progress = 0;
@@ -503,7 +502,7 @@ export function calculateStreakProgress(
 			break; // Streak broken
 		}
 	}
-	console.log(progress, threshold)
+	console.log(progress, threshold);
 
 	return Math.min(progress, 3); // Cap at 3
 }

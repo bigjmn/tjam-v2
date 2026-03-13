@@ -69,21 +69,19 @@ function Tile({
 	// const STAGGER = 60; // ms delay per column index
 	const FLIP_DURATION = 800;
 
-	const { colors } = useTheme()
-
+	const { colors } = useTheme();
 
 	// Entrance animation for new home row tiles
 	useEffect(() => {
-		
 		if (isNew && starty === 0) {
-			const delay = 400
+			const delay = 400;
 			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,
 				withTiming(targetX, {
 					duration: SLIDE_DURATION,
 					// easing: Easing.out(Easing.cubic),
-					easing: Easing.linear
+					easing: Easing.linear,
 				}),
 			);
 			// opacity.value = withDelay(delay, withTiming(1, { duration: 80 }));
@@ -94,13 +92,13 @@ function Tile({
 	useEffect(() => {
 		if (isHomeRowExiting) {
 			// gearloadSound()
-			const delay = 50
+			const delay = 50;
 			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,
 				withTiming(translateX.value - 380, {
 					duration: SLIDE_DURATION,
-					easing: Easing.linear
+					easing: Easing.linear,
 					// easing: Easing.in(Easing.cubic),
 				}),
 			);
@@ -204,26 +202,26 @@ function Tile({
 	// Front face style for flip animation
 	const frontFaceStyle = useAnimatedStyle(() => ({
 		transform: [{ rotateY: `${rotateY.value}deg` }],
-		backfaceVisibility: 'hidden',
-		position: 'absolute',
-		width: '100%',
-		height: '100%',
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius:12
+		backfaceVisibility: "hidden",
+		position: "absolute",
+		width: "100%",
+		height: "100%",
+		justifyContent: "center",
+		alignItems: "center",
+		borderRadius: 12,
 	}));
 
 	// Back face style for flip animation (pre-rotated 180deg)
 	const backFaceStyle = useAnimatedStyle(() => ({
 		transform: [{ rotateY: `${rotateY.value + 180}deg` }],
-		backfaceVisibility: 'hidden',
-		position: 'absolute',
-		width: '100%',
-		height: '100%',
-		justifyContent: 'center',
-		alignItems: 'center',
+		backfaceVisibility: "hidden",
+		position: "absolute",
+		width: "100%",
+		height: "100%",
+		justifyContent: "center",
+		alignItems: "center",
 		backgroundColor: colors.tileFrozen,
-		borderRadius:12
+		borderRadius: 12,
 	}));
 	//style of 'shadow' on square currently dragged over
 	const underlay = useAnimatedStyle(() => {
@@ -241,22 +239,24 @@ function Tile({
 				{ translateY: translation.y },
 			],
 			zIndex: 0,
-			backgroundColor: !inMotion ? "transparent" : [
-				"00",
-				"10",
-				"20",
-				"02",
-				"12",
-				"22",
-				"03",
-				"13",
-				"23",
-				"04",
-				"14",
-				"24",
-			].includes(position)
-				? "#aaa"
-				: "transparent",
+			backgroundColor: !inMotion
+				? "transparent"
+				: [
+							"00",
+							"10",
+							"20",
+							"02",
+							"12",
+							"22",
+							"03",
+							"13",
+							"23",
+							"04",
+							"14",
+							"24",
+					  ].includes(position)
+					? "#aaa"
+					: "transparent",
 		};
 	});
 	// new tile dragging event
@@ -336,7 +336,7 @@ function Tile({
 	);
 }
 
-export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
+export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 	const {
 		tiles,
 		inMotion,
@@ -362,12 +362,13 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 	const { colors } = useTheme();
 
 	// Determine tile color based on variant
-	const movableTileColor = vKey === "scrabble" ? "#F285D1" : colors.tileMovable;
+	const movableTileColor =
+		vKey === "scrabble" ? "#F285D1" : colors.tileMovable;
 
 	useFocusEffect(
 		useCallback(() => {
 			startGame();
-		}, [])
+		}, []),
 	);
 
 	const openExitModal = () => {
@@ -403,7 +404,12 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
-				<GameHeader onExitPress={openExitModal} headerName={vKey === "scrabble" ? "ScrabWord Jam" : "Trio Jam"} />
+				<GameHeader
+					onExitPress={openExitModal}
+					headerName={
+						vKey === "scrabble" ? "ScrabWord Jam" : "Trio Jam"
+					}
+				/>
 				<ExitConfirmModal
 					visible={showExitModal}
 					onCancel={closeExitModal}
@@ -434,8 +440,12 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 										}
 										isNew={tile.isNew}
 										isHomeRowExiting={tile.isHomeRowExiting}
-										shouldFlip={flippingTileIds.has(tile.id)}
-										shouldPinwheel={pinwheelingTileIds.has(tile.id)}
+										shouldFlip={flippingTileIds.has(
+											tile.id,
+										)}
+										shouldPinwheel={pinwheelingTileIds.has(
+											tile.id,
+										)}
 										movableTileColor={movableTileColor}
 									/>
 								))}
@@ -448,13 +458,20 @@ export default function Game({vKey}:{vKey?:VariantKey|undefined}) {
 								styles.buttonStyle,
 								{
 									opacity:
-										!validBoard || !!inMotion || isAnimating ? 0.3 : 1,
+										!validBoard || !!inMotion || isAnimating
+											? 0.3
+											: 1,
 								},
 							]}
 							onPress={handleCommitMove}
 							hitSlop={10}
 						>
-							<ThemedText style={{color:"white"}} variant="strong">Commit Move</ThemedText>
+							<ThemedText
+								style={{ color: "white" }}
+								variant="strong"
+							>
+								Commit Move
+							</ThemedText>
 						</ThemedButton>
 						{/* <Pressable
 						disabled={!validBoard || !!inMotion}

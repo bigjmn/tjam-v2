@@ -27,7 +27,10 @@ export default function ExitConfirmModal({
 		>
 			<Pressable style={styles.overlay} onPress={onCancel}>
 				<Pressable
-					style={[styles.modalView, { backgroundColor: colors.background }]}
+					style={[
+						styles.modalView,
+						{ backgroundColor: colors.background },
+					]}
 					onPress={(e) => e.stopPropagation()}
 				>
 					<ThemedText variant="header2" style={styles.title}>

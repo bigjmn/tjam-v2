@@ -238,9 +238,15 @@ export default function UsernamePicker() {
 						]}
 					>
 						<Ionicons
-							name={user?.isAnonymous ? "person-outline" : "person"}
+							name={
+								user?.isAnonymous ? "person-outline" : "person"
+							}
 							size={24}
-							color={user?.isAnonymous ? colors.mutedText : colors.primary}
+							color={
+								user?.isAnonymous
+									? colors.mutedText
+									: colors.primary
+							}
 						/>
 					</View>
 					<View style={styles.headerText}>
@@ -292,7 +298,10 @@ export default function UsernamePicker() {
 						{/* Right side actions */}
 						<View style={styles.actionButtons}>
 							{isLoading ? (
-								<ActivityIndicator size="small" color={colors.primary} />
+								<ActivityIndicator
+									size="small"
+									color={colors.primary}
+								/>
 							) : isEditing && hasChanged ? (
 								<>
 									<View
@@ -314,7 +323,8 @@ export default function UsernamePicker() {
 										style={[
 											styles.actionButton,
 											{
-												backgroundColor: colors.primary + "20",
+												backgroundColor:
+													colors.primary + "20",
 											},
 										]}
 									>
@@ -340,8 +350,14 @@ export default function UsernamePicker() {
 									<Ionicons
 										name="pencil"
 										size={18}
-										color={isDisabled ? colors.mutedText : colors.primary}
-										onPress={isDisabled ? undefined : handleEdit}
+										color={
+											isDisabled
+												? colors.mutedText
+												: colors.primary
+										}
+										onPress={
+											isDisabled ? undefined : handleEdit
+										}
 									/>
 								</View>
 							)}
@@ -364,7 +380,12 @@ export default function UsernamePicker() {
 
 				{/* Status messages */}
 				{isLoading && (
-					<View style={[styles.messageContainer, styles.loadingContainer]}>
+					<View
+						style={[
+							styles.messageContainer,
+							styles.loadingContainer,
+						]}
+					>
 						<ThemedText variant="soft" style={styles.messageText}>
 							Updating username...
 						</ThemedText>
@@ -378,7 +399,11 @@ export default function UsernamePicker() {
 							{ backgroundColor: "#4ade8015" },
 						]}
 					>
-						<Ionicons name="checkmark-circle" size={16} color="#4ade80" />
+						<Ionicons
+							name="checkmark-circle"
+							size={16}
+							color="#4ade80"
+						/>
 						<ThemedText
 							variant="soft"
 							style={[styles.messageText, { color: "#4ade80" }]}
@@ -390,9 +415,16 @@ export default function UsernamePicker() {
 
 				{error && (
 					<View
-						style={[styles.messageContainer, { backgroundColor: "#ff444415" }]}
+						style={[
+							styles.messageContainer,
+							{ backgroundColor: "#ff444415" },
+						]}
 					>
-						<Ionicons name="alert-circle" size={16} color="#ff4444" />
+						<Ionicons
+							name="alert-circle"
+							size={16}
+							color="#ff4444"
+						/>
 						<ThemedText
 							variant="soft"
 							style={[styles.messageText, { color: "#ff4444" }]}
@@ -411,7 +443,8 @@ export default function UsernamePicker() {
 							color={colors.mutedText}
 						/>
 						<ThemedText variant="soft" style={styles.helperText}>
-							Sign in with Google or Apple to set a custom username
+							Sign in with Google or Apple to set a custom
+							username
 						</ThemedText>
 					</View>
 				)}

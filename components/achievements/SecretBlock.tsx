@@ -30,12 +30,12 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 		const blockTranslateY = useSharedValue(SCREEN_HEIGHT);
 		const blockTranslateX = useSharedValue(0);
 
-		const { achieveSound } = useSfx()
+		const { achieveSound } = useSfx();
 
 		// Store shared values in a ref - create them imperatively, not with hooks
-		const tileRotations = React.useRef<Map<string, Animated.SharedValue<number>>>(
-			new Map()
-		);
+		const tileRotations = React.useRef<
+			Map<string, Animated.SharedValue<number>>
+		>(new Map());
 
 		// Helper to get or create rotation value (imperatively using makeMutable)
 		const getRotation = (key: string): Animated.SharedValue<number> => {
@@ -63,7 +63,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 							...revealedKeys,
 							achievementKey,
 						]);
-						runOnJS(achieveSound)()
+						runOnJS(achieveSound)();
 						runOnJS(resolve)();
 					},
 				);

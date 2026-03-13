@@ -10,10 +10,20 @@ const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_WEB_ID;
 const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_IOS_ID;
 
 if (!WEB_CLIENT_ID || !IOS_CLIENT_ID) {
-	console.error("🔴 [GoogleAuth] CRITICAL: Missing Google OAuth credentials!");
-	console.error("🔴 [GoogleAuth] WEB_CLIENT_ID:", WEB_CLIENT_ID ? "✓" : "❌ MISSING");
-	console.error("🔴 [GoogleAuth] IOS_CLIENT_ID:", IOS_CLIENT_ID ? "✓" : "❌ MISSING");
-	console.error("🔴 [GoogleAuth] App will crash if Google Sign-In is attempted!");
+	console.error(
+		"🔴 [GoogleAuth] CRITICAL: Missing Google OAuth credentials!",
+	);
+	console.error(
+		"🔴 [GoogleAuth] WEB_CLIENT_ID:",
+		WEB_CLIENT_ID ? "✓" : "❌ MISSING",
+	);
+	console.error(
+		"🔴 [GoogleAuth] IOS_CLIENT_ID:",
+		IOS_CLIENT_ID ? "✓" : "❌ MISSING",
+	);
+	console.error(
+		"🔴 [GoogleAuth] App will crash if Google Sign-In is attempted!",
+	);
 } else {
 	console.log("✅ [GoogleAuth] Google OAuth credentials loaded successfully");
 }

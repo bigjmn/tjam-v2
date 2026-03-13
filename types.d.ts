@@ -50,7 +50,7 @@ interface PlayerStats {
 	numGames: number;
 	gameHist: GameRecord[];
 	achievementsWon: string[];
-	dateJoined:Date;
+	dateJoined: Date;
 	username?: string;
 	email?: string;
 }
@@ -175,7 +175,6 @@ type AchievementAnimationEvent =
 	| RevealSecretEvent
 	| ShowRankUpEvent;
 
-
 interface StatBoxProps {
 	highScore: number;
 	globalRank: number;
@@ -187,26 +186,25 @@ interface StatBoxProps {
 
 interface VariantBests {
 	scrabble: number;
-	fours: number,
-	fiveline: number
+	fours: number;
+	fiveline: number;
 }
 
-type VariantKey = "scrabble"|"fours"|"fiveline"
+type VariantKey = "scrabble" | "fours" | "fiveline";
 
 interface GameVariant {
 	key: VariantKey;
-	name: string; 
-	rules: string; 
-	unlockLevel: number; 
-
+	name: string;
+	rules: string;
+	unlockLevel: number;
 }
 interface WordOfDayStats {
-	longestStreak:number;
-	currentStreak:number;
-	wodRate:number;
+	longestStreak: number;
+	currentStreak: number;
+	wodRate: number;
 }
 
 interface VariantScore {
-	variant:VariantKey;
-	score:number;
+	variant: VariantKey;
+	score: number;
 }

@@ -6,292 +6,298 @@ import { useSfx } from "../../hooks/useSfx";
 import { turnLog } from "../../utils/loggers";
 import fourlets from "../../assets/fourLetterWords";
 export const useFourgame = () => {
-    const { wooshSound, gearloadSound } = useSfx()
-    const [tiles, setTiles] = useState<Tile[]>([]);
-    const [wordList, setWordList] = useState(shuffle(fourlets));
-    const [inMotion, setInMotion] = useState<string | null>(null);
-    const [takenSpots, setTakenSpots] = useState<string[]>([]);
+	const { wooshSound, gearloadSound } = useSfx();
+	const [tiles, setTiles] = useState<Tile[]>([]);
+	const [wordList, setWordList] = useState(shuffle(fourlets));
+	const [inMotion, setInMotion] = useState<string | null>(null);
+	const [takenSpots, setTakenSpots] = useState<string[]>([]);
 
-    const [wordNum, setWordNum] = useState<number | null>(null);
-    //squares in rows/cols containing words
-    const [validRows, setValidRows] = useState<string[]>([]);
-    //if two tiles have been placed.
-    const [validBoard, setValidBoard] = useState<boolean>(false);
-    //tile id of sole tile in 'home row', if any
-    const [frozenHome, setFrozenHome] = useState<string | null>(null);
-    //tile in motion, so others can't move
+	const [wordNum, setWordNum] = useState<number | null>(null);
+	//squares in rows/cols containing words
+	const [validRows, setValidRows] = useState<string[]>([]);
+	//if two tiles have been placed.
+	const [validBoard, setValidBoard] = useState<boolean>(false);
+	//tile id of sole tile in 'home row', if any
+	const [frozenHome, setFrozenHome] = useState<string | null>(null);
+	//tile in motion, so others can't move
 
-    const [validWords, setValidWords] = useState<string[]>([]);
-    const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
+	const [validWords, setValidWords] = useState<string[]>([]);
+	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
 
-    const [gameActive, setGameActive] = useState(false)
-    const [isAnimating, setIsAnimating] = useState(false);
-    const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(new Set());
-    const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(new Set());
+	const [gameActive, setGameActive] = useState(false);
+	const [isAnimating, setIsAnimating] = useState(false);
+	const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(
+		new Set(),
+	);
+	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(
+		new Set(),
+	);
 
-    const router = useRouter();
+	const router = useRouter();
 
-    const achieve = useAchievements();
+	const achieve = useAchievements();
 
-    const checkSquareArr = (arr: string[]) => {
-        let rowword = "";
-        //for each square in a row
-        for (let i = 0; i < 4; i++) {
-            let squarecheck = arr[i];
-            //find the tile sitting on the square
-            let tilecheck = tiles.find((tile) => tile.sitOn === squarecheck);
-            //if there is no tile, this row can't have a valid word
-            if (!tilecheck) {
-                return false;
-            }
-            rowword += tilecheck.letter;
-        }
-        if (wordList.includes(rowword)) {
-            return rowword;
-        }
-        //returns true if the 3 letter string is on the word list, false otherwise
-        return false;
-    };
+	const checkSquareArr = (arr: string[]) => {
+		let rowword = "";
+		//for each square in a row
+		for (let i = 0; i < 4; i++) {
+			let squarecheck = arr[i];
+			//find the tile sitting on the square
+			let tilecheck = tiles.find((tile) => tile.sitOn === squarecheck);
+			//if there is no tile, this row can't have a valid word
+			if (!tilecheck) {
+				return false;
+			}
+			rowword += tilecheck.letter;
+		}
+		if (wordList.includes(rowword)) {
+			return rowword;
+		}
+		//returns true if the 3 letter string is on the word list, false otherwise
+		return false;
+	};
 
-    //checking all the rows/cols
-    const checkValidRows = () => {
-        // can't check without a word list
-        if (!wordList) {
-            return;
-        }
-        let valWords = [];
-        let valSquares = [];
-        //list of rows AND columns. may as well do this one by hand
-        let rowList = [
-            ["02", "12", "22","32"],
-            ["03", "13", "23","33"],
-            ["04", "14", "24","34"],
-            ["05","15","25","35"],
-            ["02", "03", "04","05"],
-            ["12", "13", "14","15"],
-            ["22", "23", "24","25"],
-            ["32","33","34","35"]
-        ];
-        // filter into rows/cols with valid words. flatten array to get squares.
-        // will occasionally double count squares, but that doesn't matter
+	//checking all the rows/cols
+	const checkValidRows = () => {
+		// can't check without a word list
+		if (!wordList) {
+			return;
+		}
+		let valWords = [];
+		let valSquares = [];
+		//list of rows AND columns. may as well do this one by hand
+		let rowList = [
+			["02", "12", "22", "32"],
+			["03", "13", "23", "33"],
+			["04", "14", "24", "34"],
+			["05", "15", "25", "35"],
+			["02", "03", "04", "05"],
+			["12", "13", "14", "15"],
+			["22", "23", "24", "25"],
+			["32", "33", "34", "35"],
+		];
+		// filter into rows/cols with valid words. flatten array to get squares.
+		// will occasionally double count squares, but that doesn't matter
 
-        for (let i = 0; i < rowList.length; i++) {
-            let madeWord = checkSquareArr(rowList[i]);
-            if (madeWord) {
-                valWords.push(madeWord);
-                valSquares.push(rowList[i]);
-            }
-        }
-        setValidWords(valWords);
+		for (let i = 0; i < rowList.length; i++) {
+			let madeWord = checkSquareArr(rowList[i]);
+			if (madeWord) {
+				valWords.push(madeWord);
+				valSquares.push(rowList[i]);
+			}
+		}
+		setValidWords(valWords);
 
-        setValidRows(valSquares.flat());
-    };
+		setValidRows(valSquares.flat());
+	};
 
-    //checking if 2 tiles placed, i.e. move can be submitted
+	//checking if 2 tiles placed, i.e. move can be submitted
 
-    const checkValidBoard = () => {
-        //list of tiles sitting on the 'home' row
-        let hometiles = tiles.filter((tile) => tile.sitOn[1] == "0");
-        //if 1, mark the id as frozen
-        if (hometiles.length == 1) {
-            let frozenId = hometiles[0].id;
-            setFrozenHome(frozenId);
-            setValidBoard(true);
-        } else {
-            setFrozenHome(null);
-            setValidBoard(false);
-        }
-    };
+	const checkValidBoard = () => {
+		//list of tiles sitting on the 'home' row
+		let hometiles = tiles.filter((tile) => tile.sitOn[1] == "0");
+		//if 1, mark the id as frozen
+		if (hometiles.length == 1) {
+			let frozenId = hometiles[0].id;
+			setFrozenHome(frozenId);
+			setValidBoard(true);
+		} else {
+			setFrozenHome(null);
+			setValidBoard(false);
+		}
+	};
 
-    //updating which squares are taken
-    const markTaken = () => {
-        let squarestaken = tiles.map((tile) => tile.sitOn);
-        setTakenSpots(squarestaken);
-    };
+	//updating which squares are taken
+	const markTaken = () => {
+		let squarestaken = tiles.map((tile) => tile.sitOn);
+		setTakenSpots(squarestaken);
+	};
 
-    const getBoardstate = (tileList: Tile[]) => {
-        return boardSquares()
-            .map((bs) => {
-                const tLoc = tileList.find((x) => x.sitOn === bs);
-                return tLoc ? tLoc.letter : "*";
-            })
-            .join("");
-    };
+	const getBoardstate = (tileList: Tile[]) => {
+		return boardSquares()
+			.map((bs) => {
+				const tLoc = tileList.find((x) => x.sitOn === bs);
+				return tLoc ? tLoc.letter : "*";
+			})
+			.join("");
+	};
 
-    const getNextBoard = () => {
-        if (wordNum === null) {
-            return;
-        }
+	const getNextBoard = () => {
+		if (wordNum === null) {
+			return;
+		}
 
-        // Step 1: Mark old home row tiles for exit animation
-        const tilesWithExit = tiles.map((tile) => {
-            if (tile.sitOn[1] === "0") {
-                return { ...tile, isHomeRowExiting: true };
-            }
-            return tile;
-        });
-        setTiles(tilesWithExit);
+		// Step 1: Mark old home row tiles for exit animation
+		const tilesWithExit = tiles.map((tile) => {
+			if (tile.sitOn[1] === "0") {
+				return { ...tile, isHomeRowExiting: true };
+			}
+			return tile;
+		});
+		setTiles(tilesWithExit);
 
-        // Step 2: Wait for exit animation, then add new tiles
-        setTimeout(() => {
-            const word = wordList[wordNum];
-            const wordParts = word.split("");
-            const newTiles: Tile[] = wordParts.map((w, i) => ({
-                id: "w" + wordNum.toString() + "l" + i.toString(),
-                letter: w,
-                x: i,
-                y: 0,
-                sitOn: i.toString() + "0",
-                canMove: true,
-                isNew: true,
-            }));
+		// Step 2: Wait for exit animation, then add new tiles
+		setTimeout(() => {
+			const word = wordList[wordNum];
+			const wordParts = word.split("");
+			const newTiles: Tile[] = wordParts.map((w, i) => ({
+				id: "w" + wordNum.toString() + "l" + i.toString(),
+				letter: w,
+				x: i,
+				y: 0,
+				sitOn: i.toString() + "0",
+				canMove: true,
+				isNew: true,
+			}));
 
-            const clearedLets = tiles
-                .filter(
-                    (tile) =>
-                        tile.sitOn[1] != "0" &&
-                        !tile.canMove &&
-                        validRows.includes(tile.sitOn),
-                )
-                .map((tile) => tile.letter);
+			const clearedLets = tiles
+				.filter(
+					(tile) =>
+						tile.sitOn[1] != "0" &&
+						!tile.canMove &&
+						validRows.includes(tile.sitOn),
+				)
+				.map((tile) => tile.letter);
 
-            //filter out old tiles in words and remaining in home row
-            //and make moveable tiles unmovable, then add new tiles
-            const newboard = [
-                ...tiles
-                    .filter(
-                        (tile) =>
-                            tile.sitOn[1] != "0" &&
-                            (tile.canMove || !validRows.includes(tile.sitOn)),
-                    )
-                    .map((tile) => ({ ...tile, canMove: false })),
-                ...newTiles,
-            ];
-            const stringBoard = getBoardstate(newboard);
-            const turnInfo: TurnInfo = {
-                givenWord: wordList[wordNum],
-                turnNo: wordNum,
-                wordsMade: validWords,
-                lettersCleared: clearedLets,
-                boardState: stringBoard,
-            };
+			//filter out old tiles in words and remaining in home row
+			//and make moveable tiles unmovable, then add new tiles
+			const newboard = [
+				...tiles
+					.filter(
+						(tile) =>
+							tile.sitOn[1] != "0" &&
+							(tile.canMove || !validRows.includes(tile.sitOn)),
+					)
+					.map((tile) => ({ ...tile, canMove: false })),
+				...newTiles,
+			];
+			const stringBoard = getBoardstate(newboard);
+			const turnInfo: TurnInfo = {
+				givenWord: wordList[wordNum],
+				turnNo: wordNum,
+				wordsMade: validWords,
+				lettersCleared: clearedLets,
+				boardState: stringBoard,
+			};
 
-            setGameTurns((gt) => [...gt, turnInfo]);
-            turnLog(turnInfo)
-            setTiles(newboard);
+			setGameTurns((gt) => [...gt, turnInfo]);
+			turnLog(turnInfo);
+			setTiles(newboard);
 
-            if (newboard.length >= 18) {
-                handleGameEnd();
-            }
-        }, 500); // Wait for staggered exit animations to complete
-    };
-    const nextTurn = () => {
-        setWordNum((w) => (w === null ? 0 : w + 1));
-    };
+			if (newboard.length >= 18) {
+				handleGameEnd();
+			}
+		}, 500); // Wait for staggered exit animations to complete
+	};
+	const nextTurn = () => {
+		setWordNum((w) => (w === null ? 0 : w + 1));
+	};
 
-    const handleCommitMove = () => {
-        console.log('ANIMATION START');
+	const handleCommitMove = () => {
+		console.log("ANIMATION START");
 
-        // Capture which tiles should animate RIGHT NOW (before state changes)
-        const tilesToFlip = new Set(
-            tiles.filter(t => (t.canMove && t.id !== frozenHome)).map(t => t.id)
-        );
-        const tilesToPinwheel = new Set(
-            tiles.filter(t => validRows.includes(t.sitOn) && !t.canMove).map(t => t.id)
-        );
+		// Capture which tiles should animate RIGHT NOW (before state changes)
+		const tilesToFlip = new Set(
+			tiles
+				.filter((t) => t.canMove && t.id !== frozenHome)
+				.map((t) => t.id),
+		);
+		const tilesToPinwheel = new Set(
+			tiles
+				.filter((t) => validRows.includes(t.sitOn) && !t.canMove)
+				.map((t) => t.id),
+		);
 
-        setFlippingTileIds(tilesToFlip);
-        setPinwheelingTileIds(tilesToPinwheel);
-        setIsAnimating(true);
-        if (tilesToPinwheel.size !== 0){
-            wooshSound()
-        }
+		setFlippingTileIds(tilesToFlip);
+		setPinwheelingTileIds(tilesToPinwheel);
+		setIsAnimating(true);
+		if (tilesToPinwheel.size !== 0) {
+			wooshSound();
+		}
 
-        // Wait for flip animation to complete, then trigger next turn
-        setTimeout(() => {
-            console.log('ANIMATION END');
-            nextTurn();
-            console.log('NEXT TURN TRIGGERED');
+		// Wait for flip animation to complete, then trigger next turn
+		setTimeout(() => {
+			console.log("ANIMATION END");
+			nextTurn();
+			console.log("NEXT TURN TRIGGERED");
 
-            // Wait for getNextBoard to update tiles (500ms) before clearing animation state
-            setTimeout(() => {
-                setIsAnimating(false);
-                setFlippingTileIds(new Set());
-                setPinwheelingTileIds(new Set());
-            }, 550);
-        }, 950);
-    };
+			// Wait for getNextBoard to update tiles (500ms) before clearing animation state
+			setTimeout(() => {
+				setIsAnimating(false);
+				setFlippingTileIds(new Set());
+				setPinwheelingTileIds(new Set());
+			}, 550);
+		}, 950);
+	};
 
+	const handleGameEnd = () => {
+		const newScore = gameTurns.length;
+		setGameActive(false);
+		const varscore: VariantScore = { score: newScore, variant: "fours" };
+		const scoreInfo = JSON.stringify(varscore);
+		router.push({
+			pathname: "/variantresults",
+			params: {
+				scoreJson: scoreInfo,
+			},
+		});
+	};
 
+	const handleAbandonGame = () => {
+		router.push("/(dashboard)/home");
+	};
 
-    const handleGameEnd = () => {
-        const newScore = gameTurns.length
-        setGameActive(false)
-        const varscore:VariantScore = {score:newScore, variant:"fours"}
-        const scoreInfo = JSON.stringify(varscore)
-        router.push({
-            pathname: "/variantresults",
-            params: {
-                scoreJson: scoreInfo
-            },
-        });
-    };
+	const startGame = () => {
+		setTiles([]);
+		setGameActive(true);
+		setWordList(shuffle(fourlets));
+		setWordNum(0);
+		setGameTurns([]);
+	};
 
-    const handleAbandonGame = () => {
-        router.push("/(dashboard)/home");
-    };
+	const givePos = (id: string, pos: string) => {
+		setTiles(
+			tiles.map((tile) =>
+				tile.id === id ? { ...tile, sitOn: pos } : tile,
+			),
+		);
+		setInMotion(null);
+	};
 
-    const startGame = () => {
-        setTiles([])
-        setGameActive(true)
-        setWordList(shuffle(fourlets));
-        setWordNum(0);
-        setGameTurns([]);
-    };
+	const claimMovement = (id: string) => {
+		setInMotion(id);
+	};
 
-    const givePos = (id: string, pos: string) => {
-        setTiles(
-            tiles.map((tile) =>
-                tile.id === id ? { ...tile, sitOn: pos } : tile,
-            ),
-        );
-        setInMotion(null);
-    };
+	useEffect(() => {
+		if (!gameActive) {
+			return;
+		}
+		markTaken();
+		checkValidRows();
+		checkValidBoard();
+	}, [tiles]);
 
-    const claimMovement = (id: string) => {
-        setInMotion(id);
-    };
+	useEffect(() => {
+		getNextBoard();
+	}, [wordNum]);
 
-    useEffect(() => {
-        if (!gameActive){
-            return
-        }
-        markTaken();
-        checkValidRows();
-        checkValidBoard();
-    }, [tiles]);
-
-    useEffect(() => {
-        getNextBoard();
-    }, [wordNum]);
-
-    return {
-        tiles,
-        inMotion,
-        takenSpots,
-        validBoard,
-        validRows,
-        givePos,
-        claimMovement,
-        nextTurn,
-        wordNum,
-        frozenHome,
-        startGame,
-        gameTurns,
-        handleAbandonGame,
-        handleCommitMove,
-        isAnimating,
-        flippingTileIds,
-        pinwheelingTileIds,
-    };
+	return {
+		tiles,
+		inMotion,
+		takenSpots,
+		validBoard,
+		validRows,
+		givePos,
+		claimMovement,
+		nextTurn,
+		wordNum,
+		frozenHome,
+		startGame,
+		gameTurns,
+		handleAbandonGame,
+		handleCommitMove,
+		isAnimating,
+		flippingTileIds,
+		pinwheelingTileIds,
+	};
 };

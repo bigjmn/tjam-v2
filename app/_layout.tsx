@@ -7,14 +7,14 @@ import { Stack } from "expo-router";
 import { UserProvider } from "../providers/UserProviderFixed";
 import "react-native-reanimated";
 import {
-  configureReanimatedLogger,
-  ReanimatedLogLevel,
-} from 'react-native-reanimated';
+	configureReanimatedLogger,
+	ReanimatedLogLevel,
+} from "react-native-reanimated";
 
 // This is the default configuration
 configureReanimatedLogger({
-  level: ReanimatedLogLevel.warn,
-  strict: false, // Reanimated runs in strict mode by default
+	level: ReanimatedLogLevel.warn,
+	strict: false, // Reanimated runs in strict mode by default
 });
 const RootLayout = () => {
 	const { colors } = useTheme();
@@ -38,9 +38,6 @@ const RootLayout = () => {
 							name="(auth)"
 							options={{ headerShown: false }}
 						/>
-						
-
-						
 					</Stack>
 				</ThemedView>
 			</UserProvider>

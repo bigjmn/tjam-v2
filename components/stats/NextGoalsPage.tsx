@@ -30,7 +30,10 @@ export const NextGoalsPage: React.FC = () => {
 	const streakProgress = React.useMemo(() => {
 		if (!playerStats || !streaking) return 0;
 		const achievement = streaking as StreakingAchievement;
-		return calculateStreakProgress(playerStats.gameHist, achievement.streakScore);
+		return calculateStreakProgress(
+			playerStats.gameHist,
+			achievement.streakScore,
+		);
 	}, [playerStats, streaking]);
 
 	return (

@@ -21,17 +21,27 @@ const DividerWithText = ({
 	if (isDate) {
 		return (
 			<ThemedView style={[styles.container, style]}>
-				<ThemedView style={[styles.line, { backgroundColor: colors.mutedText }]} />
+				<ThemedView
+					style={[styles.line, { backgroundColor: colors.mutedText }]}
+				/>
 				<ThemedText variant="italic">{text}</ThemedText>
-				<ThemedView style={[styles.line, { backgroundColor: colors.mutedText }]} />
+				<ThemedView
+					style={[styles.line, { backgroundColor: colors.mutedText }]}
+				/>
 			</ThemedView>
 		);
 	}
 	return (
 		<ThemedView style={[styles.container, style]}>
-			<ThemedView style={[styles.line, { backgroundColor: colors.mutedText }]} />
-			<ThemedText style={[styles.text, { color: colors.text }]}>{text}</ThemedText>
-			<ThemedView style={[styles.line, { backgroundColor: colors.mutedText }]} />
+			<ThemedView
+				style={[styles.line, { backgroundColor: colors.mutedText }]}
+			/>
+			<ThemedText style={[styles.text, { color: colors.text }]}>
+				{text}
+			</ThemedText>
+			<ThemedView
+				style={[styles.line, { backgroundColor: colors.mutedText }]}
+			/>
 		</ThemedView>
 	);
 };

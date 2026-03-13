@@ -22,8 +22,12 @@ export const useFiveline = () => {
 
 	const [gameActive, setGameActive] = useState(false);
 	const [isAnimating, setIsAnimating] = useState(false);
-	const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(new Set());
-	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(new Set());
+	const [flippingTileIds, setFlippingTileIds] = useState<Set<string>>(
+		new Set(),
+	);
+	const [pinwheelingTileIds, setPinwheelingTileIds] = useState<Set<string>>(
+		new Set(),
+	);
 
 	const router = useRouter();
 
@@ -162,10 +166,14 @@ export const useFiveline = () => {
 
 	const handleCommitMove = () => {
 		const tilesToFlip = new Set(
-			tiles.filter((t) => t.canMove && t.id !== frozenHome).map((t) => t.id),
+			tiles
+				.filter((t) => t.canMove && t.id !== frozenHome)
+				.map((t) => t.id),
 		);
 		const tilesToPinwheel = new Set(
-			tiles.filter((t) => validRows.includes(t.sitOn) && !t.canMove).map((t) => t.id),
+			tiles
+				.filter((t) => validRows.includes(t.sitOn) && !t.canMove)
+				.map((t) => t.id),
 		);
 
 		setFlippingTileIds(tilesToFlip);
@@ -210,7 +218,11 @@ export const useFiveline = () => {
 	};
 
 	const givePos = (id: string, pos: string) => {
-		setTiles(tiles.map((tile) => (tile.id === id ? { ...tile, sitOn: pos } : tile)));
+		setTiles(
+			tiles.map((tile) =>
+				tile.id === id ? { ...tile, sitOn: pos } : tile,
+			),
+		);
 		setInMotion(null);
 	};
 

@@ -176,7 +176,10 @@ function Tile({
 	}));
 
 	const underlay = useAnimatedStyle(() => {
-		const position = toPosition({ x: translateX.value, y: translateY.value });
+		const position = toPosition({
+			x: translateX.value,
+			y: translateY.value,
+		});
 		const translation = toTranslation(position);
 		return {
 			transform: [
@@ -186,7 +189,9 @@ function Tile({
 			zIndex: 0,
 			backgroundColor: !inMotion
 				? "transparent"
-				: ["00", "10", "20", "02", "12", "22", "32", "42"].includes(position)
+				: ["00", "10", "20", "02", "12", "22", "32", "42"].includes(
+							position,
+					  )
 					? "#aaa"
 					: "transparent",
 		};
@@ -207,7 +212,9 @@ function Tile({
 		.onEnd(() => {
 			isPressed.value = false;
 			runOnJS(popSound)();
-			runOnJS(moveTile)(toPosition({ x: translateX.value, y: translateY.value }));
+			runOnJS(moveTile)(
+				toPosition({ x: translateX.value, y: translateY.value }),
+			);
 		});
 
 	return (
@@ -270,7 +277,10 @@ export default function FivelineGame() {
 	return (
 		<GestureHandlerRootView>
 			<ThemedView style={styles.outerContainer}>
-				<GameHeader onExitPress={() => setShowExitModal(true)} headerName="1D-o Jam" />
+				<GameHeader
+					onExitPress={() => setShowExitModal(true)}
+					headerName="1D-o Jam"
+				/>
 				<ExitConfirmModal
 					visible={showExitModal}
 					onCancel={() => setShowExitModal(false)}
@@ -294,11 +304,15 @@ export default function FivelineGame() {
 									claimMovement={claimMovement}
 									inMotion={inMotion}
 									takenSpots={takenSpots}
-									canMove={tile.canMove && tile.id != frozenHome}
+									canMove={
+										tile.canMove && tile.id != frozenHome
+									}
 									isNew={tile.isNew}
 									isHomeRowExiting={tile.isHomeRowExiting}
 									shouldFlip={flippingTileIds.has(tile.id)}
-									shouldPinwheel={pinwheelingTileIds.has(tile.id)}
+									shouldPinwheel={pinwheelingTileIds.has(
+										tile.id,
+									)}
 								/>
 							))}
 						</ThemedView>
@@ -308,15 +322,24 @@ export default function FivelineGame() {
 							disabled={!validBoard || !!inMotion || isAnimating}
 							style={[
 								styles.buttonStyle,
-								{ opacity: !validBoard || !!inMotion || isAnimating ? 0.3 : 1 },
+								{
+									opacity:
+										!validBoard || !!inMotion || isAnimating
+											? 0.3
+											: 1,
+								},
 							]}
 							onPress={handleCommitMove}
 							hitSlop={10}
 						>
-							<ThemedText variant="strong">Commit Move</ThemedText>
+							<ThemedText variant="strong">
+								Commit Move
+							</ThemedText>
 						</ThemedButton>
 						<View style={styles.scoreHolder}>
-							<ThemedText style={styles.scoreText}>Points: {wordNum}</ThemedText>
+							<ThemedText style={styles.scoreText}>
+								Points: {wordNum}
+							</ThemedText>
 						</View>
 					</View>
 				</ThemedView>

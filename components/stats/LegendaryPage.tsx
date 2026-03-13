@@ -78,6 +78,6 @@ const styles = StyleSheet.create({
 	},
 	tile: {
 		marginVertical: 8,
-		marginRight:16
+		marginRight: 16,
 	},
 });

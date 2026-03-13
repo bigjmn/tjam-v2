@@ -11,11 +11,21 @@ export default function SectionHeader({ title }: SectionHeaderProps) {
 
 	return (
 		<View style={styles.container}>
-			<View style={[styles.divider, { backgroundColor: colors.mutedText + "40" }]} />
+			<View
+				style={[
+					styles.divider,
+					{ backgroundColor: colors.mutedText + "40" },
+				]}
+			/>
 			<ThemedText variant="medium" style={styles.title}>
 				{title}
 			</ThemedText>
-			<View style={[styles.divider, { backgroundColor: colors.mutedText + "40" }]} />
+			<View
+				style={[
+					styles.divider,
+					{ backgroundColor: colors.mutedText + "40" },
+				]}
+			/>
 		</View>
 	);
 }

@@ -19,18 +19,20 @@ export const RulesSection: React.FC = () => {
 						How to Play
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						Every turn, you are given 3 new letters. You must take exactly two of them and place them on the board. If you form a valid word (either across or down) the tiles in that word that were already on the board will disappear. 
+						Every turn, you are given 3 new letters. You must take
+						exactly two of them and place them on the board. If you
+						form a valid word (either across or down) the tiles in
+						that word that were already on the board will disappear.
 					</ThemedText>
 				</View>
-
-				
 
 				<View style={styles.section}>
 					<ThemedText variant="header2" style={styles.sectionTitle}>
 						Achievements
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						Level up by scoring achievements. Higher levels unlock variants and (possibly in the future) new themes! 
+						Level up by scoring achievements. Higher levels unlock
+						variants and (possibly in the future) new themes!
 					</ThemedText>
 				</View>
 
@@ -39,13 +41,16 @@ export const RulesSection: React.FC = () => {
 						Tips
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						• Think in terms of easy-to-clear rows and columns, not individual letters
+						• Think in terms of easy-to-clear rows and columns, not
+						individual letters
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						• Try to put consonants in the corners and vowels in between
+						• Try to put consonants in the corners and vowels in
+						between
 					</ThemedText>
 					<ThemedText variant="regular" style={styles.paragraph}>
-						• The center square can be a useful place to put a troublesome V or K
+						• The center square can be a useful place to put a
+						troublesome V or K
 					</ThemedText>
 				</View>
 			</ScrollView>

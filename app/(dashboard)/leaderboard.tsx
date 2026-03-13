@@ -9,18 +9,18 @@ import ThemedText from "../../components/ui/ThemedText";
 import React from "react";
 export default function LeaderBoard() {
 	const { user, authChecked } = useUser();
-    if (authChecked && (user === null || user.isAnonymous)){
-        return <DeniedLeaderboard />
-    }
-    if (!authChecked || !user){
+	if (authChecked && (user === null || user.isAnonymous)) {
+		return <DeniedLeaderboard />;
+	}
+	if (!authChecked || !user) {
 		return (
 			<ThemedView>
 				<ThemedText>Loading</ThemedText>
 				<ThemedLoader />
 			</ThemedView>
-        )
-    }
-    return <Leaderboard />
+		);
+	}
+	return <Leaderboard />;
 	// const router = useRouter();
 
 	// useEffect(() => {

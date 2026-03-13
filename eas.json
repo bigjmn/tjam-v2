@@ -1,33 +1,33 @@
 {
-  "cli": {
-    "version": ">= 3.0.0",
-    "appVersionSource": "remote"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "ios-development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      }
-    },
-    "preview": {
-      "distribution": "internal"
-    },
-    "production": {
-      "environment": "production",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_WEB_ID": "69866138009-h77bgl4en8rqo6b7f2ieiv0hhuf4sbsi.apps.googleusercontent.com",
-        "EXPO_PUBLIC_IOS_ID": "69866138009-ife8ui5n34uhgur4mqcsmjeol5s4o9nl.apps.googleusercontent.com"
-      }
-    }
-  },
-  "submit": {
-    "production": {}
-  }
+	"cli": {
+		"version": ">= 3.0.0",
+		"appVersionSource": "remote"
+	},
+	"build": {
+		"development": {
+			"developmentClient": true,
+			"distribution": "internal"
+		},
+		"ios-development": {
+			"developmentClient": true,
+			"distribution": "internal",
+			"ios": {
+				"simulator": true
+			}
+		},
+		"preview": {
+			"distribution": "internal"
+		},
+		"production": {
+			"environment": "production",
+			"autoIncrement": true,
+			"env": {
+				"EXPO_PUBLIC_WEB_ID": "69866138009-h77bgl4en8rqo6b7f2ieiv0hhuf4sbsi.apps.googleusercontent.com",
+				"EXPO_PUBLIC_IOS_ID": "69866138009-ife8ui5n34uhgur4mqcsmjeol5s4o9nl.apps.googleusercontent.com"
+			}
+		}
+	},
+	"submit": {
+		"production": {}
+	}
 }

@@ -25,57 +25,57 @@ In your game component (e.g., `components/game/game.tsx`):
 import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
 
 export default function Game() {
-  // ... existing hooks ...
-  const { startTracking, endTracking } = useActiveGameTracking();
+	// ... existing hooks ...
+	const { startTracking, endTracking } = useActiveGameTracking();
 
-  // When game starts (in useEffect or initialization)
-  useEffect(() => {
-    if (gameActive) {
-      console.log("🎮 Game started - beginning tracking");
-      startTracking({
-        variant: "classic",
-        isWordOfDay: false, // Set to true if this is a Word of Day game
-      });
-    }
-  }, [gameActive]);
+	// When game starts (in useEffect or initialization)
+	useEffect(() => {
+		if (gameActive) {
+			console.log("🎮 Game started - beginning tracking");
+			startTracking({
+				variant: "classic",
+				isWordOfDay: false, // Set to true if this is a Word of Day game
+			});
+		}
+	}, [gameActive]);
 
-  // When game ends normally (existing results logic)
-  const handleGameEnd = async () => {
-    // ... existing game end logic ...
+	// When game ends normally (existing results logic)
+	const handleGameEnd = async () => {
+		// ... existing game end logic ...
 
-    // IMPORTANT: End tracking AFTER saving the game record
-    await endTracking();
+		// IMPORTANT: End tracking AFTER saving the game record
+		await endTracking();
 
-    router.push("/(auth)/results");
-  };
+		router.push("/(auth)/results");
+	};
 
-  // When user explicitly abandons (existing confirmExit logic)
-  const confirmExit = async () => {
-    setShowExitModal(false);
+	// When user explicitly abandons (existing confirmExit logic)
+	const confirmExit = async () => {
+		setShowExitModal(false);
 
-    // Save abandoned game record (EXISTING CODE)
-    if (playerStats) {
-      const gameRecord: GameRecord = {
-        timestamp: new Date(),
-        score: wordNum || 0,
-        abandoned: true,
-      };
+		// Save abandoned game record (EXISTING CODE)
+		if (playerStats) {
+			const gameRecord: GameRecord = {
+				timestamp: new Date(),
+				score: wordNum || 0,
+				abandoned: true,
+			};
 
-      const newGameHist = [...playerStats.gameHist, gameRecord];
+			const newGameHist = [...playerStats.gameHist, gameRecord];
 
-      await updatePlayerStats({
-        gameHist: newGameHist,
-        numGames: playerStats.numGames + 1,
-      });
-    }
+			await updatePlayerStats({
+				gameHist: newGameHist,
+				numGames: playerStats.numGames + 1,
+			});
+		}
 
-    // IMPORTANT: End tracking after saving abandoned record
-    await endTracking();
+		// IMPORTANT: End tracking after saving abandoned record
+		await endTracking();
 
-    handleAbandonGame();
-  };
+		handleAbandonGame();
+	};
 
-  // ... rest of component
+	// ... rest of component
 }
 ```
 
@@ -87,8 +87,8 @@ If you have a separate Word of the Day mode:
 
 ```typescript
 startTracking({
-  variant: "wordofday",
-  isWordOfDay: true, // ← Mark as WOD game
+	variant: "wordofday",
+	isWordOfDay: true, // ← Mark as WOD game
 });
 ```
 
@@ -103,9 +103,9 @@ const { startTracking, endTracking } = useActiveGameTracking();
 
 // On game start
 useEffect(() => {
-  if (gameActive) {
-    startTracking({ variant: "fours" }); // or "fiveline"
-  }
+	if (gameActive) {
+		startTracking({ variant: "fours" }); // or "fiveline"
+	}
 }, [gameActive]);
 
 // On game end and abandon
@@ -125,6 +125,7 @@ const BACKGROUND_GRACE_PERIOD = 30000; // 30 seconds
 ```
 
 To:
+
 ```typescript
 const BACKGROUND_GRACE_PERIOD = 60000; // 60 seconds (more forgiving)
 // or
@@ -137,14 +138,14 @@ const BACKGROUND_GRACE_PERIOD = 10000; // 10 seconds (stricter)
 
 ```typescript
 const getGracePeriod = (variant?: string) => {
-  switch (variant) {
-    case "wordofday":
-      return 10000; // Strict for daily challenges
-    case "classic":
-      return 60000; // More forgiving for casual play
-    default:
-      return 30000;
-  }
+	switch (variant) {
+		case "wordofday":
+			return 10000; // Strict for daily challenges
+		case "classic":
+			return 60000; // More forgiving for casual play
+		default:
+			return 30000;
+	}
 };
 ```
 
@@ -153,6 +154,7 @@ const getGracePeriod = (variant?: string) => {
 ## Testing
 
 ### Test 1: Force Quit Detection
+
 ```
 1. Start a game
 2. Force quit the app (swipe up from multitasking)
@@ -164,6 +166,7 @@ const getGracePeriod = (variant?: string) => {
 ```
 
 ### Test 2: Background Grace Period
+
 ```
 1. Start a game
 2. Press home button (background app)
@@ -176,6 +179,7 @@ const getGracePeriod = (variant?: string) => {
 ```
 
 ### Test 3: Grace Period Return
+
 ```
 1. Start a game
 2. Press home button
@@ -189,6 +193,7 @@ const getGracePeriod = (variant?: string) => {
 ```
 
 ### Test 4: Normal Game Completion
+
 ```
 1. Start a game
 2. Complete it normally
@@ -207,20 +212,22 @@ const getGracePeriod = (variant?: string) => {
 The `abandoned` field on `GameRecord` is already used in your streak calculations:
 
 ### In `helpers.ts` (weekBest):
+
 ```typescript
-const possibleGames = pstat.gameHist
-  .filter((gr) => {
-    const gameDate = moment(gr.timestamp);
-    return gameDate.isAfter(cutoff) && !gr.abandoned; // ← Filters out abandoned games
-  })
+const possibleGames = pstat.gameHist.filter((gr) => {
+	const gameDate = moment(gr.timestamp);
+	return gameDate.isAfter(cutoff) && !gr.abandoned; // ← Filters out abandoned games
+});
 ```
 
 ### In `useAchievements.ts`:
+
 ```typescript
 ...playerStats.gameHist.map((gr) => (gr.abandoned ? 0 : gr.score)) // ← Counts abandoned as 0
 ```
 
 So any game with `abandoned: true` will:
+
 - ✅ Not count toward best scores
 - ✅ Not count for achievements
 - ✅ Break daily/weekly streaks
@@ -230,24 +237,31 @@ So any game with `abandoned: true` will:
 ## Edge Cases Handled
 
 ### ✅ App Crash
+
 Orphaned active game is detected on next startup.
 
 ### ✅ Force Quit
+
 Same as crash - detected on next startup.
 
 ### ✅ Phone Battery Dies
+
 Same as crash - detected on next charge/startup.
 
 ### ✅ Quick App Switching
+
 Grace period timer gives 30 seconds to return without penalty.
 
 ### ✅ Phone Call During Game
+
 AppState goes to "inactive" → grace period starts → user can return.
 
 ### ✅ Multiple Backgrounding Events
+
 Timer is reset each time app returns to foreground.
 
 ### ✅ User Returns After Timer Expired
+
 Game already marked as abandoned, so nothing happens on return.
 
 ---
@@ -263,14 +277,16 @@ const activeGame: ActiveGameData = JSON.parse(activeGameJson);
 
 // Only create abandoned record for Word of the Day games
 if (activeGame.isWordOfDay) {
-  const abandonedRecord: GameRecord = {
-    timestamp: new Date(),
-    score: 0,
-    abandoned: true,
-  };
-  // ... save record
+	const abandonedRecord: GameRecord = {
+		timestamp: new Date(),
+		score: 0,
+		abandoned: true,
+	};
+	// ... save record
 } else {
-  console.log("🎮 [GameTracking] Non-WOD game abandoned - not breaking streak");
+	console.log(
+		"🎮 [GameTracking] Non-WOD game abandoned - not breaking streak",
+	);
 }
 
 // Always clear the active game flag
@@ -286,7 +302,7 @@ Add a warning modal in the `handleAppStateChange` function:
 ```typescript
 // Before starting timer
 const timeoutId = setTimeout(() => {
-  showWarningModal("Game will be abandoned in 10 seconds!");
+	showWarningModal("Game will be abandoned in 10 seconds!");
 }, BACKGROUND_GRACE_PERIOD - 10000);
 ```
 
@@ -299,23 +315,23 @@ Add analytics events to track abandonment patterns:
 ```typescript
 // In checkForOrphanedGame
 if (activeGameJson) {
-  const activeGame: ActiveGameData = JSON.parse(activeGameJson);
+	const activeGame: ActiveGameData = JSON.parse(activeGameJson);
 
-  // Log to analytics
-  logEvent("game_abandoned_on_startup", {
-    variant: activeGame.variant,
-    isWordOfDay: activeGame.isWordOfDay,
-    timeSinceStart: quitDuration,
-  });
+	// Log to analytics
+	logEvent("game_abandoned_on_startup", {
+		variant: activeGame.variant,
+		isWordOfDay: activeGame.isWordOfDay,
+		timeSinceStart: quitDuration,
+	});
 }
 
 // In background timer
 setTimeout(async () => {
-  logEvent("game_abandoned_on_background", {
-    variant: activeGame.variant,
-    backgroundDuration: BACKGROUND_GRACE_PERIOD,
-  });
-  // ... mark as abandoned
+	logEvent("game_abandoned_on_background", {
+		variant: activeGame.variant,
+		backgroundDuration: BACKGROUND_GRACE_PERIOD,
+	});
+	// ... mark as abandoned
 }, BACKGROUND_GRACE_PERIOD);
 ```
 
@@ -324,18 +340,23 @@ setTimeout(async () => {
 ## FAQ
 
 ### Q: What if user legitimately needs to background the app?
+
 **A:** 30-second grace period allows quick app switching without penalty.
 
 ### Q: Can I disable tracking for practice/casual games?
+
 **A:** Yes, simply don't call `startTracking()` for those game modes.
 
 ### Q: What if AsyncStorage write fails?
+
 **A:** Errors are logged but won't crash the app. Worst case: abandoned game isn't detected.
 
 ### Q: Does this work for all game variants?
+
 **A:** Yes, as long as you call `startTracking()` and `endTracking()` in each variant.
 
 ### Q: Can users game the system?
+
 **A:** Not easily. Force quitting always creates an abandoned record. Only backgrounding has a grace period.
 
 ---

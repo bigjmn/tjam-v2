@@ -12,17 +12,19 @@
 ## 🔴 CRITICAL BUGS FIXED
 
 ### 1. Apple Sign-In Missing ID Update ✅
+
 **Location:** `UserProviderFixed.tsx:186`
 
 **Problem:** Apple sign-in didn't update the `id` field to Firebase UID, unlike Google.
 
 **Fix:**
+
 ```typescript
 const nextStats: PlayerStats = {
-  ...playerStats,
-  id: uid,  // ← NOW INCLUDED (was missing)
-  email: email,
-  username: newUsername,
+	...playerStats,
+	id: uid, // ← NOW INCLUDED (was missing)
+	email: email,
+	username: newUsername,
 };
 ```
 
@@ -31,18 +33,22 @@ const nextStats: PlayerStats = {
 ---
 
 ### 2. Race: Auth Check Before Stats Hydration ✅
+
 **Location:** `UserProviderFixed.tsx:620-627`
 
 **Problem:** `onAuthStateChanged` could fire before stats loaded from AsyncStorage, causing crashes.
 
 **Fix:**
+
 ```typescript
 // Only mark auth as checked when BOTH are ready
 useEffect(() => {
-  if (statsHydrated && user && !authChecked) {
-    console.log("✅ [Init] Both auth and stats ready - marking authChecked=true");
-    setAuthChecked(true);
-  }
+	if (statsHydrated && user && !authChecked) {
+		console.log(
+			"✅ [Init] Both auth and stats ready - marking authChecked=true",
+		);
+		setAuthChecked(true);
+	}
 }, [statsHydrated, user, authChecked]);
 ```
 
@@ -51,23 +57,27 @@ useEffect(() => {
 ---
 
 ### 3. Username Invariant Violation ✅
+
 **Location:** `UserProviderFixed.tsx:503-522`
 
 **Problem:** Anonymous users could keep usernames if auth state changed before stats hydrated.
 
 **Fix:**
+
 ```typescript
 // Now guards with statsHydrated
 useEffect(() => {
-  if (!user || !playerStats || !statsHydrated) return;
+	if (!user || !playerStats || !statsHydrated) return;
 
-  if (user.isAnonymous && (playerStats.username || playerStats.email)) {
-    console.log("🔒 [Invariant] Anonymous user has auth fields - stripping...");
-    const { username, email, ...remainingStats } = playerStats;
-    setPlayerStats(remainingStats);
-    // Also update AsyncStorage
-    AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(remainingStats));
-  }
+	if (user.isAnonymous && (playerStats.username || playerStats.email)) {
+		console.log(
+			"🔒 [Invariant] Anonymous user has auth fields - stripping...",
+		);
+		const { username, email, ...remainingStats } = playerStats;
+		setPlayerStats(remainingStats);
+		// Also update AsyncStorage
+		AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(remainingStats));
+	}
 }, [user, playerStats, statsHydrated]);
 ```
 
@@ -76,24 +86,29 @@ useEffect(() => {
 ---
 
 ### 4. Double Anonymous Sign-In on Logout ✅
+
 **Location:** `UserProviderFixed.tsx:378-408`
 
 **Problem:** Logout called `signInAnonymously` directly AND triggered auth listener's sign-in.
 
 **Fix:**
+
 ```typescript
 async function logout() {
-  await signOut(auth);  // Triggers auth listener
+	await signOut(auth); // Triggers auth listener
 
-  // Strip username/email from local stats
-  if (playerStats) {
-    const { username, email, ...statsWithoutAuth } = playerStats;
-    setPlayerStats(statsWithoutAuth);
-    await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(statsWithoutAuth));
-  }
+	// Strip username/email from local stats
+	if (playerStats) {
+		const { username, email, ...statsWithoutAuth } = playerStats;
+		setPlayerStats(statsWithoutAuth);
+		await AsyncStorage.setItem(
+			PLAYER_V2_KEY,
+			JSON.stringify(statsWithoutAuth),
+		);
+	}
 
-  // ← REMOVED: await signInAnonymously(auth);
-  // Let auth listener handle it!
+	// ← REMOVED: await signInAnonymously(auth);
+	// Let auth listener handle it!
 }
 ```
 
@@ -102,11 +117,13 @@ async function logout() {
 ---
 
 ### 5. Migration Runs Multiple Times ✅
+
 **Location:** `UserProviderFixed.tsx:452-468`
 
 **Problem:** If app crashed between state update and AsyncStorage write, migration would re-run.
 
 **Fix:**
+
 ```typescript
 // Write to AsyncStorage FIRST, then delete old key
 await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(convertedPlayer));
@@ -122,18 +139,20 @@ console.log("💾 [Hydration] ✓ Old v1 key deleted");
 ---
 
 ### 6. makeOrGetDoc Effect Writes Incomplete Stats ✅
+
 **Location:** `UserProviderFixed.tsx:527-548`
 
 **Problem:** Effect could run before migration completed.
 
 **Fix:**
+
 ```typescript
 const makeOrGetDoc = async () => {
-  // Added statsHydrated guard
-  if (!user || !playerStats || user.isAnonymous || !statsHydrated) {
-    return;
-  }
-  // ... rest of function
+	// Added statsHydrated guard
+	if (!user || !playerStats || user.isAnonymous || !statsHydrated) {
+		return;
+	}
+	// ... rest of function
 };
 ```
 
@@ -142,24 +161,27 @@ const makeOrGetDoc = async () => {
 ---
 
 ### 7. Insecure Nonce Generation for Apple ✅
+
 **Location:** `appleAuthFixed.ts:13-29`
 
 **Problem:** Used `Math.random()` instead of cryptographically secure random.
 
 **Fix:**
+
 ```typescript
 async function randomNonce(length = 32): Promise<string> {
-  // Generate random bytes using expo-crypto
-  const randomBytes = await Crypto.getRandomBytesAsync(length);
+	// Generate random bytes using expo-crypto
+	const randomBytes = await Crypto.getRandomBytesAsync(length);
 
-  const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  let out = "";
+	const chars =
+		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	let out = "";
 
-  for (let i = 0; i < length; i++) {
-    out += chars[randomBytes[i] % chars.length];
-  }
+	for (let i = 0; i < length; i++) {
+		out += chars[randomBytes[i] % chars.length];
+	}
 
-  return out;
+	return out;
 }
 ```
 
@@ -168,13 +190,15 @@ async function randomNonce(length = 32): Promise<string> {
 ---
 
 ### 8. wodPct Array Index Bug ✅
+
 **Location:** `helpersFixed.ts:20`
 
 **Problem:** Used `dates[-1]` which is undefined in JavaScript.
 
 **Fix:**
+
 ```typescript
-const latestDate = dates[dates.length - 1];  // ← Was dates[-1]
+const latestDate = dates[dates.length - 1]; // ← Was dates[-1]
 ```
 
 **Impact:** Word of the day percentage now calculates correctly.
@@ -182,18 +206,20 @@ const latestDate = dates[dates.length - 1];  // ← Was dates[-1]
 ---
 
 ### 9. AsyncStorage Writes Not Awaited ✅
+
 **Location:** `UserProviderFixed.tsx:632-638`
 
 **Problem:** Stats persistence had no error handling.
 
 **Fix:**
+
 ```typescript
 useEffect(() => {
-  if (!statsHydrated || !playerStats) return;
+	if (!statsHydrated || !playerStats) return;
 
-  AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(playerStats))
-    .then(() => console.log("💾 [AutoSave] ✓ Stats saved"))
-    .catch((err) => console.error("💾 [AutoSave] ❌ Save failed:", err));
+	AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(playerStats))
+		.then(() => console.log("💾 [AutoSave] ✓ Stats saved"))
+		.catch((err) => console.error("💾 [AutoSave] ❌ Save failed:", err));
 }, [playerStats, statsHydrated]);
 ```
 
@@ -204,6 +230,7 @@ useEffect(() => {
 ## 🟡 REMAINING KNOWN ISSUES
 
 ### 1. Username Mapping Race Condition ⚠️
+
 **Status:** PARTIALLY MITIGATED, NOT FULLY FIXED
 
 **Problem:** Username uniqueness check + creation is not atomic.
@@ -215,18 +242,19 @@ This requires Firestore transactions or batched writes. The current implementati
 The numeric suffix reduces collision probability to near-zero for typical usage, but it's not impossible.
 
 **Proper Fix:**
+
 ```typescript
 // Use Firestore transaction
 await runTransaction(firestore, async (transaction) => {
-  const uNameDocRef = doc(firestore, "usernames", newUsername);
-  const uNameDoc = await transaction.get(uNameDocRef);
+	const uNameDocRef = doc(firestore, "usernames", newUsername);
+	const uNameDoc = await transaction.get(uNameDocRef);
 
-  if (uNameDoc.exists() && uNameDoc.data().userid !== uid) {
-    newUsername += usernameNumberTail();
-  }
+	if (uNameDoc.exists() && uNameDoc.data().userid !== uid) {
+		newUsername += usernameNumberTail();
+	}
 
-  transaction.set(uNameDocRef, { userid: uid });
-  transaction.set(userDocRef, stats);
+	transaction.set(uNameDocRef, { userid: uid });
+	transaction.set(userDocRef, stats);
 });
 ```
 
@@ -235,11 +263,13 @@ await runTransaction(firestore, async (transaction) => {
 ---
 
 ### 2. Fallback Sign-In Data Attribution ⚠️
+
 **Status:** EDGE CASE, UNLIKELY IN PRACTICE
 
 **Problem:** If a Google/Apple account exists in Firebase Auth but has NO Firestore doc, the fallback sign-in treats it as a new user and creates a doc with anonymous stats.
 
 **Scenario:**
+
 1. User A creates Google account on a different device but never opens the app
 2. User B (anonymous) tries to link that Google account
 3. Linking fails → fallback sign-in
@@ -282,10 +312,13 @@ Log format: `[Component] Message` with appropriate emoji.
 ### Step 1: Replace UserProvider
 
 In `/app/_layout.tsx`, change:
+
 ```typescript
 import { UserProvider } from "../providers/UserProvider";
 ```
+
 To:
+
 ```typescript
 import { UserProvider } from "../providers/UserProviderFixed";
 ```
@@ -293,6 +326,7 @@ import { UserProvider } from "../providers/UserProviderFixed";
 ### Step 2: Replace Apple Auth Helper
 
 In `UserProviderFixed.tsx` (already done), the import is:
+
 ```typescript
 import { getAppleCredential } from "../utils/authHelpers/appleAuthFixed";
 ```
@@ -302,6 +336,7 @@ Make sure this matches your import.
 ### Step 3: Replace Login Helper
 
 In `UserProviderFixed.tsx` (already done), the import is:
+
 ```typescript
 import { linkOrSignIn } from "../components/auth/loginHelperFixed";
 ```
@@ -309,10 +344,13 @@ import { linkOrSignIn } from "../components/auth/loginHelperFixed";
 ### Step 4: Replace wodPct Helper
 
 In any file using `wodPct`, change:
+
 ```typescript
 import { wodPct } from "../utils/helpers";
 ```
+
 To:
+
 ```typescript
 import { wodPct } from "../utils/helpersFixed";
 ```
@@ -322,6 +360,7 @@ Or add the fix directly to `helpers.ts`.
 ### Step 5: Test Thoroughly
 
 Test these scenarios:
+
 1. ✅ Fresh install → anonymous play → Google sign-in
 2. ✅ Fresh install → anonymous play → Apple sign-in
 3. ✅ Sign out → play as guest → sign back in
@@ -336,12 +375,14 @@ Test these scenarios:
 ## 🧪 TESTING CHECKLIST
 
 ### Anonymous Flow
+
 - [ ] Fresh install creates anonymous user
 - [ ] Anonymous user has no username/email
 - [ ] Anonymous stats persist across restarts
 - [ ] Anonymous user can play games and earn achievements
 
 ### Google Sign-In
+
 - [ ] New Google user: creates account with username
 - [ ] Existing Google user: merges stats correctly
 - [ ] Username collision: adds numeric suffix
@@ -350,18 +391,21 @@ Test these scenarios:
 - [ ] Game history is combined
 
 ### Apple Sign-In
+
 - [ ] Same tests as Google
 - [ ] First sign-in: captures name/email
 - [ ] Subsequent sign-ins: works without name/email
 - [ ] ID is correctly updated to Firebase UID
 
 ### Logout
+
 - [ ] Strips username/email from local stats
 - [ ] Returns to anonymous mode
 - [ ] Preserves game progress
 - [ ] No duplicate sign-in attempts
 
 ### Migration
+
 - [ ] Old v1 stats convert to v2
 - [ ] Top score preserved
 - [ ] Achievements preserved
@@ -369,6 +413,7 @@ Test these scenarios:
 - [ ] Migration only runs once
 
 ### Edge Cases
+
 - [ ] App restart during sign-in
 - [ ] Network error during sign-in
 - [ ] Rapid sign-in/sign-out
@@ -427,6 +472,7 @@ The merge function correctly handles:
 ## 📞 QUESTIONS?
 
 If you see any unexpected behavior:
+
 1. Check the logs for error messages
 2. Look for the emoji prefixes to trace the flow
 3. Verify that all imports are using the "Fixed" versions

@@ -20,7 +20,7 @@ export const useLeaderboard = () => {
 	const [boardErr, setBoardErr] = useState<Error | null>(null);
 
 	const [boardScope, setBoardScope] = useState<BoardScope>("global");
-    
+
 	const getLeaders = async () => {
 		const leadersRef = collection(firestore, "users").withConverter(
 			playerStatConverter,
@@ -55,7 +55,6 @@ export const useLeaderboard = () => {
 		} catch (err) {
 			console.log(err);
 			if (err instanceof Error) {
-                
 				setBoardErr(err);
 			} else {
 				setBoardErr(new Error("something went wrong!"));

@@ -22,7 +22,8 @@ export default function Results() {
 	}
 
 	// Get old top score (before this game) for animation purposes
-	const oldTopScoreNum = typeof oldTopScore === "string" ? parseInt(oldTopScore, 10) : 0;
+	const oldTopScoreNum =
+		typeof oldTopScore === "string" ? parseInt(oldTopScore, 10) : 0;
 
 	// Get personal best (current/new top score)
 	const personalBest = playerStats?.topScore ?? 0;

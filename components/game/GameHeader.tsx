@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native";
 
 interface GameHeaderProps {
 	onExitPress: () => void;
-	headerName:string;
+	headerName: string;
 }
 
 export const GameHeader = ({ onExitPress, headerName }: GameHeaderProps) => {

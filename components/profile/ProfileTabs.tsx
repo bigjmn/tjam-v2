@@ -46,7 +46,12 @@ export default function ProfileTabs() {
 	return (
 		<ThemedView style={styles.container}>
 			{/* Tab Bar */}
-			<View style={[styles.tabBar, { borderBottomColor: colors.mutedText + "30" }]}>
+			<View
+				style={[
+					styles.tabBar,
+					{ borderBottomColor: colors.mutedText + "30" },
+				]}
+			>
 				{TABS.map((tab) => {
 					const isActive = activeTab === tab.key;
 					return (

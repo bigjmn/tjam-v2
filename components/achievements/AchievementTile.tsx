@@ -31,13 +31,15 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 	const backgroundColor = isWon ? colors.primary : colors.uiBackground;
 
 	// Get daily word for dynamic text
-	const dailyWord = achievement.type === 'dailyWord' ? getDailyWord() : null;
-	const title = achievement.type === 'dailyWord' && dailyWord
-		? `${achievement.name} - ${dailyWord.toUpperCase()}`
-		: achievement.name;
-	const explainer = achievement.type === 'dailyWord' && dailyWord
-		? `Make the word ${dailyWord.toUpperCase()}`
-		: achievement.explainer;
+	const dailyWord = achievement.type === "dailyWord" ? getDailyWord() : null;
+	const title =
+		achievement.type === "dailyWord" && dailyWord
+			? `${achievement.name} - ${dailyWord.toUpperCase()}`
+			: achievement.name;
+	const explainer =
+		achievement.type === "dailyWord" && dailyWord
+			? `Make the word ${dailyWord.toUpperCase()}`
+			: achievement.explainer;
 
 	return (
 		<View style={[styles.badgeContainer, style]}>
@@ -45,10 +47,10 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 				style={[styles.container, { borderColor, backgroundColor }]}
 			>
 				{/* Add date display for daily word */}
-				{showDate && achievement.type === 'dailyWord' && (
+				{showDate && achievement.type === "dailyWord" && (
 					<View style={styles.dateContainer}>
 						<ThemedText variant="soft" style={styles.dateText}>
-							{moment(new Date()).format('MMM DD')}
+							{moment(new Date()).format("MMM DD")}
 						</ThemedText>
 					</View>
 				)}
@@ -57,31 +59,41 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 					<View style={styles.titleRow}>
 						<ThemedText
 							variant="strong"
-							style={isWon ? { color: '#ffffff' } : undefined}
+							style={isWon ? { color: "#ffffff" } : undefined}
 						>
 							{title}
 						</ThemedText>
 
 						{/* Show streak progress for streaking achievements */}
-						{achievement.type === "streaking" && streakProgress !== undefined && (
-							<StreakProgressIndicator progress={streakProgress} />
-						)}
+						{achievement.type === "streaking" &&
+							streakProgress !== undefined && (
+								<StreakProgressIndicator
+									progress={streakProgress}
+								/>
+							)}
 					</View>
 					<ThemedText
 						variant="soft"
 						style={
 							isWon
-								? [styles.explainer, { color: 'rgba(255, 255, 255, 0.85)' }] :
-								isPlaceholder ? [styles.explainer, {fontStyle: "italic"}]
-								: styles.explainer
+								? [
+										styles.explainer,
+										{ color: "rgba(255, 255, 255, 0.85)" },
+									]
+								: isPlaceholder
+									? [
+											styles.explainer,
+											{ fontStyle: "italic" },
+										]
+									: styles.explainer
 						}
 					>
-						{isPlaceholder
-							? "Hmm... what could it be?"
-							: explainer}
+						{isPlaceholder ? "Hmm... what could it be?" : explainer}
 					</ThemedText>
 				</ThemedView>
-				<ThemedView style={[styles.rewardContainer, { backgroundColor }]}>
+				<ThemedView
+					style={[styles.rewardContainer, { backgroundColor }]}
+				>
 					<StarIconGroup
 						totalCount={achievement.reward}
 						filledCount={achievement.reward}
@@ -149,10 +161,10 @@ const styles = StyleSheet.create({
 		elevation: 4,
 	},
 	dateContainer: {
-		position: 'absolute',
+		position: "absolute",
 		top: 8,
 		left: 8,
-		backgroundColor: 'rgba(0, 0, 0, 0.2)',
+		backgroundColor: "rgba(0, 0, 0, 0.2)",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 4,
@@ -160,6 +172,6 @@ const styles = StyleSheet.create({
 	},
 	dateText: {
 		fontSize: 11,
-		fontWeight: '600',
+		fontWeight: "600",
 	},
 });

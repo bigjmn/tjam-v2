@@ -9,12 +9,22 @@ import {
 	ranksList,
 } from "../utils/achievements";
 import { animals, bodyParts } from "../constants/SpecialWords";
-import { groupFreq, bareBilly, getDailyWord, luckyThirteen, halfLooper, adults, papaya, doubleTake, tripleTake } from "../utils/helpers";
+import {
+	groupFreq,
+	bareBilly,
+	getDailyWord,
+	luckyThirteen,
+	halfLooper,
+	adults,
+	papaya,
+	doubleTake,
+	tripleTake,
+} from "../utils/helpers";
 import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const DEBUG_SET:string[] = []
+const DEBUG_SET: string[] = [];
 export const useAchievements = () => {
 	const { playerStats } = useUser();
 	if (playerStats === null) return;
@@ -28,7 +38,9 @@ export const useAchievements = () => {
 			return [];
 		}
 		const pastThree: number[] = [
-			...playerStats.gameHist.map((gr) => (gr.abandoned ? 0 : gr.score)).slice(-2),
+			...playerStats.gameHist
+				.map((gr) => (gr.abandoned ? 0 : gr.score))
+				.slice(-2),
 			newscore,
 		];
 		const newStreakAchs = streakingAchievements
@@ -100,33 +112,31 @@ export const useAchievements = () => {
 			allAchievements.push("bareboard");
 		}
 
-		if (luckyThirteen(allWordsMade)){
-			allAchievements.push('lucky13')
+		if (luckyThirteen(allWordsMade)) {
+			allAchievements.push("lucky13");
 		}
-		if (animals.filter(a => allWordsMade.includes(a)).length >= 3){
-			allAchievements.push('zootrip')
+		if (animals.filter((a) => allWordsMade.includes(a)).length >= 3) {
+			allAchievements.push("zootrip");
 		}
-		if (bodyParts.filter(b => allWordsMade.includes(b)).length >= 5){
-			allAchievements.push('bodyshop')
+		if (bodyParts.filter((b) => allWordsMade.includes(b)).length >= 5) {
+			allAchievements.push("bodyshop");
 		}
-		if (halfLooper(turns)){
-			allAchievements.push('halflooper')
+		if (halfLooper(turns)) {
+			allAchievements.push("halflooper");
 		}
-		if (papaya(turns)){
-			allAchievements.push('papaya')
+		if (papaya(turns)) {
+			allAchievements.push("papaya");
 		}
-		if (doubleTake(turns)){
-			allAchievements.push('doubletake')
+		if (doubleTake(turns)) {
+			allAchievements.push("doubletake");
 		}
-		if (tripleTake(turns)){
-			allAchievements.push('tripletake')
+		if (tripleTake(turns)) {
+			allAchievements.push("tripletake");
 		}
-
-
 
 		// Check daily word achievement
 		const dailyWord = getDailyWord();
-		const datestring = moment(new Date()).format('M/DD/YYYY');
+		const datestring = moment(new Date()).format("M/DD/YYYY");
 		const dailyWordKey = `wordoftheday_${datestring}`;
 
 		if (dailyWord && allWordsMade.includes(dailyWord.toUpperCase())) {
@@ -139,8 +149,8 @@ export const useAchievements = () => {
 		const currentNoveltyGoal = noveltyAchievements.filter(
 			(na) => !playerStats.achievementsWon.includes(na.key),
 		)[0];
-		for (const dba of DEBUG_SET){
-			allAchievements.push(dba)
+		for (const dba of DEBUG_SET) {
+			allAchievements.push(dba);
 		}
 
 		// Filter out achievements already scored, and novelty achievements besides the next goal
@@ -150,25 +160,25 @@ export const useAchievements = () => {
 				(ac === currentNoveltyGoal?.key ||
 					!noveltyAchievements.find((x) => x.key === ac)),
 		);
-		
 
 		return Array.from(new Set(newAchievements));
 	};
 	const getCareerStars = () => {
-		let careerStars = 0; 
-		for (const achKey of playerStats.achievementsWon){
+		let careerStars = 0;
+		for (const achKey of playerStats.achievementsWon) {
 			const baseKey = achKey.startsWith("wordoftheday_")
 				? "wordoftheday"
 				: achKey;
 
-			const achievement = allAchievements.find((ach) => ach.key === baseKey);
+			const achievement = allAchievements.find(
+				(ach) => ach.key === baseKey,
+			);
 			if (achievement) {
 				careerStars += achievement.reward;
 			}
-
 		}
-		return careerStars
-	}
+		return careerStars;
+	};
 
 	const scoreAndRank = () => {
 		let totalStars = 0;
@@ -180,7 +190,9 @@ export const useAchievements = () => {
 				? "wordoftheday"
 				: achKey;
 
-			const achievement = allAchievements.find((ach) => ach.key === baseKey);
+			const achievement = allAchievements.find(
+				(ach) => ach.key === baseKey,
+			);
 			if (achievement) {
 				totalStars += achievement.reward;
 			}
@@ -344,7 +356,7 @@ export const useAchievements = () => {
 		categorizeAchievements,
 		calculateRankChanges,
 		scoreAndRank,
-		getCareerStars
+		getCareerStars,
 	};
 };
 

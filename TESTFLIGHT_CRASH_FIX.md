@@ -7,14 +7,16 @@ The app crashes immediately in TestFlight because **Google OAuth environment var
 ### What Was Happening
 
 **GoogleLoginButton.tsx** runs this code at module initialization:
+
 ```typescript
 GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_WEB_ID,   // ← undefined in production!
-  iosClientId: process.env.EXPO_PUBLIC_IOS_ID,    // ← undefined in production!
+	webClientId: process.env.EXPO_PUBLIC_WEB_ID, // ← undefined in production!
+	iosClientId: process.env.EXPO_PUBLIC_IOS_ID, // ← undefined in production!
 });
 ```
 
 **Timeline:**
+
 1. App starts → Loads `_layout.tsx`
 2. Loads `UserProvider` → Imports `GoogleLoginButton.tsx`
 3. `GoogleSignin.configure()` runs with `undefined` values
@@ -47,6 +49,7 @@ GoogleSignin.configure({
 ```
 
 **Why this works:**
+
 - EAS now injects these variables at build time
 - `process.env.EXPO_PUBLIC_*` will be available in production
 - Google Sign-In configures correctly
@@ -61,16 +64,27 @@ const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_WEB_ID;
 const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_IOS_ID;
 
 if (!WEB_CLIENT_ID || !IOS_CLIENT_ID) {
-  console.error("🔴 [GoogleAuth] CRITICAL: Missing Google OAuth credentials!");
-  console.error("🔴 [GoogleAuth] WEB_CLIENT_ID:", WEB_CLIENT_ID ? "✓" : "❌ MISSING");
-  console.error("🔴 [GoogleAuth] IOS_CLIENT_ID:", IOS_CLIENT_ID ? "✓" : "❌ MISSING");
-  console.error("🔴 [GoogleAuth] App will crash if Google Sign-In is attempted!");
+	console.error(
+		"🔴 [GoogleAuth] CRITICAL: Missing Google OAuth credentials!",
+	);
+	console.error(
+		"🔴 [GoogleAuth] WEB_CLIENT_ID:",
+		WEB_CLIENT_ID ? "✓" : "❌ MISSING",
+	);
+	console.error(
+		"🔴 [GoogleAuth] IOS_CLIENT_ID:",
+		IOS_CLIENT_ID ? "✓" : "❌ MISSING",
+	);
+	console.error(
+		"🔴 [GoogleAuth] App will crash if Google Sign-In is attempted!",
+	);
 } else {
-  console.log("✅ [GoogleAuth] Google OAuth credentials loaded successfully");
+	console.log("✅ [GoogleAuth] Google OAuth credentials loaded successfully");
 }
 ```
 
 **Why this helps:**
+
 - Logs clear error messages if env variables are missing
 - Easier to diagnose future environment issues
 - Fails gracefully with informative errors
@@ -80,6 +94,7 @@ if (!WEB_CLIENT_ID || !IOS_CLIENT_ID) {
 ## 🚀 How to Deploy the Fix
 
 ### Step 1: Build Production Version
+
 ```bash
 eas build --platform ios --profile production
 ```
@@ -87,11 +102,13 @@ eas build --platform ios --profile production
 ### Step 2: Verify in Build Logs
 
 After the build starts, check the logs for:
+
 ```
 ✅ [GoogleAuth] Google OAuth credentials loaded successfully
 ```
 
 If you see:
+
 ```
 🔴 [GoogleAuth] CRITICAL: Missing Google OAuth credentials!
 ```
@@ -99,6 +116,7 @@ If you see:
 Then the env variables didn't load correctly.
 
 ### Step 3: Submit to TestFlight
+
 ```bash
 eas submit --platform ios --profile production
 ```
@@ -106,6 +124,7 @@ eas submit --platform ios --profile production
 ### Step 4: Test in TestFlight
 
 **Critical tests:**
+
 1. ✅ App launches without crashing
 2. ✅ Can play as anonymous user
 3. ✅ Can sign in with Google
@@ -116,20 +135,24 @@ eas submit --platform ios --profile production
 ## 🔍 Other Potential Production Issues (Checked)
 
 ### ✅ Firebase Configuration
+
 - Firebase config is hardcoded in `lib/firebase.ts` ✓
 - No environment variables needed ✓
 - Should work in production ✓
 
 ### ✅ AsyncStorage
+
 - Properly initialized with Firebase persistence ✓
 - No production-specific issues ✓
 
 ### ✅ Apple Authentication
+
 - Uses `expo-apple-authentication` plugin ✓
 - Configured in `app.json` ✓
 - Should work in production ✓
 
 ### ⚠️ Console Statements (219 found)
+
 - Not a crash risk, but increases bundle size
 - Consider removing or using conditional logging in future
 
@@ -140,6 +163,7 @@ eas submit --platform ios --profile production
 ### 1. Always Test Production Builds Locally
 
 Before submitting to TestFlight:
+
 ```bash
 # Build a production-like preview
 eas build --platform ios --profile preview
@@ -151,6 +175,7 @@ npx expo start --no-dev --minify
 ### 2. Use EAS Secrets for Sensitive Values
 
 For production credentials:
+
 ```bash
 # Store as EAS secrets (encrypted)
 eas secret:create --name EXPO_PUBLIC_WEB_ID --value "your-value"
@@ -158,6 +183,7 @@ eas secret:create --name EXPO_PUBLIC_IOS_ID --value "your-value"
 ```
 
 Then reference in `eas.json`:
+
 ```json
 "env": {
   "EXPO_PUBLIC_WEB_ID": "${EXPO_PUBLIC_WEB_ID}",
@@ -168,30 +194,27 @@ Then reference in `eas.json`:
 ### 3. Add Startup Validation
 
 Create a startup validation hook:
+
 ```typescript
 // hooks/useStartupValidation.ts
 export function useStartupValidation() {
-  useEffect(() => {
-    const requiredEnvVars = [
-      'EXPO_PUBLIC_WEB_ID',
-      'EXPO_PUBLIC_IOS_ID',
-    ];
+	useEffect(() => {
+		const requiredEnvVars = ["EXPO_PUBLIC_WEB_ID", "EXPO_PUBLIC_IOS_ID"];
 
-    const missing = requiredEnvVars.filter(
-      key => !process.env[key]
-    );
+		const missing = requiredEnvVars.filter((key) => !process.env[key]);
 
-    if (missing.length > 0) {
-      console.error('❌ Missing environment variables:', missing);
-      // Could show an error screen in development
-    }
-  }, []);
+		if (missing.length > 0) {
+			console.error("❌ Missing environment variables:", missing);
+			// Could show an error screen in development
+		}
+	}, []);
 }
 ```
 
 ### 4. Enable Crash Reporting
 
 Add crash reporting to catch production issues:
+
 ```bash
 npx expo install expo-crash-analytics
 # or
@@ -221,13 +244,14 @@ npm install @sentry/react-native
 ### Enable Debug Logs in Production
 
 Temporarily add to `_layout.tsx`:
+
 ```typescript
 if (!__DEV__) {
-  console.log('🚀 App starting in PRODUCTION mode');
-  console.log('📦 Environment check:', {
-    hasWebId: !!process.env.EXPO_PUBLIC_WEB_ID,
-    hasIosId: !!process.env.EXPO_PUBLIC_IOS_ID,
-  });
+	console.log("🚀 App starting in PRODUCTION mode");
+	console.log("📦 Environment check:", {
+		hasWebId: !!process.env.EXPO_PUBLIC_WEB_ID,
+		hasIosId: !!process.env.EXPO_PUBLIC_IOS_ID,
+	});
 }
 ```
 
@@ -244,6 +268,7 @@ After rebuilding with the fix:
 5. ✅ Environment variables are loaded
 
 You should see in the console (visible via Xcode logs):
+
 ```
 ✅ [GoogleAuth] Google OAuth credentials loaded successfully
 ```
@@ -255,27 +280,29 @@ You should see in the console (visible via Xcode logs):
 ### Check These:
 
 1. **Rebuild from scratch:**
-   ```bash
-   eas build --platform ios --profile production --clear-cache
-   ```
+
+    ```bash
+    eas build --platform ios --profile production --clear-cache
+    ```
 
 2. **Verify env variables in build:**
-   - Check EAS build logs
-   - Look for "Environment variables" section
-   - Confirm `EXPO_PUBLIC_*` variables are listed
+    - Check EAS build logs
+    - Look for "Environment variables" section
+    - Confirm `EXPO_PUBLIC_*` variables are listed
 
 3. **Check for other undefined values:**
-   - Search codebase for `process.env.EXPO_PUBLIC_`
-   - Ensure all are defined in `eas.json`
+    - Search codebase for `process.env.EXPO_PUBLIC_`
+    - Ensure all are defined in `eas.json`
 
 4. **Enable verbose logging:**
-   ```bash
-   eas build --platform ios --profile production --verbose
-   ```
+
+    ```bash
+    eas build --platform ios --profile production --verbose
+    ```
 
 5. **Check Apple App Store Connect for crash logs:**
-   - TestFlight → Crashes tab
-   - Look for stack trace pointing to crash location
+    - TestFlight → Crashes tab
+    - Look for stack trace pointing to crash location
 
 ---
 

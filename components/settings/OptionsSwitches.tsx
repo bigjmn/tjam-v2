@@ -25,7 +25,7 @@ export default function OptionSwitches() {
 	return (
 		<ThemedView style={styles.container}>
 			<Spacer />
-			<ThemedView style={[styles.optionHolder ]}>
+			<ThemedView style={[styles.optionHolder]}>
 				<ThemedText style={{ marginBottom: 5 }}>
 					Display Mode
 				</ThemedText>
@@ -40,12 +40,12 @@ export default function OptionSwitches() {
 							borderBottomRightRadius: 0,
 							borderTopRightRadius: 0,
 							backgroundColor:
-								theme === "light" ? colors.primary : colors.background,
+								theme === "light"
+									? colors.primary
+									: colors.background,
 						}}
 					>
-						<ThemedText variant="medium">
-							Light
-						</ThemedText>
+						<ThemedText variant="medium">Light</ThemedText>
 					</ThemedButton>
 					<ThemedButton
 						onPress={() => toggleTo("dark")}
@@ -57,12 +57,12 @@ export default function OptionSwitches() {
 							borderBottomRightRadius: 6,
 							borderTopRightRadius: 6,
 							backgroundColor:
-								theme === "dark" ? colors.primary : colors.background,
+								theme === "dark"
+									? colors.primary
+									: colors.background,
 						}}
 					>
-						<ThemedText variant="medium">
-							Dark
-						</ThemedText>
+						<ThemedText variant="medium">Dark</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 				{theme === "light" && (
@@ -91,9 +91,7 @@ export default function OptionSwitches() {
 								: colors.background,
 						}}
 					>
-						<ThemedText variant="medium">
-							On
-						</ThemedText>
+						<ThemedText variant="medium">On</ThemedText>
 					</ThemedButton>
 					<ThemedButton
 						onPress={() => turnOffSound()}
@@ -109,9 +107,7 @@ export default function OptionSwitches() {
 								: colors.primary,
 						}}
 					>
-						<ThemedText variant="medium">
-							Off
-						</ThemedText>
+						<ThemedText variant="medium">Off</ThemedText>
 					</ThemedButton>
 				</ThemedView>
 				{sfxOn && (
@@ -148,7 +144,7 @@ const styles = StyleSheet.create({
 	},
 	optionHolder: {
 		alignItems: "center",
-        width:"80%"
+		width: "80%",
 	},
 	buttonHolder: {
 		flexDirection: "row",

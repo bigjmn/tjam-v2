@@ -74,6 +74,7 @@ export const NextGoalsBlock = forwardRef<
 		const noveltyTranslateX = useSharedValue(0);
 		const blockTranslateY = useSharedValue(SCREEN_HEIGHT); // Start below screen
 		const blockTranslateX = useSharedValue(0);
+		const blockOpacity = useSharedValue(1);
 
 		const scoringPulseScale = useSharedValue(1);
 		const scoringPulseOpacity = useSharedValue(1);
@@ -224,6 +225,7 @@ export const NextGoalsBlock = forwardRef<
 
 		const enter = async (): Promise<void> => {
 			return new Promise((resolve) => {
+				blockOpacity.value = 1; // Ensure opacity is 1 on enter
 				blockTranslateY.value = withTiming(
 					0,
 					{
@@ -239,6 +241,12 @@ export const NextGoalsBlock = forwardRef<
 
 		const exit = async (): Promise<void> => {
 			return new Promise((resolve) => {
+				// Fade out while sliding left to prevent flash
+				blockOpacity.value = withTiming(0, {
+					duration: 500,
+					easing: Easing.bezier(0.4, 0.0, 0.2, 1),
+				});
+
 				blockTranslateX.value = withTiming(
 					-SCREEN_WIDTH,
 					{
@@ -289,6 +297,7 @@ export const NextGoalsBlock = forwardRef<
 				{ translateY: blockTranslateY.value },
 				{ translateX: blockTranslateX.value },
 			],
+			opacity: blockOpacity.value,
 		}));
 
 		return (

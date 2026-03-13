@@ -309,7 +309,7 @@ export const useGame = (vKey?: VariantKey) => {
 		if (!vKey) {
 			await endTracking();
 		}
-		router.push("/(dashboard)/home");
+		router.push("/(dashboard)/index");
 	};
 
 	const startGame = () => {

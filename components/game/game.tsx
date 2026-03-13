@@ -626,9 +626,7 @@ const styles = StyleSheet.create({
 	buttonStyle: {
 		height: 50,
 		width: 180,
-		borderStyle: "solid",
 		borderRadius: 10,
-		borderWidth: 2,
 
 		display: "flex",
 		justifyContent: "center",

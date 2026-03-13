@@ -29,6 +29,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 		const [revealedKeys, setRevealedKeys] = React.useState<string[]>([]);
 		const blockTranslateY = useSharedValue(SCREEN_HEIGHT);
 		const blockTranslateX = useSharedValue(0);
+		const blockOpacity = useSharedValue(1);
 
 		const { achieveSound } = useSfx();
 
@@ -72,6 +73,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 
 		const enter = async (): Promise<void> => {
 			return new Promise((resolve) => {
+				blockOpacity.value = 1; // Ensure opacity is 1 on enter
 				blockTranslateY.value = withTiming(
 					0,
 					{
@@ -87,6 +89,12 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 
 		const exit = async (): Promise<void> => {
 			return new Promise((resolve) => {
+				// Fade out while sliding left to prevent flash
+				blockOpacity.value = withTiming(0, {
+					duration: 500,
+					easing: Easing.bezier(0.4, 0.0, 0.2, 1),
+				});
+
 				blockTranslateX.value = withTiming(
 					-SCREEN_WIDTH,
 					{
@@ -111,6 +119,7 @@ export const SecretBlock = forwardRef<SecretBlockHandle, SecretBlockProps>(
 				{ translateY: blockTranslateY.value },
 				{ translateX: blockTranslateX.value },
 			],
+			opacity: blockOpacity.value,
 		}));
 
 		if (earnedKeys.length === 0) {

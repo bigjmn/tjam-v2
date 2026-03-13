@@ -53,7 +53,8 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 			x: pageIndex * SCREEN_WIDTH,
 			animated: true,
 		});
-		onPageChange(pageIndex);
+		// Don't call onPageChange here - let the scroll handler update it
+		// This prevents the flash where the button updates before the scroll completes
 	};
 
 	return (

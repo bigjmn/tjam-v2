@@ -443,7 +443,7 @@ export default function UsernamePicker() {
 							color={colors.mutedText}
 						/>
 						<ThemedText variant="soft" style={styles.helperText}>
-							Sign in with Google or Apple to set a custom
+							Sign in with Google to set a custom
 							username
 						</ThemedText>
 					</View>

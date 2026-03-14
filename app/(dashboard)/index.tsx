@@ -4,9 +4,11 @@ import SectionHeader from "../../components/ui/SectionHeader";
 import { PlayCard } from "../../components/home/PlayCard";
 import { VariantCards } from "../../components/home/VariantCards";
 import ThemedText from "../../components/ui/ThemedText";
+import Spacer from "../../components/ui/Spacer";
 const Home = () => {
 	return (
-		<ThemedView style={styles.container}>
+		<ThemedView safe={true} style={styles.container}>
+			<Spacer height={100} />
 			<ThemedText variant="title">Trio Jam</ThemedText>
 			<ThemedText>A nice Little Word game</ThemedText>
 			<PlayCard />
@@ -21,7 +23,7 @@ export default Home;
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingTop: 24,
+		paddingTop: 40,
 		alignItems: "center",
 		gap: 20,
 	},

@@ -206,7 +206,7 @@ export const useFiveline = () => {
 	};
 
 	const handleAbandonGame = () => {
-		router.push("/(dashboard)/home");
+		router.push("/(dashboard)");
 	};
 
 	const startGame = () => {

@@ -58,7 +58,7 @@ export default function DashboardLayout() {
 			<Tabs.Screen
 				name="stats"
 				options={{
-					title: "Achievements",
+					title: "Profile",
 					tabBarIcon: ({ focused }) => (
 						<Ionicons
 							size={24}

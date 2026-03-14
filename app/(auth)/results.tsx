@@ -56,7 +56,7 @@ export default function Results() {
 	// Called when user presses "Go Home"
 	const handleGoHome = () => {
 		router.replace({
-			pathname: "/(dashboard)/index",
+			pathname: "/(dashboard)",
 		});
 	};
 

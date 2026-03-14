@@ -58,7 +58,7 @@ import ThemedView from "../../components/ui/ThemedView";
 import ProfileScreen from "../../components/profile/ProfileScreen";
 export default function StatsPage() {
 	return (
-		<ThemedView style={{ flex: 1 }}>
+		<ThemedView safe={true} style={{ flex: 1 }}>
 			<ProfileScreen />
 		</ThemedView>
 	);

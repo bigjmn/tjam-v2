@@ -14,7 +14,7 @@ export default function LeaderBoard() {
 	}
 	if (!authChecked || !user) {
 		return (
-			<ThemedView>
+			<ThemedView safe={true}>
 				<ThemedText>Loading</ThemedText>
 				<ThemedLoader />
 			</ThemedView>
@@ -30,7 +30,7 @@ export default function LeaderBoard() {
 	// }, [authChecked, user]);
 	// if (!authChecked || !user) {
 	// 	return (
-	// 		<ThemedView>
+	// 		<ThemedView safe={true}>
 	// 			<ThemedText>Loading</ThemedText>
 	// 			<ThemedLoader />
 	// 		</ThemedView>

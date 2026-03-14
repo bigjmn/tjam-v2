@@ -23,7 +23,7 @@ const RootLayout = () => {
 		<ThemeProvider>
 			<UserProvider>
 				<StatusBar style="auto" />
-				<ThemedView safe={true} style={{ flex: 1 }}>
+				<ThemedView style={{ flex: 1 }}>
 					<Stack
 						screenOptions={{
 							headerStyle: {

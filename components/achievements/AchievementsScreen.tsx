@@ -652,9 +652,10 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				)}
 			</ThemedView>
 
-			{/* Scores and action buttons - fixed at bottom */}
-			{!isProcessing && (
-				<ThemedView style={styles.completeContainer}>
+		{/* Scores and action buttons - centered on screen */}
+		{!isProcessing && (
+			<ThemedView style={styles.completeContainer}>
+				<View style={styles.buttonWrapper}>
 					<ThemedText variant="header2" style={styles.scoreText}>
 						Score: {gameScore}
 					</ThemedText>
@@ -677,8 +678,9 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 							Go Home
 						</ThemedText>
 					</ThemedButton>
-				</ThemedView>
-			)}
+				</View>
+			</ThemedView>
+		)}
 
 			{/* Rank Up Modal */}
 			<RankUpModal ref={rankUpModalRef} />
@@ -703,13 +705,20 @@ const styles = StyleSheet.create({
 	},
 	completeContainer: {
 		position: "absolute",
+		top: 0,
 		bottom: 0,
 		left: 0,
 		right: 0,
+		justifyContent: "center",
+		alignItems: "center",
 		padding: 20,
+		zIndex: 2,
+		pointerEvents: "box-none",
+	},
+	buttonWrapper: {
 		alignItems: "center",
 		gap: 12,
-		zIndex: 2,
+		pointerEvents: "auto",
 	},
 	scoreText: {
 		marginBottom: 4,

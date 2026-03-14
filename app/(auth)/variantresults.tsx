@@ -32,7 +32,7 @@ export default function VariantResults() {
 			<ThemedText>
 				Your Top {vname} Score: {bestOb[variant]}
 			</ThemedText>
-			<ThemedButton onPress={() => router.replace("/")}>
+			<ThemedButton onPress={() => router.replace("/(dashboard)")}>
 				<ThemedText style={{ color: "white" }}>Main Menu</ThemedText>
 			</ThemedButton>
 		</ThemedView>

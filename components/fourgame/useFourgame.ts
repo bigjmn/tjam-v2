@@ -244,7 +244,7 @@ export const useFourgame = () => {
 	};
 
 	const handleAbandonGame = () => {
-		router.push("/(dashboard)/home");
+		router.push("/(dashboard)");
 	};
 
 	const startGame = () => {

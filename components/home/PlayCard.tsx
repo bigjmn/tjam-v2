@@ -50,9 +50,6 @@ export const PlayCard = () => {
 								</View>
 							)}
 						</View>
-						<ThemedText variant="light" style={styles.dateText}>
-							{formattedDate}
-						</ThemedText>
 					</View>
 					<Image
 						source={trioImage}
@@ -65,6 +62,12 @@ export const PlayCard = () => {
 						<ThemedText variant="light" style={styles.wordLabel}>
 							Word of the Day
 						</ThemedText>
+							<ThemedText variant="light" style={styles.divider}>
+							•
+							</ThemedText>
+							<ThemedText variant="light" style={styles.dateText}>
+							{formattedDate}
+							</ThemedText>
 						<TouchableOpacity
 							onPress={() => setShowExplainer(true)}
 							style={styles.helpButton}
@@ -117,11 +120,11 @@ export const PlayCard = () => {
 						</View>
 						<View style={styles.modalBody}>
 							<ThemedText style={styles.modalText}>
-								A special 1-point achievement that you can win every day! Just make the word - simple as that. 
+								A special 1-point achievement that you can win every day! Just make the word - simple as that.
 							</ThemedText>
 							<View style={styles.modalDivider} />
 							<ThemedText style={styles.modalText}>
-								The word changes at midnight. Because that's when the day changes, am I right? (I am in fact right.) 
+								The word changes at midnight. Because that's when the day changes, am I right? (I am in fact right.)
 							</ThemedText>
 							{dailyWordWon && (
 								<View style={[styles.successBanner, { backgroundColor: colors.success + "20" }]}>
@@ -187,6 +190,11 @@ const styles = StyleSheet.create({
 	dateText: {
 		fontSize: 13,
 		opacity: 0.7,
+	},
+	divider: {
+		fontSize: 13,
+		opacity: 0.5,
+		marginHorizontal: 6,
 	},
 	imageStyle: {
 		height: 60,

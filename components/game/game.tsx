@@ -66,7 +66,7 @@ function Tile({
 	const pinwheelRotate = useSharedValue(0);
 	const pinwheelScale = useSharedValue(1);
 
-	const SLIDE_DURATION = 520;
+	const SLIDE_DURATION = 280;
 	// const STAGGER = 60; // ms delay per column index
 	const FLIP_DURATION = 800;
 
@@ -75,7 +75,7 @@ function Tile({
 	// Entrance animation for new home row tiles
 	useEffect(() => {
 		if (isNew && starty === 0) {
-			const delay = 400;
+			const delay = 200;
 			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,

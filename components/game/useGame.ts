@@ -198,7 +198,7 @@ export const useGame = (vKey?: VariantKey) => {
 			if (newboard.length >= 11) {
 				endGame();
 			}
-		}, 500); // Wait for staggered exit animations to complete
+		}, 350); // Wait for exit animations to complete (280ms slide + 50ms exit delay + buffer)
 	};
 	const nextTurn = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
@@ -237,7 +237,7 @@ export const useGame = (vKey?: VariantKey) => {
 				setIsAnimating(false);
 				setFlippingTileIds(new Set());
 				setPinwheelingTileIds(new Set());
-			}, 550);
+			}, 400);
 		}, 950);
 	};
 

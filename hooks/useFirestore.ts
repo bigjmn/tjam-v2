@@ -14,7 +14,7 @@ export const useFirestore = () => {
 				gameScore: gameTurns.length,
 				numgames: playerStats.numGames,
 				topscore: playerStats.topScore,
-				dateAdded: new Date().toTimeString(),
+				dateAdded: new Date(),
 			});
 			console.log("🔥 [Firestore] ✓ Game saved successfully");
 		} catch (e) {

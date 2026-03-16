@@ -5,7 +5,7 @@ const baseBest: VariantBests = { scrabble: 0, fours: 0, fiveline: 0 };
 const variantList: GameVariant[] = [
 	{
 		key: "scrabble",
-		name: "Scrabble Words",
+		name: "Scrab Jam",
 		rules: "If you've been cursing me for my word list, curse no longer. This version has a word list suspiciously similar to one owned by Hasbro, and has all the archaic words you can hope for.",
 		unlockLevel: 5,
 	},

@@ -46,7 +46,7 @@ const VariantBox = () => {
 				<View style={styles.scoresContainer}>
 					<View style={[styles.scoreLine, { borderBottomColor: colors.borderSubtle }]}>
 						<ThemedText variant="medium" style={styles.variantName}>
-							Scrabble
+							Scrab Jam
 						</ThemedText>
 						<ThemedText variant="strong" style={[styles.scoreValue, { color: colors.primary }]}>
 							{bestOb.scrabble}
@@ -62,7 +62,7 @@ const VariantBox = () => {
 					</View>
 					<View style={styles.scoreLine}>
 						<ThemedText variant="medium" style={styles.variantName}>
-							QuadJam
+							Quatro Jam
 						</ThemedText>
 						<ThemedText variant="strong" style={[styles.scoreValue, { color: colors.primary }]}>
 							{bestOb.fours}

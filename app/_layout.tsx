@@ -17,30 +17,38 @@ configureReanimatedLogger({
 	level: ReanimatedLogLevel.warn,
 	strict: false, // Reanimated runs in strict mode by default
 });
-const RootLayout = () => {
+const AppContent = () => {
 	const { colors, theme } = useTheme();
+	return (
+		<>
+			<StatusBar style={theme === "dark" ? "light" : "dark"} />
+			<ThemedView style={{ flex: 1 }}>
+				<Stack
+					screenOptions={{
+						headerStyle: {
+							backgroundColor: colors.navBackground,
+						},
+					}}
+				>
+					<Stack.Screen
+						name="(dashboard)"
+						options={{ headerShown: false }}
+					/>
+					<Stack.Screen
+						name="(auth)"
+						options={{ headerShown: false }}
+					/>
+				</Stack>
+			</ThemedView>
+		</>
+	);
+};
+
+const RootLayout = () => {
 	return (
 		<ThemeProvider>
 			<UserProvider>
-				<StatusBar />
-				<ThemedView style={{ flex: 1 }}>
-					<Stack
-						screenOptions={{
-							headerStyle: {
-								backgroundColor: colors.navBackground,
-							},
-						}}
-					>
-						<Stack.Screen
-							name="(dashboard)"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
-							name="(auth)"
-							options={{ headerShown: false }}
-						/>
-					</Stack>
-				</ThemedView>
+				<AppContent />
 			</UserProvider>
 		</ThemeProvider>
 	);

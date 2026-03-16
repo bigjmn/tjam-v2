@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
+import * as SystemUI from "expo-system-ui";
 
 type ThemeStyle = "light" | "dark";
 interface ThemeContextProps {
@@ -22,10 +23,26 @@ export const ThemeContext = createContext<ThemeContextProps>({
 
 const THEME_STORAGE_KEY = "@app_theme";
 const SFX_STORAGE_KEY = "@app_sfx";
+
+// Native background colors for each theme
+const THEME_COLORS = {
+	light: "#FFFFFF",
+	dark: "#000000",
+};
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const systemColorScheme = useColorScheme();
 	const [theme, setTheme] = useState<ThemeStyle>("light");
 	const [sfxOn, setSfxOn] = useState<boolean>(true);
+
+	// Set native background color when theme changes
+	const setNativeBackgroundColor = async (themeStyle: ThemeStyle) => {
+		try {
+			await SystemUI.setBackgroundColorAsync(THEME_COLORS[themeStyle]);
+		} catch (error) {
+			console.error("Failed to set native background color:", error);
+		}
+	};
 
 	useEffect(() => {
 		loadSavedTheme();
@@ -47,15 +64,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const loadSavedTheme = async () => {
 		try {
 			const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+			let themeToSet: ThemeStyle;
+
 			if (
 				savedTheme &&
 				(savedTheme === "light" || savedTheme === "dark")
 			) {
-				setTheme(savedTheme);
+				themeToSet = savedTheme;
 			} else {
 				// Use system theme as default if no saved theme
-				setTheme(systemColorScheme || "dark");
+				themeToSet = (systemColorScheme as ThemeStyle) || "dark";
 			}
+
+			setTheme(themeToSet);
+			await setNativeBackgroundColor(themeToSet);
 		} catch (error) {
 			console.error("Failed to load theme:", error);
 		}
@@ -79,6 +101,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		setTheme(newTheme);
 		try {
 			await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
+			await setNativeBackgroundColor(newTheme);
 		} catch (error) {
 			console.error("Failed to save theme:", error);
 		}

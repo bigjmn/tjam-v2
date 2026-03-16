@@ -2,8 +2,8 @@ import { firestore } from "../lib/firebase";
 import { useUser } from "./useUser";
 import { collection, addDoc } from "firebase/firestore";
 export const useFirestore = () => {
-	const { user } = useUser();
-	if (!user) {
+	const { user, playerStats } = useUser();
+	if (!user || !playerStats) {
 		return;
 	}
 	const addGame = async (gameTurns: TurnInfo[]) => {
@@ -11,7 +11,9 @@ export const useFirestore = () => {
 		const docref = collection(firestore, "games", uid, "history");
 		try {
 			await addDoc(docref, {
-				gameTurns: gameTurns,
+				gameScore: gameTurns.length,
+				numgames: playerStats.numGames,
+				topscore: playerStats.topScore,
 				dateAdded: new Date().toTimeString(),
 			});
 			console.log("🔥 [Firestore] ✓ Game saved successfully");

@@ -140,17 +140,17 @@ interface WeeklyBoardRank extends BoardRank {
 }
 
 // Achievement Animation Types
+// Order: Secret → Legendary → NextGoals (stays visible)
 type AnimationPhase =
 	| "idle"
-	| "next-goals-enter"
-	| "next-goals-animating"
-	| "next-goals-exit"
-	| "legendary-enter"
-	| "legendary-animating"
-	| "legendary-exit"
 	| "secret-enter"
 	| "secret-animating"
 	| "secret-exit"
+	| "legendary-enter"
+	| "legendary-animating"
+	| "legendary-exit"
+	| "next-goals-enter"
+	| "next-goals-animating"
 	| "rank-up-modal"
 	| "complete";
 
@@ -181,8 +181,6 @@ interface StatBoxProps {
 	globalRank: number;
 	dateJoined: string;
 	points: number;
-	level: number;
-	title: string;
 }
 
 interface VariantBests {

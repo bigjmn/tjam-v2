@@ -48,11 +48,11 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 			>
 				{/* Add date display for daily word */}
 				{showDate && achievement.type === "dailyWord" && (
-					<ThemedView style={styles.dateContainer}>
+					<View style={styles.dateContainer}>
 						<ThemedText variant="soft" style={styles.dateText}>
 							{moment(new Date()).format("MMM DD")}
 						</ThemedText>
-					</ThemedView>
+					</View>
 				)}
 
 				<ThemedView style={[styles.contentArea, { backgroundColor }]}>
@@ -116,7 +116,7 @@ export const AchievementTile: React.FC<AchievementTileProps> = ({
 const styles = StyleSheet.create({
 	badgeContainer: {
 		position: "relative",
-		marginVertical: 8,
+		marginVertical: 4,
 	},
 	container: {
 		flexDirection: "row",
@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
 	},
 	dateContainer: {
 		position: "absolute",
-		top: 8,
-		left: 8,
+		bottom: 8,
+		right: 8,
 		// backgroundColor: "rgba(0, 0, 0, 0.2)",
 		paddingHorizontal: 8,
 		paddingVertical: 4,

@@ -20,6 +20,7 @@ interface RankProgressProps {
 	rank: Rank;
 	totalStars: number;
 	filledStars: number;
+	variant?: "default" | "compact";
 }
 
 export interface RankProgressHandle {
@@ -29,7 +30,7 @@ export interface RankProgressHandle {
 
 export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 	(
-		{ rank: initialRank, totalStars: initialTotalStars, filledStars },
+		{ rank: initialRank, totalStars: initialTotalStars, filledStars, variant = "default" },
 		ref,
 	) => {
 		const { popSound } = useSfx();
@@ -118,22 +119,23 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 					},
 					() => {
 						console.log("[RANK] Transition complete");
-						// Update current rank
-						runOnJS(setCurrentRank)(newRankToShow);
-						runOnJS(setTotalStars)(newRankToShow.starsToFill);
-						runOnJS(setNextRank)(null);
-						runOnJS(setIsTransitioning)(false);
-
-						// Reset all stars
+						// Reset all stars BEFORE updating state
 						for (let i = 0; i < maxStars; i++) {
 							starProgress[i].value = 0;
 							newRankStarProgress[i].value = 0;
 						}
 
-						// Reset position
+						// Reset position BEFORE updating state
 						containerTranslateX.value = 0;
 
-						runOnJS(resolve)();
+						// Update state in a single batch AFTER resetting position
+						runOnJS(() => {
+							setCurrentRank(newRankToShow);
+							setTotalStars(newRankToShow.starsToFill);
+							setNextRank(null);
+							setIsTransitioning(false);
+							resolve();
+						})();
 					},
 				);
 			});
@@ -148,8 +150,10 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 			transform: [{ translateX: containerTranslateX.value }],
 		}));
 
+		const isCompact = variant === "compact";
+
 		return (
-			<View style={styles.containerWrapper}>
+			<View style={[styles.containerWrapper, isCompact && styles.containerWrapperCompact]}>
 				<Animated.View
 					style={[
 						styles.slidingContainer,
@@ -160,11 +164,14 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 				>
 					{/* Current Rank */}
 					<View style={styles.rankView}>
-						<ThemedText variant="header" style={styles.rankName}>
+						<ThemedText
+							variant={isCompact ? "medium" : "header"}
+							style={[styles.rankName, isCompact && styles.rankNameCompact]}
+						>
 							{currentRank.name}
 						</ThemedText>
-						<DividerWithText text={`Level ${currentRank.level}`} />
-						<View style={styles.starsContainer}>
+						<DividerWithText text={`Level ${currentRank.level}`} compact={isCompact} />
+						<View style={[styles.starsContainer, isCompact && styles.starsContainerCompact]}>
 							{starProgress
 								.slice(0, totalStars)
 								.map((progress, index) => (
@@ -177,13 +184,13 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 					{nextRank && (
 						<View style={styles.rankView}>
 							<ThemedText
-								variant="header"
-								style={styles.rankName}
+								variant={isCompact ? "medium" : "header"}
+								style={[styles.rankName, isCompact && styles.rankNameCompact]}
 							>
 								{nextRank.name}
 							</ThemedText>
-							<DividerWithText text={`Level ${nextRank.level}`} />
-							<View style={styles.starsContainer}>
+							<DividerWithText text={`Level ${nextRank.level}`} compact={isCompact} />
+							<View style={[styles.starsContainer, isCompact && styles.starsContainerCompact]}>
 								{newRankStarProgress
 									.slice(0, nextRank.starsToFill)
 									.map((progress, index) => (
@@ -237,6 +244,10 @@ const styles = StyleSheet.create({
 		paddingVertical: 20,
 		paddingHorizontal: 16,
 	},
+	containerWrapperCompact: {
+		paddingVertical: 12,
+		paddingHorizontal: 12,
+	},
 	slidingContainer: {
 		flexDirection: "row",
 		width: SCREEN_WIDTH, // Default width, will be overridden during transition
@@ -249,10 +260,18 @@ const styles = StyleSheet.create({
 	rankName: {
 		fontWeight: "700", // Make rank name bolder for better visibility
 	},
+	rankNameCompact: {
+		fontSize: 18,
+		fontWeight: "600",
+	},
 	starsContainer: {
 		flexDirection: "row",
 		marginTop: 4,
 		gap: 8,
+	},
+	starsContainerCompact: {
+		marginTop: 2,
+		gap: 6,
 	},
 	star: {
 		width: 24,

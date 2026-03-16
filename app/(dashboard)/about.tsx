@@ -41,7 +41,7 @@ export default function AboutScreen() {
 			x: tabIndex * SCREEN_WIDTH,
 			animated: true,
 		});
-		setCurrentTab(tabIndex);
+		// Don't set state here - let the scroll handler update it when animation completes
 	};
 
 	return (
@@ -112,6 +112,7 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		alignItems:'center'
 	},
 	header: {
 		paddingHorizontal: 16,
@@ -129,6 +130,15 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 		alignItems: "center",
 		justifyContent: "center",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.15,
+		shadowRadius: 3,
+		elevation: 3,
+		
 	},
 	tabText: {
 		fontSize: 14,

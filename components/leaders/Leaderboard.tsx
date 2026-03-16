@@ -25,7 +25,7 @@ export const Leaderboard = () => {
 	}
 
 	return (
-		<ThemedView style={styles.container}>
+		<ThemedView safe={true} style={styles.container}>
 			<ThemedText variant="header">Leaderboard</ThemedText>
 			<ThemedView style={styles.buttonPanel}>
 				<UnderlinedButton

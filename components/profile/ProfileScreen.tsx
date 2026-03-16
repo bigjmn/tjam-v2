@@ -22,7 +22,7 @@ const ProfileScreen = () => {
 	const stats = statsOb.getStats();
 	if (!stats) return;
 
-	const { highScore, globalRank, dateJoined, points, level, title } = stats;
+	const { highScore, globalRank, dateJoined, points } = stats;
 	return (
 		<ThemedView style={styles.container}>
 			{/* Settings Button */}
@@ -42,14 +42,14 @@ const ProfileScreen = () => {
 
 			<UsernamePicker />
 
-			<StatBox
-				highScore={highScore}
-				globalRank={globalRank}
-				dateJoined={dateJoined}
-				points={points}
-				level={level}
-				title={title}
-			/>
+			<View style={styles.statBoxWrapper}>
+				<StatBox
+					highScore={highScore}
+					globalRank={globalRank}
+					dateJoined={dateJoined}
+					points={points}
+				/>
+			</View>
 
 			<View style={styles.tabsContainer}>
 				<ProfileTabs />
@@ -74,10 +74,15 @@ const styles = StyleSheet.create({
 	},
 	settingsButton: {
 		position: "absolute",
-		top: 30,
+		top: 20,
 		right: 25,
 		zIndex: 10,
 		padding: 8,
+	},
+	statBoxWrapper: {
+		width: "100%",
+		paddingHorizontal: 20,
+		marginBottom: 12,
 	},
 	tabsContainer: {
 		flex: 1,

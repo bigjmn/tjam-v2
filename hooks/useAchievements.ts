@@ -24,7 +24,7 @@ import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const DEBUG_SET: string[] = [];
+const DEBUG_SET: string[] = ["vowelcrusher", "drtripleword"];
 export const useAchievements = () => {
 	const { playerStats } = useUser();
 	if (playerStats === null) return;
@@ -132,6 +132,9 @@ export const useAchievements = () => {
 		}
 		if (tripleTake(turns)) {
 			allAchievements.push("tripletake");
+		}
+		if (adults(turns)){
+			allAchievements.push('adults')
 		}
 
 		// Check daily word achievement

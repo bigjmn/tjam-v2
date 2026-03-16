@@ -158,5 +158,6 @@ const styles = StyleSheet.create({
 	},
 	carousel: {
 		flex: 1,
+		marginBottom:-40
 	},
 });

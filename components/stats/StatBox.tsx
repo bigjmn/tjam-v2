@@ -33,28 +33,19 @@ export const StatBox: React.FC<StatBoxProps> = ({
 	globalRank,
 	dateJoined,
 	points,
-	level,
-	title,
 }) => {
 	const { colors } = useTheme();
 	return (
 		<View style={[styles.container, { backgroundColor: colors.primary }]}>
-			{/* Top Row */}
 			<View style={styles.row}>
 				<StatItem value={highScore} label="High Score" />
 				<StatItem value={globalRank} label="Global Rank" />
+				<StatItem value={points} label="Points" />
 				<StatItem
 					value={dateJoined}
 					label="Date Joined"
 					valueSize="small"
 				/>
-			</View>
-
-			{/* Bottom Row */}
-			<View style={styles.row}>
-				<StatItem value={points} label="Points" />
-				<StatItem value={level} label="Level" />
-				<StatItem value={title} label="Title" valueSize="small" />
 			</View>
 		</View>
 	);
@@ -65,8 +56,8 @@ const styles = StyleSheet.create({
 		borderRadius: 18,
 		paddingVertical: 16,
 		paddingHorizontal: 12,
-		width: 285,
-		height: 126,
+		width: "100%",
+		height: 80,
 	},
 	row: {
 		flexDirection: "row",
@@ -76,8 +67,8 @@ const styles = StyleSheet.create({
 	statItem: {
 		flex: 1,
 		alignItems: "center",
-		justifyContent: "flex-end", // Align items to bottom of container
-		paddingBottom: 4, // Small padding for consistent spacing
+		justifyContent: "center",
+		paddingHorizontal: 4,
 	},
 	statValue: {
 		color: "#ffffff",
@@ -87,9 +78,9 @@ const styles = StyleSheet.create({
 		marginBottom: 2,
 	},
 	statValueSmall: {
-		fontSize: 15, // Increased from 12 to make it a bit bigger
+		fontSize: 15,
 		fontWeight: "500",
-		marginBottom: 2, // Match the margin of regular values for alignment
+		marginBottom: 2,
 	},
 	statLabel: {
 		color: "#ffffff",

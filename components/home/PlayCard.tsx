@@ -90,6 +90,7 @@ export const PlayCard = () => {
 						>
 							<ThemedText style={styles.playButtonText}>Play</ThemedText>
 						</ThemedButton>
+						<View />
 					</View>
 				</View>
 			</ThemedCard>
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
 	wordLabelRow: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
+		gap: 4,
 		marginBottom: 4,
 	},
 	wordLabel: {
@@ -222,18 +223,20 @@ const styles = StyleSheet.create({
 	},
 	wordRow: {
 		flexDirection: "row",
-		justifyContent: "space-between",
+		justifyContent: "center",
 		alignItems: "center",
+		gap: 36,
+		marginTop: 8,
 	},
 	wordText: {
 		fontSize: 20,
 		fontWeight: "600",
-		flex: 1,
 	},
 	playButton: {
 		paddingHorizontal: 24,
 		paddingVertical: 10,
 		borderRadius: 10,
+		width:120,
 		minWidth: 80,
 		alignItems: "center",
 	},

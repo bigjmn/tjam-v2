@@ -18,11 +18,11 @@ configureReanimatedLogger({
 	strict: false, // Reanimated runs in strict mode by default
 });
 const RootLayout = () => {
-	const { colors } = useTheme();
+	const { colors, theme } = useTheme();
 	return (
 		<ThemeProvider>
 			<UserProvider>
-				<StatusBar style="auto" />
+				<StatusBar />
 				<ThemedView style={{ flex: 1 }}>
 					<Stack
 						screenOptions={{

@@ -357,7 +357,7 @@ export const NextGoalsBlock = forwardRef<
 const styles = StyleSheet.create({
 	container: {
 		paddingHorizontal: 16,
-		paddingVertical: 20,
+		paddingVertical: 0,
 	},
 	title: {
 		marginBottom: 16,

@@ -8,19 +8,21 @@ interface DividerWithTextProps {
 	text?: string;
 	isDate?: boolean;
 	style?: StyleProp<ViewStyle>;
+	compact?: boolean;
 	[key: string]: any;
 }
 const DividerWithText = ({
 	text,
 	isDate = false,
 	style,
+	compact = false,
 	...props
 }: DividerWithTextProps) => {
 	const { colors } = useTheme();
 
 	if (isDate) {
 		return (
-			<ThemedView style={[styles.container, style]}>
+			<ThemedView style={[styles.container, compact && styles.containerCompact, style]}>
 				<ThemedView
 					style={[styles.line, { backgroundColor: colors.mutedText }]}
 				/>
@@ -32,11 +34,11 @@ const DividerWithText = ({
 		);
 	}
 	return (
-		<ThemedView style={[styles.container, style]}>
+		<ThemedView style={[styles.container, compact && styles.containerCompact, style]}>
 			<ThemedView
 				style={[styles.line, { backgroundColor: colors.mutedText }]}
 			/>
-			<ThemedText style={[styles.text, { color: colors.text }]}>
+			<ThemedText style={[styles.text, compact && styles.textCompact, { color: colors.text }]}>
 				{text}
 			</ThemedText>
 			<ThemedView
@@ -51,7 +53,11 @@ const styles = StyleSheet.create({
 		width: "80%",
 		flexDirection: "row",
 		alignItems: "center",
+		backgroundColor: "transparent",
 		marginVertical: 20, // Adjust as needed for spacing
+	},
+	containerCompact: {
+		marginVertical: 8,
 	},
 	line: {
 		flex: 1,
@@ -63,6 +69,10 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "600", // Make text a bit bolder for better readability
 		// color now set dynamically via theme
+	},
+	textCompact: {
+		fontSize: 14,
+		marginHorizontal: 8,
 	},
 });
 

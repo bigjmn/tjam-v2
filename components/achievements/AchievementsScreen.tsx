@@ -93,6 +93,65 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			currentAchievements: simulatedAchievements.length,
 		});
 
+		// ============================================================
+		// BUILD QUEUE IN ORDER: Secret → Legendary → NextGoals
+		// ============================================================
+
+		// Process Secret achievements FIRST
+		for (const key of secret) {
+			const achievement = allAchievements.find((a) => a.key === key);
+			if (!achievement) continue;
+
+			queue.push({
+				type: "revealSecret",
+				achievementKey: key,
+			} as RevealSecretEvent);
+
+			for (let i = 0; i < achievement.reward; i++) {
+				starCounter++;
+				queue.push({
+					type: "fillStar",
+					rankIndex: currentRankIndex,
+				} as FillStarEvent);
+
+				const rankChange = rankChanges.find(
+					(rc) => rc.starIndex === starCounter,
+				);
+				if (rankChange) {
+					queue.push({
+						type: "showRankUp",
+						newRank: rankChange.newRank,
+						rankIndex: rankChange.rankIndex,
+					} as ShowRankUpEvent);
+				}
+			}
+		}
+
+		// Process Legendary achievements SECOND
+		for (const key of legendary) {
+			const achievement = allAchievements.find((a) => a.key === key);
+			if (!achievement) continue;
+
+			for (let i = 0; i < achievement.reward; i++) {
+				starCounter++;
+				queue.push({
+					type: "fillStar",
+					rankIndex: currentRankIndex,
+				} as FillStarEvent);
+
+				const rankChange = rankChanges.find(
+					(rc) => rc.starIndex === starCounter,
+				);
+				if (rankChange) {
+					queue.push({
+						type: "showRankUp",
+						newRank: rankChange.newRank,
+						rankIndex: rankChange.rankIndex,
+					} as ShowRankUpEvent);
+				}
+			}
+		}
+
 		// Sort nextGoals achievements by their thresholds to ensure correct progression
 		// This is CRITICAL: scoring achievements must animate from lowest → highest
 		// Example: doubledigits (10) → dirty30 (30) → nifty50 (50)
@@ -126,7 +185,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			sortedNextGoals,
 		);
 
-		// Process Next Goals achievements
+		// Process Next Goals achievements LAST
 		for (const key of sortedNextGoals) {
 			const achievement = allAchievements.find((a) => a.key === key);
 			if (!achievement) continue;
@@ -267,61 +326,6 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			}
 		}
 
-		// Process Legendary achievements
-		for (const key of legendary) {
-			const achievement = allAchievements.find((a) => a.key === key);
-			if (!achievement) continue;
-
-			for (let i = 0; i < achievement.reward; i++) {
-				starCounter++;
-				queue.push({
-					type: "fillStar",
-					rankIndex: currentRankIndex,
-				} as FillStarEvent);
-
-				const rankChange = rankChanges.find(
-					(rc) => rc.starIndex === starCounter,
-				);
-				if (rankChange) {
-					queue.push({
-						type: "showRankUp",
-						newRank: rankChange.newRank,
-						rankIndex: rankChange.rankIndex,
-					} as ShowRankUpEvent);
-				}
-			}
-		}
-
-		// Process Secret achievements
-		for (const key of secret) {
-			const achievement = allAchievements.find((a) => a.key === key);
-			if (!achievement) continue;
-
-			queue.push({
-				type: "revealSecret",
-				achievementKey: key,
-			} as RevealSecretEvent);
-
-			for (let i = 0; i < achievement.reward; i++) {
-				starCounter++;
-				queue.push({
-					type: "fillStar",
-					rankIndex: currentRankIndex,
-				} as FillStarEvent);
-
-				const rankChange = rankChanges.find(
-					(rc) => rc.starIndex === starCounter,
-				);
-				if (rankChange) {
-					queue.push({
-						type: "showRankUp",
-						newRank: rankChange.newRank,
-						rankIndex: rankChange.rankIndex,
-					} as ShowRankUpEvent);
-				}
-			}
-		}
-
 		return queue;
 	};
 
@@ -357,9 +361,21 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		});
 
 		// Track which events belong to which block
-		let currentBlock: "nextGoals" | "legendary" | "secret" = "nextGoals";
+		// Queue order: Secret → Legendary → NextGoals
+		let currentBlock: "nextGoals" | "legendary" | "secret" = "secret";
+
+		// Find boundaries between blocks in the queue
 		const firstRevealSecretIndex = queue.findIndex(
 			(e) => e.type === "revealSecret",
+		);
+		const lastSecretIndex = queue.findLastIndex(
+			(e) => e.type === "revealSecret" ||
+				(firstRevealSecretIndex !== -1 &&
+				 e.type === "fillStar" &&
+				 queue.slice(firstRevealSecretIndex).includes(e))
+		);
+		const firstMarkWonIndex = queue.findIndex(
+			(e) => e.type === "markWon" || e.type === "slideTile",
 		);
 
 		// Helper to determine if event belongs to current block
@@ -367,161 +383,34 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			event: AchievementAnimationEvent,
 			index: number,
 		) => {
+			// NextGoals-specific events (only in NextGoals block)
 			if (event.type === "markWon" || event.type === "slideTile")
 				return currentBlock === "nextGoals";
-			if (event.type === "revealSecret") return currentBlock === "secret";
+
+			// Secret-specific events (only in Secret block)
+			if (event.type === "revealSecret")
+				return currentBlock === "secret";
+
+			// Star fills and rank-ups can belong to any block
+			// Determine by position in queue
 			if (event.type === "showRankUp" || event.type === "fillStar") {
-				// Star fills belong to the block that earned them
-				if (
-					currentBlock === "nextGoals" &&
-					(firstRevealSecretIndex === -1 ||
-						index < firstRevealSecretIndex)
-				)
-					return true;
-				if (
-					currentBlock === "legendary" &&
-					index >= firstRevealSecretIndex
-				)
-					return false;
-				if (
-					currentBlock === "secret" &&
-					firstRevealSecretIndex !== -1 &&
-					index >= firstRevealSecretIndex
-				)
-					return true;
+				if (currentBlock === "secret") {
+					// Secret events come first (before any markWon/slideTile)
+					return firstMarkWonIndex === -1 || index < firstMarkWonIndex;
+				}
+				if (currentBlock === "legendary") {
+					// Legendary events are between last secret and first nextGoals
+					const afterSecret = firstRevealSecretIndex === -1 || index > lastSecretIndex;
+					const beforeNextGoals = firstMarkWonIndex === -1 || index < firstMarkWonIndex;
+					return afterSecret && beforeNextGoals;
+				}
+				if (currentBlock === "nextGoals") {
+					// NextGoals events come last (at or after first markWon/slideTile)
+					return firstMarkWonIndex !== -1 && index >= firstMarkWonIndex;
+				}
 			}
 			return false;
 		};
-
-		// NEXT GOALS BLOCK
-		if (nextGoals.length > 0 || dailyWordKeys.length > 0) {
-			console.log("[ACHIEVEMENTS] Entering next goals block");
-			setPhase("next-goals-enter");
-			await nextGoalsRef.current?.enter();
-			await delay(200);
-			setPhase("next-goals-animating");
-
-			// Process only Next Goals and Daily Word events
-			console.log("[ACHIEVEMENTS] Processing next goals events");
-			currentBlock = "nextGoals";
-			for (let i = 0; i < queue.length; i++) {
-				const event = queue[i];
-				if (!eventBelongsToCurrentBlock(event, i)) continue;
-
-				console.log("[ACHIEVEMENTS] Processing event:", event.type);
-				if (event.type === "markWon") {
-					const markWonEvent = event as unknown as MarkWonEvent;
-					console.log(
-						"[ACHIEVEMENTS] Marking as won:",
-						markWonEvent.category,
-					);
-					try {
-						await nextGoalsRef.current?.markAsWon(
-							markWonEvent.category,
-						);
-						await delay(200);
-					} catch (error) {
-						console.error(
-							"[ACHIEVEMENTS] Error marking as won:",
-							error,
-						);
-					}
-				} else if (event.type === "fillStar") {
-					console.log("[ACHIEVEMENTS] Filling star");
-					await rankProgressRef.current?.fillNextStar();
-					setStarsInCurrentRank((prev) => prev + 1);
-					await delay(400);
-				} else if (event.type === "slideTile") {
-					const slideEvent = event as unknown as SlideTileEvent;
-					if (slideEvent.direction === "out") {
-						await nextGoalsRef.current?.slideOut(
-							slideEvent.category,
-						);
-					} else if (
-						slideEvent.direction === "in" &&
-						slideEvent.newAchievement
-					) {
-						await nextGoalsRef.current?.slideIn(
-							slideEvent.category,
-							slideEvent.newAchievement,
-						);
-					}
-					await delay(200);
-				} else if (event.type === "revealSecret") {
-					const revealEvent = event as unknown as RevealSecretEvent;
-					await secretRef.current?.revealTile(
-						revealEvent.achievementKey,
-					);
-					await delay(400);
-				} else if (event.type === "showRankUp") {
-					const rankUpEvent = event as unknown as ShowRankUpEvent;
-					// Use slide transition instead of modal
-					await rankProgressRef.current?.transitionToNewRank(
-						rankUpEvent.newRank,
-					);
-					setCurrentRankIndex(rankUpEvent.rankIndex);
-					setStarsInCurrentRank(0);
-					// Continue with previous phase
-					if (
-						nextGoals.length > 0 &&
-						queue.indexOf(event) < queue.length - 1
-					) {
-						setPhase("next-goals-animating");
-					} else if (legendary.length > 0) {
-						setPhase("legendary-animating");
-					} else if (secret.length > 0) {
-						setPhase("secret-animating");
-					}
-					await delay(200);
-				}
-			}
-
-			// Exit Next Goals block
-			console.log("[ACHIEVEMENTS] Exiting next goals block");
-			await delay(2000); // 2 second delay before exit
-			setPhase("next-goals-exit");
-			await nextGoalsRef.current?.exit();
-			await delay(200);
-		}
-
-		// LEGENDARY BLOCK
-		if (legendary.length > 0) {
-			console.log("[ACHIEVEMENTS] Entering legendary block");
-			setPhase("legendary-enter");
-			await legendaryRef.current?.enter();
-			await delay(200);
-			setPhase("legendary-animating");
-
-			// Process Legendary events (star fills only)
-			currentBlock = "legendary";
-			for (let i = 0; i < queue.length; i++) {
-				const event = queue[i];
-				if (!eventBelongsToCurrentBlock(event, i)) continue;
-
-				console.log("[ACHIEVEMENTS] Processing event:", event.type);
-				if (event.type === "fillStar") {
-					console.log("[ACHIEVEMENTS] Filling star");
-					await rankProgressRef.current?.fillNextStar();
-					setStarsInCurrentRank((prev) => prev + 1);
-					await delay(400);
-				} else if (event.type === "showRankUp") {
-					const rankUpEvent = event as unknown as ShowRankUpEvent;
-					await rankProgressRef.current?.transitionToNewRank(
-						rankUpEvent.newRank,
-					);
-					setCurrentRankIndex(rankUpEvent.rankIndex);
-					setStarsInCurrentRank(0);
-					setPhase("legendary-animating");
-					await delay(200);
-				}
-			}
-
-			console.log("[ACHIEVEMENTS] Exiting legendary block");
-			await delay(2000); // 2 second delay before exit
-			setPhase("legendary-exit");
-			await legendaryRef.current?.exit();
-			await delay(200);
-		}
 
 		// SECRET BLOCK
 		if (secret.length > 0) {
@@ -567,6 +456,119 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			await delay(200);
 		}
 
+		// LEGENDARY BLOCK
+		if (legendary.length > 0) {
+			console.log("[ACHIEVEMENTS] Entering legendary block");
+			setPhase("legendary-enter");
+			await legendaryRef.current?.enter();
+			await delay(200);
+			setPhase("legendary-animating");
+
+			// Process Legendary events (star fills only)
+			currentBlock = "legendary";
+			for (let i = 0; i < queue.length; i++) {
+				const event = queue[i];
+				if (!eventBelongsToCurrentBlock(event, i)) continue;
+
+				console.log("[ACHIEVEMENTS] Processing event:", event.type);
+				if (event.type === "fillStar") {
+					console.log("[ACHIEVEMENTS] Filling star");
+					await rankProgressRef.current?.fillNextStar();
+					setStarsInCurrentRank((prev) => prev + 1);
+					await delay(400);
+				} else if (event.type === "showRankUp") {
+					const rankUpEvent = event as unknown as ShowRankUpEvent;
+					await rankProgressRef.current?.transitionToNewRank(
+						rankUpEvent.newRank,
+					);
+					setCurrentRankIndex(rankUpEvent.rankIndex);
+					setStarsInCurrentRank(0);
+					setPhase("legendary-animating");
+					await delay(200);
+				}
+			}
+
+			console.log("[ACHIEVEMENTS] Exiting legendary block");
+			await delay(2000); // 2 second delay before exit
+			setPhase("legendary-exit");
+			await legendaryRef.current?.exit();
+			await delay(200);
+		}
+
+		// NEXT GOALS BLOCK (ALWAYS SHOW)
+		console.log("[ACHIEVEMENTS] Entering next goals block");
+		setPhase("next-goals-enter");
+		await nextGoalsRef.current?.enter();
+		await delay(200);
+		setPhase("next-goals-animating");
+
+		// Process only Next Goals and Daily Word events
+		console.log("[ACHIEVEMENTS] Processing next goals events");
+		currentBlock = "nextGoals";
+		for (let i = 0; i < queue.length; i++) {
+			const event = queue[i];
+			if (!eventBelongsToCurrentBlock(event, i)) continue;
+
+			console.log("[ACHIEVEMENTS] Processing event:", event.type);
+			if (event.type === "markWon") {
+				const markWonEvent = event as unknown as MarkWonEvent;
+				console.log(
+					"[ACHIEVEMENTS] Marking as won:",
+					markWonEvent.category,
+				);
+				try {
+					await nextGoalsRef.current?.markAsWon(
+						markWonEvent.category,
+					);
+					await delay(200);
+				} catch (error) {
+					console.error(
+						"[ACHIEVEMENTS] Error marking as won:",
+						error,
+					);
+				}
+			} else if (event.type === "fillStar") {
+				console.log("[ACHIEVEMENTS] Filling star");
+				await rankProgressRef.current?.fillNextStar();
+				setStarsInCurrentRank((prev) => prev + 1);
+				await delay(400);
+			} else if (event.type === "slideTile") {
+				const slideEvent = event as unknown as SlideTileEvent;
+				if (slideEvent.direction === "out") {
+					await nextGoalsRef.current?.slideOut(
+						slideEvent.category,
+					);
+				} else if (
+					slideEvent.direction === "in" &&
+					slideEvent.newAchievement
+				) {
+					await nextGoalsRef.current?.slideIn(
+						slideEvent.category,
+						slideEvent.newAchievement,
+					);
+				}
+				await delay(200);
+			} else if (event.type === "revealSecret") {
+				const revealEvent = event as unknown as RevealSecretEvent;
+				await secretRef.current?.revealTile(
+					revealEvent.achievementKey,
+				);
+				await delay(400);
+			} else if (event.type === "showRankUp") {
+				const rankUpEvent = event as unknown as ShowRankUpEvent;
+				// Use slide transition instead of modal
+				await rankProgressRef.current?.transitionToNewRank(
+					rankUpEvent.newRank,
+				);
+				setCurrentRankIndex(rankUpEvent.rankIndex);
+				setStarsInCurrentRank(0);
+				setPhase("next-goals-animating");
+				await delay(200);
+			}
+		}
+
+		// NextGoals block stays visible - NO EXIT
+
 		console.log("[ACHIEVEMENTS] Animation queue complete");
 		setPhase("complete");
 		setIsProcessing(false);
@@ -611,7 +613,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	const currentRank = ranksList[currentRankIndex];
 
 	return (
-		<ThemedView style={styles.container}>
+		<ThemedView safe={true} style={styles.container}>
 			{/* Rank Progress - always at top */}
 			<RankProgress
 				ref={rankProgressRef}
@@ -623,8 +625,9 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			{/* Achievement Blocks Container - positioned beneath RankProgress */}
 			<ThemedView style={styles.blocksContainer}>
 				{/* All blocks positioned absolutely at same location */}
-				{nextGoalKeys.length > 0 && nextAchievements && (
-					<View style={styles.blockWrapper}>
+				{/* ALWAYS render NextGoalsBlock, even if no achievements earned */}
+			{nextAchievements && (
+					<View style={styles.blockWrapperWithOffset}>
 						<NextGoalsBlock
 							ref={nextGoalsRef}
 							scoringAchievement={nextAchievements.scoring}
@@ -703,15 +706,20 @@ const styles = StyleSheet.create({
 		right: 0,
 		zIndex: 1,
 	},
-	completeContainer: {
+	blockWrapperWithOffset: {
 		position: "absolute",
-		top: 0,
-		bottom: 0,
+		top: "35%",
 		left: 0,
 		right: 0,
-		justifyContent: "center",
+		zIndex: 1,
+	},
+	completeContainer: {
+		position: "absolute",
+		top: "25%",
+		left: 0,
+		right: 0,
 		alignItems: "center",
-		padding: 20,
+		paddingHorizontal: 20,
 		zIndex: 2,
 		pointerEvents: "box-none",
 	},

@@ -3,6 +3,7 @@ import { StyleSheet, TextInput, View, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../../hooks/useUser";
 import { useTheme } from "../../hooks/useTheme";
+import { useAchievements } from "../../hooks/useAchievements";
 import { firestore } from "../../lib/firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { playerStatConverter } from "../../utils/helpers";
@@ -11,6 +12,8 @@ import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import ThemedTextInput from "../ui/ThemedTextInput";
 import { getGoogleName } from "../auth/GoogleLoginButton";
+import { RankProgress } from "../achievements/RankProgress";
+import { ranksList } from "../../utils/achievements";
 
 export default function UsernamePicker() {
 	const [isEditing, setIsEditing] = useState(false);
@@ -22,6 +25,13 @@ export default function UsernamePicker() {
 
 	const { user, playerStats, updatePlayerStats } = useUser();
 	const { colors } = useTheme();
+	const achievements = useAchievements();
+
+	// Get rank data
+	const { playerRank, starsEarned } = achievements?.scoreAndRank() || {
+		playerRank: ranksList[0],
+		starsEarned: 0,
+	};
 
 	const getDefaultUsername = () => {
 		// If user is anonymous, return "None"
@@ -225,6 +235,16 @@ export default function UsernamePicker() {
 					},
 				]}
 			>
+				{/* Rank Progress */}
+				<View style={styles.rankContainer}>
+					<RankProgress
+						rank={playerRank}
+						totalStars={playerRank.starsToFill}
+						filledStars={starsEarned}
+						variant="compact"
+					/>
+				</View>
+
 				{/* Header with icon */}
 				<View style={styles.header}>
 					<View
@@ -468,6 +488,14 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 8,
 		elevation: 3,
+	},
+	rankContainer: {
+		marginBottom: 5,
+		marginHorizontal: -20,
+		marginTop: -20,
+		alignItems:'center',
+		
+		
 	},
 	header: {
 		flexDirection: "row",

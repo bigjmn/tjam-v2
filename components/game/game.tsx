@@ -75,7 +75,7 @@ function Tile({
 	// Entrance animation for new home row tiles
 	useEffect(() => {
 		if (isNew && starty === 0) {
-			const delay = 200;
+			const delay = 20;
 			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,
@@ -93,7 +93,7 @@ function Tile({
 	useEffect(() => {
 		if (isHomeRowExiting) {
 			// gearloadSound()
-			const delay = 50;
+			const delay = 20;
 			// const delay = startx * STAGGER;
 			translateX.value = withDelay(
 				delay,

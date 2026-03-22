@@ -24,7 +24,7 @@ import moment from "moment";
 
 const alphaList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const DEBUG_SET: string[] = ["vowelcrusher", "drtripleword"];
+const DEBUG_SET: string[] = [];
 export const useAchievements = () => {
 	const { playerStats } = useUser();
 	if (playerStats === null) return;

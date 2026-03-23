@@ -13,13 +13,7 @@ export const useGame = (vKey?: VariantKey) => {
 	const { wooshSound, gearloadSound } = useSfx();
 	const { playerStats, updatePlayerStats } = useUser();
 	const [tiles, setTiles] = useState<Tile[]>([]);
-	const [wordList, setWordList] = useState(
-		!vKey
-			? shuffle(wordlist)
-			: vKey === "scrabble"
-				? shuffle(threeLetterWords)
-				: shuffle(wordlist),
-	);
+	const [gameId, setGameId] = useState(0);
 	const [inMotion, setInMotion] = useState<string | null>(null);
 	const [takenSpots, setTakenSpots] = useState<string[]>([]);
 
@@ -48,8 +42,21 @@ export const useGame = (vKey?: VariantKey) => {
 	const router = useRouter();
 	const firehook = useFirestore();
 
+
+
 	const achieve = useAchievements();
 	const { startTracking, endTracking } = useActiveGameTracking();
+
+	// Memoize wordList - only regenerate when gameId or vKey changes
+	const wordList = useMemo(() => {
+		const list = !vKey
+			? shuffle(wordlist)
+			: vKey === "scrabble"
+				? shuffle(threeLetterWords)
+				: shuffle(wordlist);
+		console.log("🎲 New wordList generated, first word:", list[0]);
+		return list;
+	}, [gameId, vKey]);
 
 	const checkSquareArr = (arr: string[]) => {
 		let rowword = "";
@@ -345,9 +352,7 @@ export const useGame = (vKey?: VariantKey) => {
 	const startGame = () => {
 		setTiles([]);
 		setGameActive(true);
-		setWordList(
-			vKey === "scrabble" ? shuffle(threeLetterWords) : shuffle(wordlist),
-		);
+		setGameId((id) => id + 1); // Increment to trigger new wordList
 		setWordNum(0);
 		setGameTurns([]);
 		setCurrentWord(null);

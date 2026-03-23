@@ -515,4 +515,35 @@ export function achievementByKey(achKey:string){
 	return allAchievements.find(x => x.key === baseKey)
 }
 
+/**
+ * Backfill missing scoring achievements based on topScore
+ * Safety check: If user has a high score, they should have all lower-tier achievements
+ *
+ * Example: If topScore is 70, user should have:
+ * - doubledigits (10+) ✓
+ * - dirty30 (30+) ✓
+ * - nifty50 (50+) ✓
+ *
+ * @param topScore - Player's highest score
+ * @param currentAchievements - Array of achievement keys already earned
+ * @returns Array of missing achievement keys that should be added
+ */
+export function backfillScoringAchievements(
+	topScore: number,
+	currentAchievements: string[]
+): string[] {
+	// Get all scoring achievements the user should have based on their topScore
+	const shouldHave = scoringAchievements
+		.filter(ach => topScore >= ach.scoreThreshhold)
+		.map(ach => ach.key);
 
+	// Find which ones are missing from their current achievements
+	const missing = shouldHave.filter(key => !currentAchievements.includes(key));
+
+	if (missing.length > 0) {
+		console.log(`🔧 [Backfill] Found ${missing.length} missing scoring achievements:`, missing);
+		console.log(`🔧 [Backfill] TopScore: ${topScore}, Should have:`, shouldHave);
+	}
+
+	return missing;
+}

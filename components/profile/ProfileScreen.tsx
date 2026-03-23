@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Dimensions, Pressable } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ThemedView from "../ui/ThemedView";
 import ThemedText from "../ui/ThemedText";
 import ProfileTabs from "./ProfileTabs";
@@ -9,12 +9,15 @@ import StatBox from "../stats/StatBox";
 import { SettingsModal } from "../settings/SettingsModal";
 import { useTheme } from "../../hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
+import { useUser } from "../../hooks/useUser";
+import { backfillScoringAchievements } from "../../utils/achievements";
 
 const dimheight = Dimensions.get("screen").height;
 
 const ProfileScreen = () => {
 	const [settingsVisible, setSettingsVisible] = useState(false);
 	const { colors } = useTheme();
+	const { playerStats, updatePlayerStats } = useUser();
 	const statsOb = useStats();
 	if (!statsOb) {
 		return;
@@ -23,6 +26,29 @@ const ProfileScreen = () => {
 	if (!stats) return;
 
 	const { highScore, globalRank, dateJoined, points } = stats;
+
+	// Safety check: Backfill missing scoring achievements
+	useEffect(() => {
+		if (!playerStats || !updatePlayerStats) return;
+
+		const missingAchievements = backfillScoringAchievements(
+			playerStats.topScore,
+			playerStats.achievementsWon
+		);
+
+		if (missingAchievements.length > 0) {
+			console.log(`🔧 [Profile] Backfilling ${missingAchievements.length} missing achievements`);
+
+			const updatedAchievements = [
+				...playerStats.achievementsWon,
+				...missingAchievements
+			];
+
+			updatePlayerStats({
+				achievementsWon: updatedAchievements
+			});
+		}
+	}, [playerStats?.id]); // Only run when profile loads (id changes)
 	return (
 		<ThemedView style={styles.container}>
 			{/* Settings Button */}

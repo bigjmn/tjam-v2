@@ -753,7 +753,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		if (!user || !playerStats || !statsHydrated) return;
 		makeOrGetDoc();
-	}, [user, playerStats, statsHydrated]);
+	}, [user?.uid, playerStats?.id, statsHydrated]); // Only re-run when user or player ID changes, not on every stats update
 
 	/**
 	 * ANONYMOUS SIGN-IN WITH DUPLICATE PREVENTION

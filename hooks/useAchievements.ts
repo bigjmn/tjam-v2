@@ -333,8 +333,8 @@ export const useAchievements = () => {
 				starCounter++;
 				tempStarsInRank++;
 
-				// Check if we've filled the current rank
-				if (tempStarsInRank >= ranksList[tempRankIndex].starsToFill) {
+				// Check if we've filled the current rank (with bounds check to prevent crash at max rank)
+				if (tempRankIndex < ranksList.length && tempStarsInRank >= ranksList[tempRankIndex].starsToFill) {
 					tempRankIndex++;
 					tempStarsInRank = 0;
 

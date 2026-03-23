@@ -366,6 +366,24 @@ export const useGame = (vKey?: VariantKey) => {
 		if (!vKey) {
 			await endTracking();
 		}
+
+		// Record the abandoned game
+		if (playerStats && updatePlayerStats && gameTurns.length > 0) {
+			const gameScore = gameTurns.length;
+			const gameRecord: GameRecord = {
+				timestamp: new Date(),
+				score: gameScore,
+				abandoned: true, // Mark as abandoned
+			};
+			const newGameHist = [...playerStats.gameHist, gameRecord];
+
+			await updatePlayerStats({
+				gameHist: newGameHist,
+				numGames: playerStats.numGames + 1,
+				// Note: Don't update topScore for abandoned games
+			});
+		}
+
 		router.push("/(dashboard)");
 	};
 

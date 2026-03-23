@@ -2,6 +2,7 @@ import { View } from "react-native";
 import { AchievementsScreen } from "../../components/achievements";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUser } from "../../hooks/useUser";
+import { useCallback, useMemo } from "react";
 
 export default function Results() {
 	const newJsonPars = useLocalSearchParams<string>();
@@ -12,14 +13,20 @@ export default function Results() {
 	const { achievedJson, gameTurnsJson, oldTopScore } = newJsonPars;
 	if (typeof achievedJson !== "string") return null;
 
-	const achievementList: string[] = JSON.parse(achievedJson).achieved;
+	// Memoize parsed values to prevent re-parsing on every render
+	const achievementList: string[] = useMemo(
+		() => JSON.parse(achievedJson).achieved,
+		[achievedJson]
+	);
 
-	// Get game score from turns
-	let gameScore = 0;
-	if (typeof gameTurnsJson === "string") {
-		const gameTurns: TurnInfo[] = JSON.parse(gameTurnsJson);
-		gameScore = gameTurns.length;
-	}
+	// Get game score from turns (memoized)
+	const gameScore = useMemo(() => {
+		if (typeof gameTurnsJson === "string") {
+			const gameTurns: TurnInfo[] = JSON.parse(gameTurnsJson);
+			return gameTurns.length;
+		}
+		return 0;
+	}, [gameTurnsJson]);
 
 	// Get old top score (before this game) for animation purposes
 	const oldTopScoreNum =
@@ -28,8 +35,8 @@ export default function Results() {
 	// Get personal best (current/new top score)
 	const personalBest = playerStats?.topScore ?? 0;
 
-	// Called automatically when animations complete
-	const handleAnimationsComplete = async () => {
+	// Called automatically when animations complete (memoized to prevent re-creation)
+	const handleAnimationsComplete = useCallback(async () => {
 		if (!playerStats) {
 			return;
 		}
@@ -44,21 +51,21 @@ export default function Results() {
 		await updatePlayerStats({
 			achievementsWon: newAchievementsWon,
 		});
-	};
+	}, [playerStats, achievementList, updatePlayerStats]);
 
-	// Called when user presses "Play Again"
-	const handlePlayAgain = () => {
+	// Called when user presses "Play Again" (memoized)
+	const handlePlayAgain = useCallback(() => {
 		router.replace({
 			pathname: "/game",
 		});
-	};
+	}, [router]);
 
-	// Called when user presses "Go Home"
-	const handleGoHome = () => {
+	// Called when user presses "Go Home" (memoized)
+	const handleGoHome = useCallback(() => {
 		router.replace({
 			pathname: "/(dashboard)",
 		});
-	};
+	}, [router]);
 
 	return (
 		<AchievementsScreen

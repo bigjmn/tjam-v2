@@ -162,10 +162,11 @@ export function useActiveGameTracking() {
 
 	/**
 	 * SETUP: Check for orphaned games on startup
+	 * Only run once when playerStats becomes available (not on every stats update)
 	 */
 	useEffect(() => {
 		checkForOrphanedGame();
-	}, [playerStats]);
+	}, [playerStats?.id]);
 
 	return {
 		startTracking,

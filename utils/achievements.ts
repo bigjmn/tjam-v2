@@ -19,6 +19,7 @@
 //   {key: 'looper', name:"Looper", explainer: "Make it through the entire word list"}
 
 // ]
+import { Toast } from "toastify-react-native";
 
 export const scoringAchievements: ScoringAchievement[] = [
 	{
@@ -506,3 +507,12 @@ export function calculateStreakProgress(
 
 	return Math.min(progress, 3); // Cap at 3
 }
+
+export function achievementByKey(achKey:string){
+	const baseKey = achKey.startsWith("wordoftheday_")
+				? "wordoftheday"
+				: achKey;
+	return allAchievements.find(x => x.key === baseKey)
+}
+
+

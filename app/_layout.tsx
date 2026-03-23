@@ -6,6 +6,8 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 // import { UserProvider } from "../providers/UserProvider";
 import { UserProvider } from "../providers/UserProviderFixed";
+import ToastManager, { Toast } from 'toastify-react-native'
+import { toastConfig } from "../components/achievements/AchievementToast";
 import "react-native-reanimated";
 import {
 	configureReanimatedLogger,
@@ -39,6 +41,11 @@ const AppContent = () => {
 						options={{ headerShown: false }}
 					/>
 				</Stack>
+				<ToastManager
+				useModal={false}
+				showProgressBar={false}
+				config={toastConfig}
+			 />
 			</ThemedView>
 		</>
 	);
@@ -50,6 +57,7 @@ const RootLayout = () => {
 			<UserProvider>
 				<AppContent />
 			</UserProvider>
+			
 		</ThemeProvider>
 	);
 };

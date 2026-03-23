@@ -7,7 +7,7 @@ const achieveSource = require("../assets/sfx/achieve.wav");
 const poofSource = require("../assets/sfx/poof.wav");
 const gearload = require("../assets/sfx/gearload.mp3");
 const telewoosh = require("../assets/sfx/telewoosh.mp3");
-
+const achieveSuccess = require("../assets/sfx/achievesuccess.wav")
 export const useSfx = () => {
 	const { sfxOn } = useTheme();
 	const popPlayer = useAudioPlayer(popSource);
@@ -15,6 +15,7 @@ export const useSfx = () => {
 	const poofPlayer = useAudioPlayer(poofSource);
 	const gearPlayer = useAudioPlayer(gearload);
 	const wooshPlayer = useAudioPlayer(telewoosh);
+	const toastPlayer = useAudioPlayer(achieveSuccess)
 
 	// Safe play helper
 	const safePlay = (player: any, seekPosition: number = 0) => {
@@ -38,6 +39,9 @@ export const useSfx = () => {
 	const poofSound = () => {
 		safePlay(poofPlayer, 0);
 	};
+	const achieveToast = () => {
+		safePlay(toastPlayer,0)
+	}
 
 	const gearloadSound = () => {
 		safePlay(gearPlayer, 0.75);
@@ -47,5 +51,5 @@ export const useSfx = () => {
 		safePlay(wooshPlayer, 0.2);
 	};
 
-	return { popSound, achieveSound, poofSound, gearloadSound, wooshSound };
+	return { popSound, achieveSound, poofSound, gearloadSound, wooshSound, achieveToast };
 };

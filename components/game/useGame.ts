@@ -9,8 +9,12 @@ import { threeLetterWords } from "../../assets/scrabbleWordList";
 import { useUser } from "../../hooks/useUser";
 import { useFirestore } from "../../hooks/useFirestore";
 import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
+import { Toast } from "toastify-react-native";
+import { achievementToast } from "../achievements/AchievementToast";
+import { achievementByKey } from "../../utils/achievements";
+const DEBUG_LIST_START = ["BEE","TEE"]
 export const useGame = (vKey?: VariantKey) => {
-	const { wooshSound, gearloadSound } = useSfx();
+	const { wooshSound, achieveSound } = useSfx();
 	const { playerStats, updatePlayerStats } = useUser();
 	const [tiles, setTiles] = useState<Tile[]>([]);
 	const [gameId, setGameId] = useState(0);
@@ -39,6 +43,8 @@ export const useGame = (vKey?: VariantKey) => {
 		new Set(),
 	);
 
+	const [achievementsNotified, setAchievementsNotified] = useState<string[]>([])
+
 	const router = useRouter();
 	const firehook = useFirestore();
 
@@ -55,7 +61,7 @@ export const useGame = (vKey?: VariantKey) => {
 				? shuffle(threeLetterWords)
 				: shuffle(wordlist);
 		console.log("🎲 New wordList generated, first word:", list[0]);
-		return list;
+		return [...DEBUG_LIST_START, ...list];
 	}, [gameId, vKey]);
 
 	const checkSquareArr = (arr: string[]) => {
@@ -214,6 +220,11 @@ export const useGame = (vKey?: VariantKey) => {
 
 				setGameTurns((gt) => [...gt, turnInfo]);
 				turnLog(turnInfo);
+				if (turnInfo.lettersCleared.includes('E')){
+					achieveSound()
+					achievementToast("ecleared")
+				}
+
 			}
 
 			// Store the current word for the next turnInfo
@@ -241,6 +252,17 @@ export const useGame = (vKey?: VariantKey) => {
 	const nextTurn = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
 	};
+	useEffect(() => {
+		const scoredAchievements = achieve!.gameAchievements(gameTurns).filter(x => !achievementsNotified.includes(x))
+		if (scoredAchievements.length > 0){
+			scoredAchievements.forEach((sa) => {
+				achievementToast(sa)
+			})
+			setAchievementsNotified(an => [...an, ...scoredAchievements])
+		}
+		console.log("scored achievements: ", scoredAchievements)
+
+	}, [gameTurns])
 
 	const handleCommitMove = () => {
 		console.log("ANIMATION START");

@@ -13,7 +13,7 @@ import {
 	googleGetCred,
 	getGoogleName,
 } from "../components/auth/GoogleLoginButton";
-import { usernameNumberTail } from "../utils/helpers";
+import { usernameNumberTail, generateDefaultUsername } from "../utils/helpers";
 import { linkOrSignIn } from "../components/auth/loginHelper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -51,25 +51,36 @@ const PLAYER_V1_KEY = "player";
  *    - Coordinate auth + stats hydration before marking "ready"
  *
  * 2. ANONYMOUS MODE (default):
- *    - User plays as guest with local stats only
- *    - No username or email
- *    - Stats persist in AsyncStorage
+ *    - User plays with local stats (UUID-based ID)
+ *    - Stats persist in AsyncStorage + Firestore at /users/{uuid}
+ *    - Has username (player-XXXXX format)
  *
  * 3. PROVIDER SIGN-IN (Google/Apple):
  *    - Attempt to LINK provider to current anonymous user (preserves UID)
  *    - If linking fails (provider already used): SIGN IN to existing account
+ *    - Check /authMappings/{firebaseUID} for existing PlayerStats ID mapping
+ *    - If mapping exists: Fetch cloud stats, merge with local, UPDATE local ID to match cloud
+ *    - If no mapping: Create mapping with local ID, upload local stats to cloud
  *    - Merge local stats with remote Firestore stats (max scores, union achievements)
  *    - Assign username with collision detection
  *
  * 4. LOGOUT:
  *    - Sign out from provider
- *    - Strip username/email from local stats
+ *    - Keep playerStats.id unchanged (stable UUID)
+ *    - Keep username unchanged
+ *    - Strip email only
  *    - Return to anonymous mode
  *
  * INVARIANTS:
- * - Username exists ⟺ User has real provider account (not anonymous)
+ * - playerStats.id is stable UUID (only changes when merging with cloud stats from different device)
+ * - All users (anonymous or not) have usernames
  * - Sign-in never reduces top score or loses achievements
  * - Local stats always persist across app restarts
+ *
+ * COLLECTIONS:
+ * - /users/{playerStatsId} - PlayerStats documents (keyed by UUID)
+ * - /authMappings/{firebaseUID} - Maps Firebase UID to PlayerStats ID
+ * - /usernames/{username} - Maps username to PlayerStats ID
  */
 export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
@@ -81,14 +92,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const anonSignInRef = useRef<Promise<User | null> | null>(null);
 
 	/**
-	 * APPLE SIGN-IN FLOW
+	 * APPLE SIGN-IN FLOW (New Architecture)
 	 *
 	 * 1. Get Apple credential + profile (nonce-based)
 	 * 2. Try to LINK to current anonymous user
 	 * 3. If link fails (credential in use): SIGN IN to existing account
-	 * 4. Check if Firestore user doc exists:
-	 *    - NEW: Create doc with merged local stats + username
-	 *    - EXISTING: Merge local + remote stats, preserve username
+	 * 4. Check /authMappings/{firebaseUID} for existing PlayerStats ID mapping:
+	 *    - IF EXISTS: Fetch cloud stats, merge with local, UPDATE local ID to match cloud
+	 *    - IF NEW: Create mapping with local ID, upload local stats
 	 * 5. Handle username collisions with numeric suffix
 	 */
 	const signInWithApple = async () => {
@@ -112,133 +123,161 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 			console.log("🍎 [Apple] Attempting link or sign-in...");
 			const appleUserData = await linkOrSignIn(credential);
-			const uid = appleUserData.uid;
-			const wasAnonymous = auth.currentUser?.isAnonymous === false; // Changed from anonymous
+			const firebaseUID = appleUserData.uid;
 
 			console.log("🍎 [Apple] Link/sign-in complete:", {
-				uid,
-				wasAnonymous,
+				firebaseUID,
 				email: appleUserData.email,
+				localPlayerStatsId: playerStats.id,
 			});
 
 			// Extract email with fallback
 			const email = profile.email ?? appleUserData.email ?? undefined;
 
-			// Compute base username from Apple profile
-			let newUsername =
-				profile.displayName ||
-				profile.givenName ||
-				profile.familyName ||
-				email?.split("@")[0] ||
-				`user${uid.slice(0, 6)}`;
+			// Check if this Firebase UID already has a PlayerStats ID mapping
+			const authMappingRef = doc(firestore, "authMappings", firebaseUID);
+			const authMappingDoc = await getDoc(authMappingRef);
 
-			console.log("🍎 [Apple] Computed base username:", newUsername);
+			if (authMappingDoc.exists()) {
+				// EXISTING USER - signing in from different device or returning user
+				const mappedPlayerStatsId = authMappingDoc.data().playerStatsId;
+				console.log("🍎 [Apple] Found existing mapping:", {
+					firebaseUID,
+					mappedPlayerStatsId,
+					currentLocalId: playerStats.id,
+				});
 
-			// Check if Firestore user doc exists
-			const udocRef = doc(firestore, "users", uid).withConverter(
-				playerStatConverter,
-			);
-			const uDoc = await getDoc(udocRef);
+				// Fetch remote stats using the mapped ID
+				const remoteDocRef = doc(firestore, "users", mappedPlayerStatsId).withConverter(
+					playerStatConverter,
+				);
+				const remoteDoc = await getDoc(remoteDocRef);
 
-			if (!uDoc.exists()) {
-				console.log("🍎 [Apple] NEW USER - Creating Firestore doc");
+				if (remoteDoc.exists()) {
+					const remoteStats = remoteDoc.data();
+					console.log("🍎 [Apple] Remote stats:", {
+						id: remoteStats.id,
+						topScore: remoteStats.topScore,
+						numGames: remoteStats.numGames,
+						username: remoteStats.username,
+					});
+					console.log("🍎 [Apple] Local stats:", {
+						id: playerStats.id,
+						topScore: playerStats.topScore,
+						numGames: playerStats.numGames,
+					});
+
+					// Merge stats
+					const mergedStats = mergeStats(playerStats, remoteStats);
+
+					// CRITICAL: Update local ID to match cloud (only time ID changes!)
+					const finalStats: PlayerStats = {
+						...mergedStats,
+						id: mappedPlayerStatsId, // ← Use cloud ID
+						email: email,
+						username: remoteStats.username, // Preserve cloud username
+					};
+
+					console.log("🍎 [Apple] Merged stats (ID updated to match cloud):", {
+						id: finalStats.id,
+						topScore: finalStats.topScore,
+						username: finalStats.username,
+					});
+
+					// CRITICAL: Update local state first
+					setPlayerStats(finalStats);
+
+					// Save merged stats back to cloud
+					try {
+						await setDoc(remoteDocRef, finalStats, { merge: true });
+						console.log("🍎 [Apple] ✓ Merged stats saved to cloud");
+					} catch (firestoreErr) {
+						console.error("🍎 [Apple] ⚠️ Firestore write failed (local stats preserved):", firestoreErr);
+					}
+				} else {
+					console.warn("🍎 [Apple] Mapping exists but no user doc found - creating new doc");
+					// Mapping exists but no user doc - use local stats with mapped ID
+					const finalStats: PlayerStats = {
+						...playerStats,
+						id: mappedPlayerStatsId,
+						email: email,
+					};
+					setPlayerStats(finalStats);
+
+					try {
+						await setDoc(remoteDocRef, finalStats);
+						await setDoc(doc(firestore, "usernames", finalStats.username), {
+							userid: mappedPlayerStatsId,
+						});
+					} catch (firestoreErr) {
+						console.error("🍎 [Apple] ⚠️ Firestore write failed:", firestoreErr);
+					}
+				}
+			} else {
+				// NEW USER - first time signing in with this Firebase account
+				console.log("🍎 [Apple] NEW USER - Creating auth mapping");
+
+				const localPlayerStatsId = playerStats.id; // Keep local UUID
+				const newUsername = playerStats.username;
+
+				console.log("🍎 [Apple] Using local ID:", {
+					localPlayerStatsId,
+					username: newUsername,
+				});
 
 				// Check username availability
 				const uNameDocRef = doc(firestore, "usernames", newUsername);
 				const uNameDoc = await getDoc(uNameDocRef);
 
-				if (uNameDoc.exists() && uNameDoc.data().userid !== uid) {
+				let finalUsername = newUsername;
+				if (uNameDoc.exists() && uNameDoc.data().userid !== localPlayerStatsId) {
 					const oldUsername = newUsername;
-					newUsername += usernameNumberTail();
+					finalUsername = newUsername + usernameNumberTail();
 					console.log(
-						`🍎 [Apple] Username collision: "${oldUsername}" → "${newUsername}"`,
+						`🍎 [Apple] Username collision: "${oldUsername}" → "${finalUsername}"`,
 					);
 				}
 
-				// CRITICAL FIX: Update ID to Firebase UID (previously missing for Apple)
 				const nextStats: PlayerStats = {
 					...playerStats,
-					id: uid, // ← FIX: Now matches Google behavior
+					id: localPlayerStatsId, // ← Keep local UUID
 					email: email,
-					username: newUsername,
+					username: finalUsername,
 				};
 
-				console.log("🍎 [Apple] Writing new user stats:", {
+				console.log("🍎 [Apple] Creating new user:", {
 					id: nextStats.id,
 					username: nextStats.username,
 					email: nextStats.email,
 					topScore: nextStats.topScore,
 				});
 
+				// CRITICAL: Update local state first
 				setPlayerStats(nextStats);
 
-				// Write user doc + username mapping
-				await setDoc(udocRef, nextStats);
-				await setDoc(doc(firestore, "usernames", newUsername), {
-					userid: uid,
-				});
+				// Create mapping and user doc
+				try {
+					// Create auth mapping: Firebase UID → PlayerStats ID
+					await setDoc(authMappingRef, {
+						playerStatsId: localPlayerStatsId,
+						createdAt: new Date(),
+					});
 
-				console.log("🍎 [Apple] ✓ New user created successfully");
-			} else {
-				console.log("🍎 [Apple] EXISTING USER - Merging stats");
-
-				const remoteStats = uDoc.data();
-				console.log("🍎 [Apple] Remote stats:", {
-					topScore: remoteStats.topScore,
-					numGames: remoteStats.numGames,
-					username: remoteStats.username,
-				});
-				console.log("🍎 [Apple] Local stats:", {
-					topScore: playerStats.topScore,
-					numGames: playerStats.numGames,
-				});
-
-				const mergedStats = mergeStats(playerStats, remoteStats);
-				console.log("🍎 [Apple] Merged stats:", {
-					topScore: mergedStats.topScore,
-					numGames: mergedStats.numGames,
-					achievementsCount: mergedStats.achievementsWon.length,
-				});
-
-				const uEmail = mergedStats.email ?? email;
-				const preferredUsername = mergedStats.username ?? newUsername;
-
-				// Check username availability
-				const uNameDocRef = doc(
-					firestore,
-					"usernames",
-					preferredUsername,
-				);
-				const uNameDoc = await getDoc(uNameDocRef);
-
-				const finalUsername =
-					uNameDoc.exists() && uNameDoc.data().userid !== uid
-						? `${preferredUsername}${usernameNumberTail()}`
-						: preferredUsername;
-
-				if (finalUsername !== preferredUsername) {
-					console.log(
-						`🍎 [Apple] Username collision: "${preferredUsername}" → "${finalUsername}"`,
+					// Create user doc at /users/{localPlayerStatsId}
+					const userDocRef = doc(firestore, "users", localPlayerStatsId).withConverter(
+						playerStatConverter,
 					);
+					await setDoc(userDocRef, nextStats);
+
+					// Create username mapping
+					await setDoc(doc(firestore, "usernames", finalUsername), {
+						userid: localPlayerStatsId,
+					});
+
+					console.log("🍎 [Apple] ✓ New user created successfully");
+				} catch (firestoreErr) {
+					console.error("🍎 [Apple] ⚠️ Firestore write failed (local stats preserved):", firestoreErr);
 				}
-
-				const pstats: PlayerStats = {
-					...mergedStats,
-					email: uEmail,
-					username: finalUsername,
-				};
-
-				console.log("🍎 [Apple] Writing merged stats to Firestore");
-				setPlayerStats(pstats);
-
-				await setDoc(udocRef, pstats);
-				await setDoc(doc(firestore, "usernames", finalUsername), {
-					userid: uid,
-				});
-
-				console.log(
-					"🍎 [Apple] ✓ Existing user stats merged successfully",
-				);
 			}
 		} catch (e) {
 			console.error("🍎 [Apple] ❌ Apple Sign-In Error:", e);
@@ -251,9 +290,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	/**
-	 * GOOGLE SIGN-IN FLOW
+	 * GOOGLE SIGN-IN FLOW (New Architecture)
 	 *
-	 * Same flow as Apple, but uses Google credential
+	 * Same architecture as Apple - uses authMappings to maintain stable playerStats.id
 	 */
 	const signInWithGoogle = async () => {
 		console.log("🔵 [Google] Starting Google sign-in flow");
@@ -279,130 +318,161 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				"🔵 [Google] Credential obtained, attempting link or sign-in...",
 			);
 			const googleUserData = await linkOrSignIn(googleCred);
-			const uid = googleUserData.uid;
+			const firebaseUID = googleUserData.uid;
 
 			console.log("🔵 [Google] Link/sign-in complete:", {
-				uid,
+				firebaseUID,
 				email: googleUserData.email,
 				displayName: googleUserData.displayName,
+				localPlayerStatsId: playerStats.id,
 			});
 
-			const udocRef = doc(firestore, "users", uid).withConverter(
-				playerStatConverter,
-			);
-			const uDoc = await getDoc(udocRef);
+			const userEmail = googleUserData.email!;
 
-			if (!uDoc.exists()) {
-				console.log("🔵 [Google] NEW USER - Creating Firestore doc");
+			// Check if this Firebase UID already has a PlayerStats ID mapping
+			const authMappingRef = doc(firestore, "authMappings", firebaseUID);
+			const authMappingDoc = await getDoc(authMappingRef);
 
-				const userEmail = googleUserData.email!;
-				let newUsername =
-					getGoogleName() ||
-					googleUserData.displayName ||
-					userEmail.split("@")[0];
+			if (authMappingDoc.exists()) {
+				// EXISTING USER - signing in from different device or returning user
+				const mappedPlayerStatsId = authMappingDoc.data().playerStatsId;
+				console.log("🔵 [Google] Found existing mapping:", {
+					firebaseUID,
+					mappedPlayerStatsId,
+					currentLocalId: playerStats.id,
+				});
 
-				console.log("🔵 [Google] Computed base username:", newUsername);
+				// Fetch remote stats using the mapped ID
+				const remoteDocRef = doc(firestore, "users", mappedPlayerStatsId).withConverter(
+					playerStatConverter,
+				);
+				const remoteDoc = await getDoc(remoteDocRef);
 
+				if (remoteDoc.exists()) {
+					const remoteStats = remoteDoc.data();
+					console.log("🔵 [Google] Remote stats:", {
+						id: remoteStats.id,
+						topScore: remoteStats.topScore,
+						numGames: remoteStats.numGames,
+						username: remoteStats.username,
+					});
+					console.log("🔵 [Google] Local stats:", {
+						id: playerStats.id,
+						topScore: playerStats.topScore,
+						numGames: playerStats.numGames,
+					});
+
+					// Merge stats
+					const mergedStats = mergeStats(playerStats, remoteStats);
+
+					// CRITICAL: Update local ID to match cloud (only time ID changes!)
+					const finalStats: PlayerStats = {
+						...mergedStats,
+						id: mappedPlayerStatsId, // ← Use cloud ID
+						email: userEmail,
+						username: remoteStats.username, // Preserve cloud username
+					};
+
+					console.log("🔵 [Google] Merged stats (ID updated to match cloud):", {
+						id: finalStats.id,
+						topScore: finalStats.topScore,
+						username: finalStats.username,
+					});
+
+					// CRITICAL: Update local state first
+					setPlayerStats(finalStats);
+
+					// Save merged stats back to cloud
+					try {
+						await setDoc(remoteDocRef, finalStats, { merge: true });
+						console.log("🔵 [Google] ✓ Merged stats saved to cloud");
+					} catch (firestoreErr) {
+						console.error("🔵 [Google] ⚠️ Firestore write failed (local stats preserved):", firestoreErr);
+					}
+				} else {
+					console.warn("🔵 [Google] Mapping exists but no user doc found - creating new doc");
+					// Mapping exists but no user doc - use local stats with mapped ID
+					const finalStats: PlayerStats = {
+						...playerStats,
+						id: mappedPlayerStatsId,
+						email: userEmail,
+					};
+					setPlayerStats(finalStats);
+
+					try {
+						await setDoc(remoteDocRef, finalStats);
+						await setDoc(doc(firestore, "usernames", finalStats.username), {
+							userid: mappedPlayerStatsId,
+						});
+					} catch (firestoreErr) {
+						console.error("🔵 [Google] ⚠️ Firestore write failed:", firestoreErr);
+					}
+				}
+			} else {
+				// NEW USER - first time signing in with this Firebase account
+				console.log("🔵 [Google] NEW USER - Creating auth mapping");
+
+				const localPlayerStatsId = playerStats.id; // Keep local UUID
+				const newUsername = playerStats.username;
+
+				console.log("🔵 [Google] Using local ID:", {
+					localPlayerStatsId,
+					username: newUsername,
+				});
+
+				// Check username availability
 				const uNameDocRef = doc(firestore, "usernames", newUsername);
 				const uNameDoc = await getDoc(uNameDocRef);
 
-				if (uNameDoc.exists() && uNameDoc.data().userid !== uid) {
+				let finalUsername = newUsername;
+				if (uNameDoc.exists() && uNameDoc.data().userid !== localPlayerStatsId) {
 					const oldUsername = newUsername;
-					newUsername += usernameNumberTail();
+					finalUsername = newUsername + usernameNumberTail();
 					console.log(
-						`🔵 [Google] Username collision: "${oldUsername}" → "${newUsername}"`,
+						`🔵 [Google] Username collision: "${oldUsername}" → "${finalUsername}"`,
 					);
 				}
 
 				const nextStats: PlayerStats = {
 					...playerStats,
-					id: uid,
+					id: localPlayerStatsId, // ← Keep local UUID
 					email: userEmail,
-					username: newUsername,
+					username: finalUsername,
 				};
 
-				console.log("🔵 [Google] Writing new user stats:", {
+				console.log("🔵 [Google] Creating new user:", {
 					id: nextStats.id,
 					username: nextStats.username,
 					email: nextStats.email,
 					topScore: nextStats.topScore,
 				});
 
+				// CRITICAL: Update local state first
 				setPlayerStats(nextStats);
 
-				await setDoc(udocRef, nextStats);
-				await setDoc(doc(firestore, "usernames", newUsername), {
-					userid: googleUserData.uid,
-				});
+				// Create mapping and user doc
+				try {
+					// Create auth mapping: Firebase UID → PlayerStats ID
+					await setDoc(authMappingRef, {
+						playerStatsId: localPlayerStatsId,
+						createdAt: new Date(),
+					});
 
-				console.log("🔵 [Google] ✓ New user created successfully");
-			} else {
-				console.log("🔵 [Google] EXISTING USER - Merging stats");
-
-				const remoteStats = uDoc.data();
-				console.log("🔵 [Google] Remote stats:", {
-					topScore: remoteStats.topScore,
-					numGames: remoteStats.numGames,
-					username: remoteStats.username,
-				});
-				console.log("🔵 [Google] Local stats:", {
-					topScore: playerStats.topScore,
-					numGames: playerStats.numGames,
-				});
-
-				const mergedStats = mergeStats(playerStats, remoteStats);
-				console.log("🔵 [Google] Merged stats:", {
-					topScore: mergedStats.topScore,
-					numGames: mergedStats.numGames,
-					achievementsCount: mergedStats.achievementsWon.length,
-				});
-
-				const userEmail = googleUserData.email!;
-				const computedUsername =
-					getGoogleName() ??
-					googleUserData.displayName ??
-					userEmail.split("@")[0] ??
-					`user${uid.slice(0, 6)}`;
-
-				const preferredUsername =
-					mergedStats.username ?? computedUsername;
-
-				const uNameDocRef = doc(
-					firestore,
-					"usernames",
-					preferredUsername,
-				);
-				const uNameDoc = await getDoc(uNameDocRef);
-
-				const finalUsername =
-					uNameDoc.exists() &&
-					uNameDoc.data().userid !== googleUserData.uid
-						? `${preferredUsername}${usernameNumberTail()}`
-						: preferredUsername;
-
-				if (finalUsername !== preferredUsername) {
-					console.log(
-						`🔵 [Google] Username collision: "${preferredUsername}" → "${finalUsername}"`,
+					// Create user doc at /users/{localPlayerStatsId}
+					const userDocRef = doc(firestore, "users", localPlayerStatsId).withConverter(
+						playerStatConverter,
 					);
+					await setDoc(userDocRef, nextStats);
+
+					// Create username mapping
+					await setDoc(doc(firestore, "usernames", finalUsername), {
+						userid: localPlayerStatsId,
+					});
+
+					console.log("🔵 [Google] ✓ New user created successfully");
+				} catch (firestoreErr) {
+					console.error("🔵 [Google] ⚠️ Firestore write failed (local stats preserved):", firestoreErr);
 				}
-
-				const pstats: PlayerStats = {
-					...mergedStats,
-					email: mergedStats.email ?? userEmail,
-					username: finalUsername,
-				};
-
-				console.log("🔵 [Google] Writing merged stats to Firestore");
-				setPlayerStats(pstats);
-
-				await setDoc(udocRef, pstats);
-				await setDoc(doc(firestore, "usernames", finalUsername), {
-					userid: googleUserData.uid,
-				});
-
-				console.log(
-					"🔵 [Google] ✓ Existing user stats merged successfully",
-				);
 			}
 		} catch (err) {
 			console.error("🔵 [Google] ❌ Google Sign-In Error:", err);
@@ -414,7 +484,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	 * LOGOUT FLOW
 	 *
 	 * 1. Sign out from Firebase (triggers auth state change)
-	 * 2. Strip username/email from local stats
+	 * 2. Strip email from local stats (preserve username)
 	 * 3. Save stripped stats to AsyncStorage
 	 * 4. Auth listener will handle signing in anonymously
 	 *
@@ -428,28 +498,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			await signOut(auth);
 			console.log("🚪 [Logout] Firebase sign-out complete");
 
-			// Strip username and email from local playerStats when becoming anonymous
+			// Strip only email from local playerStats (preserve username)
 			if (playerStats) {
-				const { username, email, ...statsWithoutAuth } = playerStats;
-				const anonStats = statsWithoutAuth;
+				const { email, ...statsWithoutEmail } = playerStats;
 
 				console.log(
-					"🚪 [Logout] Stripping auth fields from local stats:",
+					"🚪 [Logout] Stripping email from local stats:",
 					{
-						removedUsername: username,
 						removedEmail: email,
-						preservedTopScore: anonStats.topScore,
+						preservedUsername: statsWithoutEmail.username,
+						preservedTopScore: statsWithoutEmail.topScore,
 					},
 				);
 
-				setPlayerStats(anonStats);
-				await AsyncStorage.setItem(
-					PLAYER_V2_KEY,
-					JSON.stringify(anonStats),
-				);
-				console.log(
-					"🚪 [Logout] ✓ Stripped stats saved to AsyncStorage",
-				);
+				// CRITICAL: Save to AsyncStorage BEFORE updating state
+				// If save fails, we keep the current state with email
+				try {
+					await AsyncStorage.setItem(
+						PLAYER_V2_KEY,
+						JSON.stringify(statsWithoutEmail),
+					);
+					console.log(
+						"🚪 [Logout] ✓ Stripped stats saved to AsyncStorage",
+					);
+
+					// Only update state after successful save
+					setPlayerStats(statsWithoutEmail);
+				} catch (saveErr) {
+					console.error("🚪 [Logout] ❌ Failed to save stats - keeping current state:", saveErr);
+					throw saveErr; // Re-throw to abort logout
+				}
 			}
 
 			// FIX: Don't call signInAnonymously here - let the auth listener handle it
@@ -483,15 +561,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				const playerOb: PlayerStats = JSON.parse(playerJson);
 
 				// Ensure dateJoined is a Date object
-				const newPlayerOb: PlayerStats = playerOb.dateJoined
+				let newPlayerOb: PlayerStats = playerOb.dateJoined
 					? { ...playerOb, dateJoined: new Date(playerOb.dateJoined) }
 					: { ...playerOb, dateJoined: new Date() };
+
+				// Migration: ensure username exists
+				if (!newPlayerOb.username) {
+					console.log("💾 [Hydration] No username - generating default");
+					newPlayerOb = { ...newPlayerOb, username: generateDefaultUsername() };
+
+					await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(newPlayerOb));
+					console.log("💾 [Hydration] ✓ Migrated with username:", newPlayerOb.username);
+				}
 
 				console.log("💾 [Hydration] Loaded v2 stats:", {
 					id: newPlayerOb.id,
 					topScore: newPlayerOb.topScore,
 					numGames: newPlayerOb.numGames,
-					hasUsername: !!newPlayerOb.username,
+					username: newPlayerOb.username,
 					hasEmail: !!newPlayerOb.email,
 				});
 
@@ -551,11 +638,54 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 			setStatsHydrated(true);
 		} catch (err) {
-			console.error("💾 [Hydration] ❌ Error loading stats:", err);
+			console.error("💾 [Hydration] ❌ CRITICAL ERROR loading stats:", err);
+			console.error("💾 [Hydration] ❌ Error details:", JSON.stringify(err));
 
-			// Fallback: create fresh stats
+			// NEVER create fresh stats on error - this would wipe user data!
+			// Instead, try one more time with a delay, then fail gracefully
+			console.log("💾 [Hydration] Retrying after 1 second...");
+
+			await new Promise(resolve => setTimeout(resolve, 1000));
+
+			try {
+				const retryJson = await AsyncStorage.getItem(PLAYER_V2_KEY);
+				if (retryJson !== null) {
+					console.log("💾 [Hydration] ✓ Retry successful");
+					const playerOb: PlayerStats = JSON.parse(retryJson);
+					let newPlayerOb: PlayerStats = playerOb.dateJoined
+						? { ...playerOb, dateJoined: new Date(playerOb.dateJoined) }
+						: { ...playerOb, dateJoined: new Date() };
+
+					if (!newPlayerOb.username) {
+						newPlayerOb = { ...newPlayerOb, username: generateDefaultUsername() };
+					}
+
+					setPlayerStats(newPlayerOb);
+					setStatsHydrated(true);
+					return;
+				}
+
+				// Check v1 on retry
+				const oldPlayerJson = await AsyncStorage.getItem(PLAYER_V1_KEY);
+				if (oldPlayerJson !== null) {
+					console.log("💾 [Hydration] ✓ Retry found v1 stats");
+					const oldPlayerOb = JSON.parse(oldPlayerJson);
+					const convertedPlayer = convertOldPlayerOb(oldPlayerOb);
+					setPlayerStats(convertedPlayer);
+					await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(convertedPlayer));
+					setStatsHydrated(true);
+					return;
+				}
+			} catch (retryErr) {
+				console.error("💾 [Hydration] ❌ Retry also failed:", retryErr);
+			}
+
+			// Only create fresh stats if BOTH attempts found no data
+			// This means it's genuinely a first-time user
+			console.log("💾 [Hydration] No stats found after retry - creating fresh player");
 			const playerOb: PlayerStats = createPlayer();
 			setPlayerStats(playerOb);
+			await AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(playerOb));
 			setStatsHydrated(true);
 		}
 	}
@@ -575,69 +705,46 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	}, [playerStats, user]);
 
 	/**
-	 * ENSURE ANONYMOUS USERS DON'T HAVE USERNAMES
-	 *
-	 * FIX: Now only strips if stats are hydrated AND user is anonymous
-	 * This prevents race condition where stats hydrate with username before
-	 * this effect runs
-	 */
-	useEffect(() => {
-		if (!user || !playerStats || !statsHydrated) return;
-
-		if (user.isAnonymous && (playerStats.username || playerStats.email)) {
-			console.log(
-				"🔒 [Invariant] Anonymous user has auth fields - stripping...",
-			);
-			console.log("🔒 [Invariant] Removing:", {
-				username: playerStats.username,
-				email: playerStats.email,
-			});
-
-			const { username, email, ...remainingStats } = playerStats;
-			setPlayerStats(remainingStats);
-
-			// Also update AsyncStorage
-			AsyncStorage.setItem(PLAYER_V2_KEY, JSON.stringify(remainingStats))
-				.then(() =>
-					console.log("🔒 [Invariant] ✓ Stripped stats saved"),
-				)
-				.catch((err) =>
-					console.error(
-						"🔒 [Invariant] ❌ Failed to save stripped stats:",
-						err,
-					),
-				);
-		}
-	}, [user, playerStats, statsHydrated]);
-
-	/**
-	 * CREATE FIRESTORE DOC FOR NON-ANONYMOUS USERS
+	 * CREATE FIRESTORE DOC FOR ALL USERS (New Architecture)
 	 *
 	 * This is a safety net in case the sign-in flow didn't create a doc.
+	 * Now uses playerStats.id (stable UUID) instead of Firebase UID.
 	 *
 	 * FIX: Now guards with statsHydrated to prevent writing incomplete data
 	 */
 	const makeOrGetDoc = async () => {
-		if (!user || !playerStats || user.isAnonymous || !statsHydrated) {
+		if (!user || !playerStats || !statsHydrated) {
 			return;
 		}
 
-		console.log("📄 [Firestore] Checking if user doc exists...");
+		console.log(`📄 [Firestore] Checking user doc (anonymous: ${user.isAnonymous}, id: ${playerStats.id})`);
 
-		const udocRef = doc(firestore, "users", user.uid).withConverter(
+		// Use playerStats.id (UUID) instead of user.uid (Firebase UID)
+		const udocRef = doc(firestore, "users", playerStats.id).withConverter(
 			playerStatConverter,
 		);
 		const uDoc = await getDoc(udocRef);
 
 		if (!uDoc.exists()) {
-			console.log(
-				"📄 [Firestore] Doc doesn't exist - creating safety doc",
-			);
-			console.log(
-				"📄 [Firestore] This should only happen if sign-in flow failed",
-			);
-			await setDoc(udocRef, playerStats);
-			console.log("📄 [Firestore] ✓ Safety doc created");
+			console.log("📄 [Firestore] Doc doesn't exist - creating");
+
+			// Ensure username exists (for migration)
+			const statsToWrite = playerStats.username
+				? playerStats
+				: { ...playerStats, username: generateDefaultUsername() };
+
+			await setDoc(udocRef, statsToWrite);
+
+			// Create username mapping for ALL users (maps to playerStats.id)
+			await setDoc(doc(firestore, "usernames", statsToWrite.username), {
+				userid: playerStats.id, // ← Use playerStats.id, not Firebase UID
+			});
+
+			console.log("📄 [Firestore] ✓ Doc created:", statsToWrite.username);
+
+			if (!playerStats.username) {
+				setPlayerStats(statsToWrite);
+			}
 		} else {
 			console.log("📄 [Firestore] Doc already exists - no action needed");
 		}
@@ -686,9 +793,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	/**
-	 * UPDATE PLAYER STATS (LOCAL + FIRESTORE SYNC)
+	 * UPDATE PLAYER STATS (LOCAL + FIRESTORE SYNC) - New Architecture
 	 *
-	 * Updates both local state/storage and Firestore (if authenticated)
+	 * Updates both local state/storage and Firestore for ALL users
+	 * Uses playerStats.id (stable UUID) instead of Firebase UID
 	 */
 	async function updatePlayerStats(updates: Partial<PlayerStats>) {
 		if (!playerStats) {
@@ -712,16 +820,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 			console.error("✏️ [Update] ❌ AsyncStorage update failed:", err);
 		}
 
-		// Update Firestore for authenticated (non-anonymous) users
-		if (user && !user.isAnonymous) {
+		// Update Firestore for ALL users (anonymous or not)
+		// Use playerStats.id (UUID) instead of user.uid (Firebase UID)
+		if (user) {
 			try {
 				const userDocRef = doc(
 					firestore,
 					"users",
-					user.uid,
+					updatedStats.id, // ← Use playerStats.id, not Firebase UID
 				).withConverter(playerStatConverter);
 				await setDoc(userDocRef, updatedStats, { merge: true });
-				console.log("✏️ [Update] ✓ Firestore updated");
+				console.log(
+					`✏️ [Update] ✓ Firestore updated (id: ${updatedStats.id}, anonymous: ${user.isAnonymous})`,
+				);
 			} catch (err) {
 				console.error("✏️ [Update] ❌ Firestore update failed:", err);
 			}

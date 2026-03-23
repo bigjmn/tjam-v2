@@ -108,15 +108,15 @@ function ResultBar({ result }: { result: Leader }) {
 		<ThemedView
 			style={[styles.resBar, { borderBottomColor: colors.secondary }]}
 		>
-			<ThemedText variant={isMe ? "strong" : "medium"}>
+			<ThemedText variant={isMe ? "strong" : "medium"} style={{ color: isMe ? colors.accent : colors.text }}>
 				{boardRank}
 			</ThemedText>
-			<ThemedText variant={isMe ? "strong" : "medium"}>
+			<ThemedText variant={isMe ? "strong" : "medium"} style={{ color: isMe ? colors.accent : colors.text }}>
 				{result.username}
 			</ThemedText>
 			<ThemedText
 				variant={isMe ? "strong" : "medium"}
-				style={{ color: colors.accent }}
+				style={{ color: isMe ? colors.accent : colors.text }}
 			>
 				{rankScope}
 			</ThemedText>

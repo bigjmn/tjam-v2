@@ -33,7 +33,7 @@ export const WordHistorySection: React.FC<WordHistorySectionProps> = ({
 	return (
 		<View style={styles.container}>
 			<ThemedText variant="header2" style={styles.header}>
-				Words Seen: {gameTurns.length} / {totalWords}
+				Words Seen:   {gameTurns.length} / {totalWords}
 			</ThemedText>
 
 			{/* Optional progress bar */}
@@ -197,7 +197,8 @@ const styles = StyleSheet.create({
 	},
 	madeColumn: {
 		flex: 1,
-		gap: 2,
+		gap: 5,
+		flexDirection:"row"
 	},
 	madeWord: {
 		fontSize: 14,

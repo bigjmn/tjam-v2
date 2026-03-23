@@ -9,9 +9,9 @@ import ThemedText from "../../components/ui/ThemedText";
 import React from "react";
 export default function LeaderBoard() {
 	const { user, authChecked } = useUser();
-	if (authChecked && (user === null || user.isAnonymous)) {
-		return <DeniedLeaderboard />;
-	}
+	// if (authChecked && (user === null || user.isAnonymous)) {
+	// 	return <DeniedLeaderboard />;
+	// }
 	if (!authChecked || !user) {
 		return (
 			<ThemedView safe={true}>
@@ -20,7 +20,11 @@ export default function LeaderBoard() {
 			</ThemedView>
 		);
 	}
-	return <Leaderboard />;
+	return (
+		<ThemedView style={{flex:1}} safe>
+	<Leaderboard />
+	</ThemedView>
+);
 	// const router = useRouter();
 
 	// useEffect(() => {

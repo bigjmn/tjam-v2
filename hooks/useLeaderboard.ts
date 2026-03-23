@@ -30,10 +30,13 @@ export const useLeaderboard = () => {
 
 		try {
 			const playerRanks = await getDocs(leadersRef).then((ld) => {
-				return ld.docs
+				const allPlayers = ld.docs
 					.map((d) => d.data())
 					.filter((d) => d.username !== null)
 					.map((d) => playerToLeader(d));
+
+				// Filter out duplicate player IDs (keep only first occurrence)
+				return allPlayers.filter((x, i) => allPlayers.findIndex(y => y.id === x.id) === i);
 			});
 			const globalList: GlobalLeader[] = [...playerRanks]
 				.sort((a, b) => b.bestAllTime - a.bestAllTime)

@@ -33,6 +33,17 @@ export const usernameNumberTail = (): string => {
 	return `${Math.floor(Math.random() * 1000)}`;
 };
 
+export const generateDefaultUsername = (): string => {
+	const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+	let randomStr = '';
+
+	for (let i = 0; i < 5; i++) {
+		randomStr += chars[Math.floor(Math.random() * chars.length)];
+	}
+
+	return `player-${randomStr}`;
+};
+
 export const convertOldPlayerOb = (oldPlayerOb: any): PlayerStats => {
 	const topScore: number = oldPlayerOb.best;
 	const id: string = oldPlayerOb.id;
@@ -60,12 +71,13 @@ export const convertOldPlayerOb = (oldPlayerOb: any): PlayerStats => {
 	}
 	const gameHist: GameRecord[] = [];
 
-	return { id, topScore, numGames, achievementsWon, gameHist, dateJoined };
+	return { id, topScore, numGames, achievementsWon, gameHist, dateJoined, username: oldPlayerOb.username || generateDefaultUsername() };
 };
 
 export const createPlayer = (): PlayerStats => {
 	let newId = uuid.v4();
 	const dj = new Date();
+	const username = generateDefaultUsername();
 
 	return {
 		id: newId,
@@ -74,6 +86,7 @@ export const createPlayer = (): PlayerStats => {
 		gameHist: [],
 		achievementsWon: [],
 		dateJoined: dj,
+		username: username,
 	};
 };
 
@@ -113,7 +126,7 @@ export const playerStatConverter = {
 			})),
 			achievementsWon: data.achievementsWon,
 			dateJoined: toDate(data.dateJoined),
-			username: data.username,
+			username: data.username || generateDefaultUsername(),
 			email: data.email || null,
 			// name: data.name,
 		} as PlayerStats;
@@ -153,7 +166,7 @@ export const mergeStats = (
 		.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 	const numGames = Math.max(localStats.numGames, remoteStats.numGames);
 	const id = remoteStats.id;
-	const uName = localStats.username ?? remoteStats.username ?? null;
+	const uName = localStats.username ?? remoteStats.username ?? generateDefaultUsername();
 	const uEmail = localStats.email ?? remoteStats.email ?? null;
 	const localDate = toDate(localStats.dateJoined);
 	const remoteDate = toDate(remoteStats.dateJoined);
@@ -261,11 +274,10 @@ export const weekBest = (pstat: PlayerStats) => {
 };
 
 export const playerToLeader = (pstat: PlayerStats): BaseLeader => {
-	const uname = pstat.username || "";
 	return {
 		id: pstat.id,
 		bestAllTime: pstat.topScore,
-		username: uname,
+		username: pstat.username,
 		bestWeek: weekBest(pstat),
 	};
 };

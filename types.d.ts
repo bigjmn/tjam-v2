@@ -52,7 +52,7 @@ interface PlayerStats {
 	gameHist: GameRecord[];
 	achievementsWon: string[];
 	dateJoined: Date;
-	username?: string;
+	username: string;
 	email?: string;
 }
 interface PlayerDoc extends PlayerStats {

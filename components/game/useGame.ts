@@ -220,10 +220,7 @@ export const useGame = (vKey?: VariantKey) => {
 
 				setGameTurns((gt) => [...gt, turnInfo]);
 				turnLog(turnInfo);
-				if (turnInfo.lettersCleared.includes('E')){
-					achieveSound()
-					achievementToast("ecleared")
-				}
+				
 
 			}
 

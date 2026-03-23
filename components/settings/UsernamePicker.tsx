@@ -34,16 +34,12 @@ export default function UsernamePicker() {
 	};
 
 	const getDefaultUsername = () => {
-		// If user is anonymous, return "None"
-		if (user?.isAnonymous) {
-			return "None";
-		}
-
-		// Priority: current username > Google displayName > Google name > email prefix > random
+		// Always use playerStats.username if available
 		if (playerStats?.username) {
 			return playerStats.username;
 		}
 
+		// Fallback for edge cases
 		if (user && !user.isAnonymous && user.displayName) {
 			return user.displayName;
 		}
@@ -213,7 +209,7 @@ export default function UsernamePicker() {
 
 	const hasChanged =
 		inputValue.trim() !== (playerStats?.username || getDefaultUsername());
-	const isDisabled = user?.isAnonymous || isLoading;
+	const isDisabled = isLoading;
 	const characterCount = inputValue.length;
 	const isOverLimit = characterCount > 20;
 
@@ -274,9 +270,7 @@ export default function UsernamePicker() {
 							Username
 						</ThemedText>
 						<ThemedText variant="soft" style={styles.subtitle}>
-							{user?.isAnonymous
-								? "Sign in to customize"
-								: "Visible to other players"}
+							Visible to other players
 						</ThemedText>
 					</View>
 				</View>
@@ -454,20 +448,6 @@ export default function UsernamePicker() {
 					</View>
 				)}
 
-				{/* Helper text for anonymous users */}
-				{user?.isAnonymous && !error && !success && (
-					<View style={styles.helperContainer}>
-						<Ionicons
-							name="information-circle-outline"
-							size={16}
-							color={colors.mutedText}
-						/>
-						<ThemedText variant="soft" style={styles.helperText}>
-							Sign in with Google to set a custom
-							username
-						</ThemedText>
-					</View>
-				)}
 			</ThemedView>
 		</ThemedView>
 	);

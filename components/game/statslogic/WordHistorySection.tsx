@@ -142,6 +142,7 @@ export const WordHistorySection: React.FC<WordHistorySectionProps> = ({
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		minHeight: 0,
 	},
 	header: {
 		marginBottom: 12,
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	scrollView: {
-		maxHeight: 400,
+		flex: 1,
 	},
 	wordEntry: {
 		flexDirection: "row",

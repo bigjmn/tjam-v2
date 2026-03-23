@@ -24,6 +24,7 @@ import ThemedButton from "../ui/ThemedButton";
 import { GameHeader } from "./GameHeader";
 import ExitConfirmModal from "./ExitConfirmModal";
 import { StatsModal } from "./statslogic/StatsModal";
+import MenuTest from "./MenuButton";
 import { useUser } from "../../hooks/useUser";
 import ThemedText from "../ui/ThemedText";
 import { useTheme } from "../../hooks/useTheme";
@@ -414,14 +415,14 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 	};
 
 	return (
-		<GestureHandlerRootView>
+		<GestureHandlerRootView style={{ flex: 1 }}>
 			<ThemedView style={styles.outerContainer}>
 				<GameHeader
-					onExitPress={openExitModal}
 					headerName={
 						vKey === "scrabble" ? "ScrabWord Jam" : "Trio Jam"
 					}
 					onStatsPress={openStatsModal}
+					onExitPress={openExitModal}
 					vKey={vKey}
 				/>
 				<ExitConfirmModal
@@ -436,6 +437,7 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 					wordNum={wordNum}
 					wordList={wordList}
 				/>
+				
 				<ThemedView style={styles.gameWrapper}>
 					<ThemedView style={styles.mainBoard}>
 						<ThemedView style={styles.layerWrapper}>
@@ -511,10 +513,14 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 							<ThemedText style={styles.scoreText}>
 								Points: {wordNum}
 							</ThemedText>
+																	
+
 						</View>
+
 					</View>
 				</ThemedView>
 			</ThemedView>
+			
 		</GestureHandlerRootView>
 	);
 }
@@ -561,6 +567,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 12,
+		paddingTop: 40,
 	},
 	container: {
 		flex: 1,
@@ -664,5 +671,12 @@ const styles = StyleSheet.create({
 		height: 200,
 		padding: 5,
 		backgroundColor: "green",
+	},
+	menuButtonContainer: {
+		position: "absolute",
+		bottom: 120,
+		right: 20,
+		zIndex: 100,
+		backgroundColor:"red"
 	},
 });

@@ -15,10 +15,10 @@ export const StatsButton: React.FC<StatsButtonProps> = ({ onPress }) => {
 			onPress={onPress}
 			style={({ pressed }) => [
 				styles.button,
-				{ opacity: pressed ? 0.6 : 1 },
+				{ opacity: pressed ? 0.6 : 1, backgroundColor:colors.uiBackground },
 			]}
 		>
-			<Ionicons name="stats-chart" size={24} color={colors.text} />
+			<Ionicons name="stats-chart" size={24} color={colors.secondary} />
 		</Pressable>
 	);
 };
@@ -26,5 +26,12 @@ export const StatsButton: React.FC<StatsButtonProps> = ({ onPress }) => {
 const styles = StyleSheet.create({
 	button: {
 		padding: 4,
+				
+		width: 56,
+		height:56,
+		borderRadius: 100,
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 });

@@ -158,6 +158,7 @@ export const useGame = (vKey?: VariantKey) => {
 		// Step 2: Wait for exit animation, then add new tiles
 		setTimeout(() => {
 			const word = wordList[wordNum];
+			console.log(wordList[0])
 			const wordParts = word.split("");
 			const newTiles: Tile[] = wordParts.map((w, i) => ({
 				id: "w" + wordNum.toString() + "l" + i.toString(),

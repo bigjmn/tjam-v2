@@ -123,7 +123,7 @@ export default function MenuTest({ onExitPress }: MenuTestProps) {
 							<Ionicons
 								name="menu"
 								size={18}
-								color={colors.iconColorFocus}
+								color={colors.iconColor}
 							/>
 						</Animated.View>
 					</AnimatedPressable>

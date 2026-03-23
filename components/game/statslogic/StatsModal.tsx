@@ -6,7 +6,6 @@ import {
 	Pressable,
 	Dimensions,
 	TouchableWithoutFeedback,
-	ScrollView,
 } from "react-native";
 import Animated, {
 	useAnimatedStyle,
@@ -128,25 +127,22 @@ export const StatsModal: React.FC<StatsModalProps> = ({
 					</View>
 
 					{/* Content */}
-					<ScrollView
-						style={styles.content}
-						showsVerticalScrollIndicator={false}
-					>
+					<View style={styles.content}>
 						{activeTab === "words" ? (
 							<WordHistorySection
 								gameTurns={gameTurns}
 								totalWords={wordList.length}
 							/>
 						) : (
-							<>
+							<View style={styles.lettersTabContent}>
 								<TilesClearedPanel gameTurns={gameTurns} />
 								<TilesRemainingPanel
 									wordList={wordList}
 									currentWordNum={wordNum ?? 0}
 								/>
-							</>
+							</View>
 						)}
-					</ScrollView>
+					</View>
 				</Animated.View>
 			</View>
 		</Modal>
@@ -165,7 +161,7 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 0,
 		right: 0,
-		maxHeight: SCREEN_HEIGHT * 0.9,
+		height: SCREEN_HEIGHT * 0.75,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 		shadowColor: "#000",
@@ -173,6 +169,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.15,
 		shadowRadius: 12,
 		elevation: 5,
+		flexDirection: "column",
 	},
 	header: {
 		flexDirection: "row",
@@ -192,8 +189,13 @@ const styles = StyleSheet.create({
 		paddingTop: 12,
 	},
 	content: {
+		flex: 1,
 		paddingTop: 8,
 		paddingHorizontal: 20,
 		paddingBottom: 20,
+	},
+	lettersTabContent: {
+		flex: 1,
+		flexDirection: "column",
 	},
 });

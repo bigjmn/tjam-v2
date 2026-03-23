@@ -3,6 +3,7 @@ import MenuTest from "./MenuButton";
 import ThemedText from "../ui/ThemedText";
 import { StyleSheet, View } from "react-native";
 import { StatsButton } from "./statslogic/StatsButton";
+import Spacer from "../ui/Spacer";
 
 interface GameHeaderProps {
 	onExitPress: () => void;
@@ -19,7 +20,7 @@ export const GameHeader = ({
 }: GameHeaderProps) => {
 	return (
 		<ThemedView style={styles.gameHeader}>
-			<ThemedView />
+			<Spacer width={90} />
 			<ThemedText variant="header">{headerName}</ThemedText>
 			<View style={styles.buttonsContainer}>
 				{!vKey && onStatsPress && (
@@ -36,11 +37,15 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		width: "90%",
 		justifyContent: "space-between",
-		alignItems: "center",
+		alignItems: "flex-end",
+		marginBottom:30
 	},
 	buttonsContainer: {
-		flexDirection: "row",
+		// flexDirection: "row",
 		alignItems: "center",
-		gap: 8,
+		justifyContent:"center",
+		gap: 38,
+		flexDirection:"row",
+
 	},
 });

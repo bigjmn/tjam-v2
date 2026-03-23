@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import ThemedText from "../../ui/ThemedText";
 import { useTheme } from "../../../hooks/useTheme";
 
@@ -51,53 +51,66 @@ export const TilesRemainingPanel: React.FC<TilesRemainingPanelProps> = ({
 			<ThemedText variant="header2" style={styles.header}>
 				Tiles Remaining Distribution
 			</ThemedText>
-			<View style={styles.barsContainer}>
+			<ScrollView
+				style={styles.scrollView}
+				contentContainerStyle={styles.barsContainer}
+				showsVerticalScrollIndicator={false}
+				nestedScrollEnabled={true}
+				scrollEnabled={true}
+			>
 				{sortedLetters.map((letter) => {
-					const count = letterCounts[letter];
-					const percentage = (count / maxCount) * 100;
+						const count = letterCounts[letter];
+						const percentage = (count / maxCount) * 100;
 
-					return (
-						<View key={letter} style={styles.barRow}>
-							<ThemedText variant="medium" style={styles.barLabel}>
-								{letter}
-							</ThemedText>
-							<View style={styles.barTrack}>
-								<View
+						return (
+							<View key={letter} style={styles.barRow}>
+								<ThemedText variant="medium" style={styles.barLabel}>
+									{letter}
+								</ThemedText>
+								<View style={styles.barTrack}>
+									<View
+										style={[
+											styles.barFill,
+											{
+												width: `${percentage}%`,
+												backgroundColor: colors.primary,
+											},
+										]}
+									/>
+								</View>
+								<ThemedText
+									variant="soft"
 									style={[
-										styles.barFill,
-										{
-											width: `${percentage}%`,
-											backgroundColor: colors.primary,
-										},
+										styles.barCount,
+										{ color: colors.mutedText },
 									]}
-								/>
+								>
+									{count}
+								</ThemedText>
 							</View>
-							<ThemedText
-								variant="soft"
-								style={[
-									styles.barCount,
-									{ color: colors.mutedText },
-								]}
-							>
-								{count}
-							</ThemedText>
-						</View>
-					);
-				})}
-			</View>
+						);
+					})}
+			</ScrollView>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		marginBottom: 24,
+		flex: 1,
+		marginTop: 12,
+		minHeight: 0,
 	},
 	header: {
 		marginBottom: 12,
 	},
+	scrollView: {
+		flex: 1,
+	},
 	barsContainer: {
 		gap: 6,
+		paddingBottom: 20,
+		flexGrow: 1,
 	},
 	barRow: {
 		flexDirection: "row",

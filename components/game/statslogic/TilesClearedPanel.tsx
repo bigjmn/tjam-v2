@@ -74,7 +74,8 @@ export const TilesClearedPanel: React.FC<TilesClearedPanelProps> = ({
 
 const styles = StyleSheet.create({
 	container: {
-		marginBottom: 24,
+		marginBottom: 16,
+		flexShrink: 0,
 	},
 	header: {
 		marginBottom: 12,

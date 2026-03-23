@@ -34,6 +34,7 @@ export const useGame = (vKey?: VariantKey) => {
 
 	const [validWords, setValidWords] = useState<string[]>([]);
 	const [gameTurns, setGameTurns] = useState<TurnInfo[]>([]);
+	const [currentWord, setCurrentWord] = useState<string | null>(null);
 
 	const [gameActive, setGameActive] = useState(false);
 	const [isAnimating, setIsAnimating] = useState(false);
@@ -163,7 +164,7 @@ export const useGame = (vKey?: VariantKey) => {
 
 			// Only create turnInfo if this isn't the first word (wordNum > 0)
 			// The turnInfo records what happened with the PREVIOUS word
-			if (wordNum > 0) {
+			if (wordNum > 0 && currentWord) {
 				const clearedLets = tiles
 					.filter(
 						(tile) =>
@@ -194,7 +195,7 @@ export const useGame = (vKey?: VariantKey) => {
 				]);
 
 				const turnInfo: TurnInfo = {
-					givenWord: wordList[wordNum - 1], // Use the PREVIOUS word
+					givenWord: currentWord, // Use the actual word that was shown
 					turnNo: wordNum - 1,
 					wordsMade: validWords,
 					lettersCleared: clearedLets,
@@ -206,6 +207,9 @@ export const useGame = (vKey?: VariantKey) => {
 				setGameTurns((gt) => [...gt, turnInfo]);
 				turnLog(turnInfo);
 			}
+
+			// Store the current word for the next turnInfo
+			setCurrentWord(word);
 
 			//filter out old tiles in words and remaining in home row
 			//and make moveable tiles unmovable, then add new tiles
@@ -346,6 +350,7 @@ export const useGame = (vKey?: VariantKey) => {
 		);
 		setWordNum(0);
 		setGameTurns([]);
+		setCurrentWord(null);
 
 		// Track game start for crash detection (classic games only)
 		if (!vKey) {

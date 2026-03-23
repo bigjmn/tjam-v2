@@ -161,14 +161,51 @@ export const useGame = (vKey?: VariantKey) => {
 				isNew: true,
 			}));
 
-			const clearedLets = tiles
-				.filter(
-					(tile) =>
-						tile.sitOn[1] != "0" &&
-						!tile.canMove &&
-						validRows.includes(tile.sitOn),
-				)
-				.map((tile) => tile.letter);
+			// Only create turnInfo if this isn't the first word (wordNum > 0)
+			// The turnInfo records what happened with the PREVIOUS word
+			if (wordNum > 0) {
+				const clearedLets = tiles
+					.filter(
+						(tile) =>
+							tile.sitOn[1] != "0" &&
+							!tile.canMove &&
+							validRows.includes(tile.sitOn),
+					)
+					.map((tile) => tile.letter);
+
+				// Capture the unused letter and its index from the frozen home tile
+				const frozenTile = frozenHome
+					? tiles.find((tile) => tile.id === frozenHome)
+					: undefined;
+				const unusedLetter = frozenTile?.letter;
+				const unusedLetterIndex = frozenTile
+					? parseInt(frozenTile.sitOn[0])
+					: undefined;
+
+				const stringBoard = getBoardstate([
+					...tiles
+						.filter(
+							(tile) =>
+								tile.sitOn[1] != "0" &&
+								(tile.canMove || !validRows.includes(tile.sitOn)),
+						)
+						.map((tile) => ({ ...tile, canMove: false })),
+					...newTiles,
+				]);
+
+				const turnInfo: TurnInfo = {
+					givenWord: wordList[wordNum - 1], // Use the PREVIOUS word
+					turnNo: wordNum - 1,
+					wordsMade: validWords,
+					lettersCleared: clearedLets,
+					boardState: stringBoard,
+					unusedLetter,
+					unusedLetterIndex,
+				};
+
+				setGameTurns((gt) => [...gt, turnInfo]);
+				turnLog(turnInfo);
+			}
 
 			//filter out old tiles in words and remaining in home row
 			//and make moveable tiles unmovable, then add new tiles
@@ -182,17 +219,6 @@ export const useGame = (vKey?: VariantKey) => {
 					.map((tile) => ({ ...tile, canMove: false })),
 				...newTiles,
 			];
-			const stringBoard = getBoardstate(newboard);
-			const turnInfo: TurnInfo = {
-				givenWord: wordList[wordNum],
-				turnNo: wordNum,
-				wordsMade: validWords,
-				lettersCleared: clearedLets,
-				boardState: stringBoard,
-			};
-
-			setGameTurns((gt) => [...gt, turnInfo]);
-			turnLog(turnInfo);
 			setTiles(newboard);
 
 			if (newboard.length >= 11) {
@@ -371,5 +397,6 @@ export const useGame = (vKey?: VariantKey) => {
 		isAnimating,
 		flippingTileIds,
 		pinwheelingTileIds,
+		wordList,
 	};
 };

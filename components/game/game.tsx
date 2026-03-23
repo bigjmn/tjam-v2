@@ -23,6 +23,7 @@ import { useSfx } from "../../hooks/useSfx";
 import ThemedButton from "../ui/ThemedButton";
 import { GameHeader } from "./GameHeader";
 import ExitConfirmModal from "./ExitConfirmModal";
+import { StatsModal } from "./statslogic/StatsModal";
 import { useUser } from "../../hooks/useUser";
 import ThemedText from "../ui/ThemedText";
 import { useTheme } from "../../hooks/useTheme";
@@ -356,10 +357,12 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 		isAnimating,
 		flippingTileIds,
 		pinwheelingTileIds,
+		wordList,
 	} = useGame(vKey);
 
 	const { playerStats, updatePlayerStats } = useUser();
 	const [showExitModal, setShowExitModal] = useState(false);
+	const [showStatsModal, setShowStatsModal] = useState(false);
 	const { colors } = useTheme();
 
 	// Determine tile color based on variant
@@ -378,6 +381,14 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 
 	const closeExitModal = () => {
 		setShowExitModal(false);
+	};
+
+	const openStatsModal = () => {
+		setShowStatsModal(true);
+	};
+
+	const closeStatsModal = () => {
+		setShowStatsModal(false);
 	};
 
 	const confirmExit = async () => {
@@ -410,11 +421,20 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 					headerName={
 						vKey === "scrabble" ? "ScrabWord Jam" : "Trio Jam"
 					}
+					onStatsPress={openStatsModal}
+					vKey={vKey}
 				/>
 				<ExitConfirmModal
 					visible={showExitModal}
 					onCancel={closeExitModal}
 					onConfirm={confirmExit}
+				/>
+				<StatsModal
+					visible={showStatsModal}
+					onClose={closeStatsModal}
+					gameTurns={gameTurns}
+					wordNum={wordNum}
+					wordList={wordList}
 				/>
 				<ThemedView style={styles.gameWrapper}>
 					<ThemedView style={styles.mainBoard}>

@@ -118,6 +118,8 @@ interface TurnInfo {
 	wordsMade: string[];
 	lettersCleared: string[];
 	boardState: string;
+	unusedLetter?: string;
+	unusedLetterIndex?: number;
 }
 
 interface Rank {

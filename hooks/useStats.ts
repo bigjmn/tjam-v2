@@ -21,7 +21,7 @@ export const useStats = () => {
 		let myRank = -1;
 		if (globalLeaders && playerStats.username) {
 			const myLeaderOb = globalLeaders.find(
-				(gl) => gl.username === playerStats.username,
+				(gl) => gl.id === playerStats.id,
 			);
 			if (myLeaderOb) {
 				myRank = myLeaderOb.globalRank;

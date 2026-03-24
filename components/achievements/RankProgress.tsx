@@ -110,6 +110,15 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 				setIsTransitioning(true);
 				setNextRank(newRankToShow);
 
+				// Create named callback for state updates (called from worklet thread)
+				const completeTransition = () => {
+					setCurrentRank(newRankToShow);
+					setTotalStars(newRankToShow.starsToFill);
+					setNextRank(null);
+					setIsTransitioning(false);
+					resolve();
+				};
+
 				// Slide container to the left
 				containerTranslateX.value = withTiming(
 					-SCREEN_WIDTH,
@@ -128,14 +137,8 @@ export const RankProgress = forwardRef<RankProgressHandle, RankProgressProps>(
 						// Reset position BEFORE updating state
 						containerTranslateX.value = 0;
 
-						// Update state in a single batch AFTER resetting position
-						runOnJS(() => {
-							setCurrentRank(newRankToShow);
-							setTotalStars(newRankToShow.starsToFill);
-							setNextRank(null);
-							setIsTransitioning(false);
-							resolve();
-						})();
+						// Update state using correct runOnJS pattern
+						runOnJS(completeTransition)();
 					},
 				);
 			});

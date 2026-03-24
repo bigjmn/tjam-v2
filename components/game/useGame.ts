@@ -12,7 +12,7 @@ import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
 import { Toast } from "toastify-react-native";
 import { achievementToast } from "../achievements/AchievementToast";
 import { achievementByKey } from "../../utils/achievements";
-const DEBUG_LIST_START = ["BEE","TEE"]
+const DEBUG_LIST_START = ["EWE","AWE","FLY","SLY","RAG"]
 export const useGame = (vKey?: VariantKey) => {
 	const { wooshSound, achieveSound } = useSfx();
 	const { playerStats, updatePlayerStats } = useUser();
@@ -254,6 +254,7 @@ export const useGame = (vKey?: VariantKey) => {
 		if (scoredAchievements.length > 0){
 			scoredAchievements.forEach((sa) => {
 				achievementToast(sa)
+				achieveSound()
 			})
 			setAchievementsNotified(an => [...an, ...scoredAchievements])
 		}

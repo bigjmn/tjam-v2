@@ -23,6 +23,7 @@ import OptionsSwitches from "./OptionsSwitches";
 import { useTheme } from "../../hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../../hooks/useUser";
+import { LoginZone } from "../auth/LoginZone";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 interface SettingsModalProps {
@@ -116,7 +117,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 					{/* Content */}
 					<View style={styles.content}>
 						<OptionsSwitches />
-						{!user?.isAnonymous && (
+						{!user?.isAnonymous ? (
 							<ThemedButton
 								style={{ backgroundColor: colors.danger }}
 								onPress={logout}
@@ -125,6 +126,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 									Log Out
 								</ThemedText>
 							</ThemedButton>
+						) : (
+							<LoginZone />
 						)}
 					</View>
 				</Animated.View>

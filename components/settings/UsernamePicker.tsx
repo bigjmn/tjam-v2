@@ -299,6 +299,7 @@ export default function UsernamePicker() {
 							editable={!isDisabled && isEditing}
 							style={[
 								styles.input,
+								
 								// { color: colors.text },
 								isDisabled && { color: colors.mutedText },
 							]}
@@ -316,7 +317,7 @@ export default function UsernamePicker() {
 									size="small"
 									color={colors.primary}
 								/>
-							) : isEditing && hasChanged ? (
+							) : isEditing ? (
 								<>
 									<View
 										style={[
@@ -346,7 +347,7 @@ export default function UsernamePicker() {
 											name="checkmark"
 											size={20}
 											color={colors.primary}
-											onPress={handleSubmit}
+											onPress={hasChanged ? handleSubmit : handleCancel}
 										/>
 									</View>
 								</>
@@ -518,9 +519,10 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		flex: 1,
-		fontSize: 16,
+		fontSize: 18,
 		fontWeight: "600",
-		padding: 0,
+		padding: 2,
+		borderWidth:0
 	},
 	actionButtons: {
 		flexDirection: "row",

@@ -22,10 +22,12 @@ interface NextGoalsBlockProps {
 	noveltyAchievement?: Achievement;
 	dailyWordAchievement?: DailyWordAchievement;
 	dailyWordWon?: boolean;
+	dailyWordAlreadyOwned?: boolean;
 }
 
 export interface NextGoalsBlockHandle {
 	markAsWon: (category: "scoring" | "streaking" | "novelty") => Promise<void>;
+	markDailyWordWon: () => Promise<void>;
 	slideOut: (category: "scoring" | "streaking" | "novelty") => Promise<void>;
 	slideIn: (
 		category: "scoring" | "streaking" | "novelty",
@@ -46,6 +48,7 @@ export const NextGoalsBlock = forwardRef<
 			noveltyAchievement,
 			dailyWordAchievement,
 			dailyWordWon,
+			dailyWordAlreadyOwned,
 		},
 		ref,
 	) => {
@@ -58,6 +61,7 @@ export const NextGoalsBlock = forwardRef<
 		const [scoringWon, setScoringWon] = useState(false);
 		const [streakingWon, setStreakingWon] = useState(false);
 		const [noveltyWon, setNoveltyWon] = useState(false);
+		const [dailyWordWonState, setDailyWordWonState] = useState(dailyWordAlreadyOwned || false);
 
 		// Calculate streak progress for current streaking goal
 		const streakProgress = React.useMemo(() => {
@@ -82,6 +86,8 @@ export const NextGoalsBlock = forwardRef<
 		const streakingPulseOpacity = useSharedValue(1);
 		const noveltyPulseScale = useSharedValue(1);
 		const noveltyPulseOpacity = useSharedValue(1);
+		const dailyWordPulseScale = useSharedValue(1);
+		const dailyWordPulseOpacity = useSharedValue(1);
 
 		const markAsWon = async (
 			category: "scoring" | "streaking" | "novelty",
@@ -126,6 +132,30 @@ export const NextGoalsBlock = forwardRef<
 				);
 
 				pulseOpacity.value = withSequence(
+					withTiming(0.8, { duration: 150 }),
+					withTiming(1, { duration: 150 }),
+				);
+			});
+		};
+
+		const markDailyWordWon = async (): Promise<void> => {
+			return new Promise((resolve) => {
+				console.log("[NEXTGOALS] markDailyWordWon called");
+
+				runOnJS(setDailyWordWonState)(true);
+				runOnJS(achieveSound)();
+				console.log("[NEXTGOALS] Daily word marked as won, playing sound and pulsing");
+
+				// Pulse animation (300ms)
+				dailyWordPulseScale.value = withSequence(
+					withTiming(1.05, { duration: 150 }),
+					withTiming(1, { duration: 150 }, () => {
+						console.log("[NEXTGOALS] Daily word pulse complete");
+						runOnJS(resolve)();
+					}),
+				);
+
+				dailyWordPulseOpacity.value = withSequence(
 					withTiming(0.8, { duration: 150 }),
 					withTiming(1, { duration: 150 }),
 				);
@@ -262,6 +292,7 @@ export const NextGoalsBlock = forwardRef<
 
 		useImperativeHandle(ref, () => ({
 			markAsWon,
+			markDailyWordWon,
 			slideOut,
 			slideIn,
 			enter,
@@ -290,6 +321,11 @@ export const NextGoalsBlock = forwardRef<
 				{ scale: noveltyPulseScale.value },
 			],
 			opacity: noveltyPulseOpacity.value,
+		}));
+
+		const dailyWordAnimatedStyle = useAnimatedStyle(() => ({
+			transform: [{ scale: dailyWordPulseScale.value }],
+			opacity: dailyWordPulseOpacity.value,
 		}));
 
 		const blockAnimatedStyle = useAnimatedStyle(() => ({
@@ -341,13 +377,13 @@ export const NextGoalsBlock = forwardRef<
 				)}
 
 				{dailyWordAchievement && (
-					<View style={styles.tileWrapper}>
+					<Animated.View style={[styles.tileWrapper, dailyWordAnimatedStyle]}>
 						<AchievementTile
 							achievement={dailyWordAchievement}
-							isWon={dailyWordWon}
+							isWon={dailyWordWonState}
 							showDate={true}
 						/>
-					</View>
+					</Animated.View>
 				)}
 			</Animated.View>
 		);

@@ -162,6 +162,7 @@ type MarkWonEvent = {
 	category: "scoring" | "streaking" | "novelty";
 	achievementKey: string;
 };
+type MarkDailyWordWonEvent = { type: "markDailyWordWon" };
 type SlideTileEvent = {
 	type: "slideTile";
 	direction: "out" | "in";
@@ -174,6 +175,7 @@ type ShowRankUpEvent = { type: "showRankUp"; newRank: Rank; rankIndex: number };
 type AchievementAnimationEvent =
 	| FillStarEvent
 	| MarkWonEvent
+	| MarkDailyWordWonEvent
 	| SlideTileEvent
 	| RevealSecretEvent
 	| ShowRankUpEvent;

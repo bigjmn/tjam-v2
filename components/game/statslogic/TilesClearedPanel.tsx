@@ -58,7 +58,7 @@ export const TilesClearedPanel: React.FC<TilesClearedPanelProps> = ({
 									variant="soft"
 									style={[
 										styles.tileCount,
-										{ color: colors.mutedText },
+										{ color: letterCounts[letter] === 0 ? colors.mutedText : colors.text },
 									]}
 								>
 									{letterCounts[letter]}

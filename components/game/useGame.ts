@@ -12,7 +12,7 @@ import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
 import { Toast } from "toastify-react-native";
 import { achievementToast } from "../achievements/AchievementToast";
 import { achievementByKey } from "../../utils/achievements";
-const DEBUG_LIST_START = ["EWE","AWE","FLY","SLY","RAG"]
+const DEBUG_LIST_START:string[] = []
 export const useGame = (vKey?: VariantKey) => {
 	const { wooshSound, achieveSound } = useSfx();
 	const { playerStats, updatePlayerStats } = useUser();

@@ -27,7 +27,7 @@ const ProfileScreen = () => {
 
 	const { highScore, globalRank, dateJoined, points } = stats;
 
-	// Safety check: Backfill missing scoring achievements
+	// Safety check: Backfill missing scoring achievements and remove duplicates
 	useEffect(() => {
 		if (!playerStats || !updatePlayerStats) return;
 
@@ -36,16 +36,24 @@ const ProfileScreen = () => {
 			playerStats.achievementsWon
 		);
 
-		if (missingAchievements.length > 0) {
-			console.log(`🔧 [Profile] Backfilling ${missingAchievements.length} missing achievements`);
+		// Combine and deduplicate achievements
+		const combinedAchievements = [
+			...playerStats.achievementsWon,
+			...missingAchievements
+		];
+		const deduplicatedAchievements = Array.from(new Set(combinedAchievements));
 
-			const updatedAchievements = [
-				...playerStats.achievementsWon,
-				...missingAchievements
-			];
+		// Check if anything changed (backfill or duplicates removed)
+		const hasChanges =
+			missingAchievements.length > 0 ||
+			deduplicatedAchievements.length !== playerStats.achievementsWon.length;
+
+		if (hasChanges) {
+			const duplicatesRemoved = combinedAchievements.length - deduplicatedAchievements.length;
+			console.log(`🔧 [Profile] Backfilling ${missingAchievements.length} missing achievements, removed ${duplicatesRemoved} duplicates`);
 
 			updatePlayerStats({
-				achievementsWon: updatedAchievements
+				achievementsWon: deduplicatedAchievements
 			});
 		}
 	}, [playerStats?.id]); // Only run when profile loads (id changes)

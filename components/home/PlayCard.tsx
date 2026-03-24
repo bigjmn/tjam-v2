@@ -42,14 +42,7 @@ export const PlayCard = () => {
 			>
 				<View style={styles.headerRow}>
 					<View style={styles.titleContainer}>
-						<View style={styles.titleWithBadge}>
-							<ThemedText variant="header">Classic</ThemedText>
-							{dailyWordWon && (
-								<View style={[styles.badge, { backgroundColor: colors.success }]}>
-									<ThemedText style={styles.badgeText}>✓</ThemedText>
-								</View>
-							)}
-						</View>
+						<ThemedText variant="header">Classic</ThemedText>
 					</View>
 					<Image
 						source={trioImage}
@@ -81,16 +74,22 @@ export const PlayCard = () => {
 						</TouchableOpacity>
 					</View>
 					<View style={styles.wordRow}>
-						<ThemedText variant="header2" style={styles.wordText}>
-							{dailyWord}
-						</ThemedText>
+						<View style={styles.wordWithBadge}>
+							<ThemedText variant="header2" style={styles.wordText}>
+								{dailyWord}
+							</ThemedText>
+							{dailyWordWon && (
+								<View style={[styles.badge, { backgroundColor: colors.success }]}>
+									<ThemedText style={styles.badgeText}>✓</ThemedText>
+								</View>
+							)}
+						</View>
 						<ThemedButton
 							onPress={startGame}
 							style={[styles.playButton, { backgroundColor: colors.primary }]}
 						>
 							<ThemedText style={styles.playButtonText}>Play</ThemedText>
 						</ThemedButton>
-						<View />
 					</View>
 				</View>
 			</ThemedCard>
@@ -227,6 +226,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 36,
 		marginTop: 8,
+	},
+	wordWithBadge: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
 	},
 	wordText: {
 		fontSize: 20,

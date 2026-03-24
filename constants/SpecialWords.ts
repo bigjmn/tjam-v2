@@ -39,4 +39,5 @@ export const animals: string[] = [
 	"COD",
 	"KOI",
 	"EWE",
+	"HOG"
 ];

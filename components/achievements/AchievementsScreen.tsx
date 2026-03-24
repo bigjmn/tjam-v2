@@ -70,8 +70,11 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		const rankChanges = achievements.calculateRankChanges(earnedKeys);
 
 		// Separate out daily word achievements
+		// Note: Daily word keys have date suffixes (e.g., "wordoftheday_3/24/2026")
+		// but allAchievements has the base "wordoftheday" entry
 		const dailyWordKeys = earnedKeys.filter((key) => {
-			const achievement = allAchievements.find((a) => a.key === key);
+			const baseKey = key.startsWith("wordoftheday_") ? "wordoftheday" : key;
+			const achievement = allAchievements.find((a) => a.key === baseKey);
 			return achievement?.type === "dailyWord";
 		});
 
@@ -295,7 +298,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 		// Process Daily Word achievements
 		for (const key of dailyWordKeys) {
-			const achievement = allAchievements.find((a) => a.key === key);
+			const baseKey = key.startsWith("wordoftheday_") ? "wordoftheday" : key;
+			const achievement = allAchievements.find((a) => a.key === baseKey);
 			if (!achievement) continue;
 
 			console.log(
@@ -303,8 +307,12 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				achievement,
 			);
 
-			// Daily word achievements don't have a markWon event since they're not in NextGoalsBlock categories
-			// Just fill stars directly
+			// Add markDailyWordWon event for animation
+			queue.push({
+				type: "markDailyWordWon",
+			} as MarkDailyWordWonEvent);
+
+			// Fill stars for daily word
 			for (let i = 0; i < achievement.reward; i++) {
 				starCounter++;
 				queue.push({
@@ -355,8 +363,11 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		});
 
 		// Separate out daily word achievements
+		// Note: Daily word keys have date suffixes (e.g., "wordoftheday_3/24/2026")
+		// but allAchievements has the base "wordoftheday" entry
 		const dailyWordKeys = earnedKeys.filter((key) => {
-			const achievement = allAchievements.find((a) => a.key === key);
+			const baseKey = key.startsWith("wordoftheday_") ? "wordoftheday" : key;
+			const achievement = allAchievements.find((a) => a.key === baseKey);
 			return achievement?.type === "dailyWord";
 		});
 
@@ -375,7 +386,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 				 queue.slice(firstRevealSecretIndex).includes(e))
 		);
 		const firstMarkWonIndex = queue.findIndex(
-			(e) => e.type === "markWon" || e.type === "slideTile",
+			(e) => e.type === "markWon" || e.type === "slideTile" || e.type === "markDailyWordWon",
 		);
 
 		// Helper to determine if event belongs to current block
@@ -384,7 +395,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			index: number,
 		) => {
 			// NextGoals-specific events (only in NextGoals block)
-			if (event.type === "markWon" || event.type === "slideTile")
+			if (event.type === "markWon" || event.type === "slideTile" || event.type === "markDailyWordWon")
 				return currentBlock === "nextGoals";
 
 			// Secret-specific events (only in Secret block)
@@ -395,7 +406,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			// Determine by position in queue
 			if (event.type === "showRankUp" || event.type === "fillStar") {
 				if (currentBlock === "secret") {
-					// Secret events come first (before any markWon/slideTile)
+					// Secret events come first (before any markWon/slideTile/markDailyWordWon)
 					return firstMarkWonIndex === -1 || index < firstMarkWonIndex;
 				}
 				if (currentBlock === "legendary") {
@@ -405,7 +416,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 					return afterSecret && beforeNextGoals;
 				}
 				if (currentBlock === "nextGoals") {
-					// NextGoals events come last (at or after first markWon/slideTile)
+					// NextGoals events come last (at or after first markWon/slideTile/markDailyWordWon)
 					return firstMarkWonIndex !== -1 && index >= firstMarkWonIndex;
 				}
 			}
@@ -527,6 +538,17 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 						error,
 					);
 				}
+			} else if (event.type === "markDailyWordWon") {
+				console.log("[ACHIEVEMENTS] Marking daily word as won");
+				try {
+					await nextGoalsRef.current?.markDailyWordWon();
+					await delay(200);
+				} catch (error) {
+					console.error(
+						"[ACHIEVEMENTS] Error marking daily word as won:",
+						error,
+					);
+				}
 			} else if (event.type === "fillStar") {
 				console.log("[ACHIEVEMENTS] Filling star");
 				await rankProgressRef.current?.fillNextStar();
@@ -605,7 +627,8 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 	// Get today's daily word achievement status
 	const datestring = moment(new Date()).format("M/DD/YYYY");
 	const dailyWordKey = `wordoftheday_${datestring}`;
-	const dailyWordWon = earnedKeys.includes(dailyWordKey);
+	const dailyWordWon = earnedKeys.includes(dailyWordKey); // Won in THIS game
+	const dailyWordAlreadyOwned = playerStats?.achievementsWon?.includes(dailyWordKey) || false; // Already owned before this game
 
 	// Find the daily word achievement
 	const dailyWordAchievement = dailyWordAchievements[0];
@@ -635,6 +658,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 							noveltyAchievement={nextAchievements.novelty}
 							dailyWordAchievement={dailyWordAchievement}
 							dailyWordWon={dailyWordWon}
+							dailyWordAlreadyOwned={dailyWordAlreadyOwned}
 						/>
 					</View>
 				)}

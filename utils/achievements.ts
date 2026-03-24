@@ -301,13 +301,7 @@ export const streakingAchievements: StreakingAchievement[] = [
 ];
 
 export const noveltyAchievements: NoveltyAchievement[] = [
-	{
-		key: "qclear",
-		name: "Q Slayer",
-		explainer: "Clear a Q from the board",
-		type: "novelty",
-		reward: 2,
-	},
+	
 	{
 		key: "maxclear",
 		name: "Max Clear",
@@ -352,18 +346,27 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		reward: 4,
 	},
 	{
-		key: "papaya",
-		name: "No way, a papaya won!",
-		explainer: "Clear 10 palindromes",
+		key: "qclear",
+		name: "Q Slayer",
+		explainer: "Clear a Q from the board",
 		type: "novelty",
 		reward: 4,
 	},
+	
+	
 	{
 		key: "tripletake",
 		name: "Triple Take",
-		explainer: "Make the same word thrice in one game",
+		explainer: "Make the same word thrice in a row",
 		type: "novelty",
 		reward: 5,
+	},
+	{
+		key: "allmyletters",
+		name: "All My Letters",
+		explainer: "Clear every letter A-Z in one game",
+		type: "novelty",
+		reward: 6,
 	},
 ];
 
@@ -414,16 +417,10 @@ export const secretAchievements: SecretAchievement[] = [
 		type: "secret",
 		reward: 1,
 	},
-	{
-		key: "allmyletters",
-		name: "All My Letters",
-		explainer: "Clear every letter A-Z in one game",
-		type: "secret",
-		reward: 3,
-	},
+	
 	{
 		key: "foures",
-		name: "Four E's a Jolly Good Fellow",
+		name: "A Jolly Good Fellow",
 		explainer: "Clear four E's in one turn",
 		type: "secret",
 		reward: 4,
@@ -432,6 +429,13 @@ export const secretAchievements: SecretAchievement[] = [
 		key: "lucky13",
 		name: "Lucky Thirteen",
 		explainer: "Clear numbers adding up to 13",
+		type: "secret",
+		reward: 4,
+	},
+	{
+		key: "papaya",
+		name: "No way, a papaya won!",
+		explainer: "Clear 10 palindromes",
 		type: "secret",
 		reward: 4,
 	},

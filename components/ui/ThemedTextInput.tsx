@@ -6,7 +6,7 @@ import {
 	TextStyle,
 } from "react-native";
 import { Colors } from "../../constants/Colors";
-
+import { useTheme } from "../../hooks/useTheme";
 interface ThemedTextInputProps {
 	style?: StyleProp<TextStyle>;
 	[key: string]: any;
@@ -17,6 +17,7 @@ export default function ThemedTextInput({
 }: ThemedTextInputProps) {
 	const colorScheme = useColorScheme() || "light";
 	const theme = Colors[colorScheme] ?? Colors.light;
+	const { colors } = useTheme()
 
 	return (
 		<TextInput
@@ -26,13 +27,13 @@ export default function ThemedTextInput({
 				{
 					fontFamily: "Ubuntu-Light",
 					fontWeight: 300,
-					backgroundColor: theme.background,
-					color: theme.primary,
+					backgroundColor: colors.background,
+					color: colors.primary,
 					padding: 10,
 					borderRadius: 6,
 					width: "80%",
 					textAlign: "center",
-					borderColor: theme.primary,
+					borderColor: colors.primary,
 					borderWidth: 1,
 					marginVertical: 5,
 					fontSize: 14,

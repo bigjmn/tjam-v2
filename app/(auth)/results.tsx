@@ -23,6 +23,7 @@ export default function Results() {
 	const gameScore = useMemo(() => {
 		if (typeof gameTurnsJson === "string") {
 			const gameTurns: TurnInfo[] = JSON.parse(gameTurnsJson);
+			console.log("gameturns", gameTurns)
 			return gameTurns.length;
 		}
 		return 0;

@@ -176,54 +176,6 @@ export const useGame = (vKey?: VariantKey) => {
 				isNew: true,
 			}));
 
-			// Only create turnInfo if this isn't the first word (wordNum > 0)
-			// The turnInfo records what happened with the PREVIOUS word
-			if (wordNum > 0 && currentWord) {
-				const clearedLets = tiles
-					.filter(
-						(tile) =>
-							tile.sitOn[1] != "0" &&
-							!tile.canMove &&
-							validRows.includes(tile.sitOn),
-					)
-					.map((tile) => tile.letter);
-
-				// Capture the unused letter and its index from the frozen home tile
-				const frozenTile = frozenHome
-					? tiles.find((tile) => tile.id === frozenHome)
-					: undefined;
-				const unusedLetter = frozenTile?.letter;
-				const unusedLetterIndex = frozenTile
-					? parseInt(frozenTile.sitOn[0])
-					: undefined;
-
-				const stringBoard = getBoardstate([
-					...tiles
-						.filter(
-							(tile) =>
-								tile.sitOn[1] != "0" &&
-								(tile.canMove || !validRows.includes(tile.sitOn)),
-						)
-						.map((tile) => ({ ...tile, canMove: false })),
-					...newTiles,
-				]);
-
-				const turnInfo: TurnInfo = {
-					givenWord: currentWord, // Use the actual word that was shown
-					turnNo: wordNum - 1,
-					wordsMade: validWords,
-					lettersCleared: clearedLets,
-					boardState: stringBoard,
-					unusedLetter,
-					unusedLetterIndex,
-				};
-
-				setGameTurns((gt) => [...gt, turnInfo]);
-				turnLog(turnInfo);
-				
-
-			}
-
 			// Store the current word for the next turnInfo
 			setCurrentWord(word);
 
@@ -264,6 +216,64 @@ export const useGame = (vKey?: VariantKey) => {
 
 	const handleCommitMove = () => {
 		console.log("ANIMATION START");
+
+		// Create turnInfo for current turn BEFORE animations (guarantees it's recorded before game end)
+		if (wordNum !== null && currentWord) {
+			const clearedLets = tiles
+				.filter(
+					(tile) =>
+						tile.sitOn[1] != "0" &&
+						!tile.canMove &&
+						validRows.includes(tile.sitOn),
+				)
+				.map((tile) => tile.letter);
+
+			// Capture the unused letter and its index from the frozen home tile
+			const frozenTile = frozenHome
+				? tiles.find((tile) => tile.id === frozenHome)
+				: undefined;
+			const unusedLetter = frozenTile?.letter;
+			const unusedLetterIndex = frozenTile
+				? parseInt(frozenTile.sitOn[0])
+				: undefined;
+
+			// Get the next word that will appear (current wordNum + 1)
+			const nextWordIndex = wordNum + 1;
+			const nextWord = wordList[nextWordIndex];
+			const nextWordTiles: Tile[] = nextWord.split("").map((w, i) => ({
+				id: "w" + nextWordIndex.toString() + "l" + i.toString(),
+				letter: w,
+				x: i,
+				y: 0,
+				sitOn: i.toString() + "0",
+				canMove: false,
+				isNew: false,
+			}));
+
+			const stringBoard = getBoardstate([
+				...tiles
+					.filter(
+						(tile) =>
+							tile.sitOn[1] != "0" &&
+							(tile.canMove || !validRows.includes(tile.sitOn)),
+					)
+					.map((tile) => ({ ...tile, canMove: false })),
+				...nextWordTiles,
+			]);
+
+			const turnInfo: TurnInfo = {
+				givenWord: currentWord,
+				turnNo: wordNum,
+				wordsMade: validWords,
+				lettersCleared: clearedLets,
+				boardState: stringBoard,
+				unusedLetter,
+				unusedLetterIndex,
+			};
+
+			setGameTurns((gt) => [...gt, turnInfo]);
+			turnLog(turnInfo);
+		}
 
 		// Capture which tiles should animate RIGHT NOW (before state changes)
 		const tilesToFlip = new Set(

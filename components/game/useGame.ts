@@ -229,11 +229,11 @@ export const useGame = (vKey?: VariantKey) => {
 						validRows.includes(tile.sitOn),
 				)
 				.map((tile) => tile.letter);
-			if (clearedLets.includes("E")){
-				dummyToast()
+			// if (clearedLets.includes("E")){
+			// 	dummyToast()
 
 
-			}
+			// }
 			// Capture the unused letter and its index from the frozen home tile
 			const frozenTile = frozenHome
 				? tiles.find((tile) => tile.id === frozenHome)

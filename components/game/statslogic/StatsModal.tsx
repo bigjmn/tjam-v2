@@ -6,6 +6,7 @@ import {
 	Pressable,
 	Dimensions,
 	TouchableWithoutFeedback,
+	ScrollView,
 } from "react-native";
 import Animated, {
 	useAnimatedStyle,
@@ -134,13 +135,17 @@ export const StatsModal: React.FC<StatsModalProps> = ({
 								totalWords={wordList.length}
 							/>
 						) : (
-							<View style={styles.lettersTabContent}>
+							<ScrollView
+								style={styles.lettersScrollView}
+								contentContainerStyle={styles.lettersScrollContent}
+								showsVerticalScrollIndicator={true}
+							>
 								<TilesClearedPanel gameTurns={gameTurns} />
 								<TilesRemainingPanel
 									wordList={wordList}
 									currentWordNum={wordNum ?? 0}
 								/>
-							</View>
+							</ScrollView>
 						)}
 					</View>
 				</Animated.View>
@@ -194,8 +199,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingBottom: 20,
 	},
-	lettersTabContent: {
+	lettersScrollView: {
 		flex: 1,
-		flexDirection: "column",
+	},
+	lettersScrollContent: {
+		paddingBottom: 20,
 	},
 });

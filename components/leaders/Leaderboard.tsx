@@ -8,6 +8,7 @@ import { useTheme } from "../../hooks/useTheme";
 import TimeAgo from "../../utils/TimeAgo";
 import { Ionicons } from "@expo/vector-icons";
 export const Leaderboard = () => {
+	const { colors } = useTheme()
 	const {
 		globalLeaders,
 		weeklyLeaders,
@@ -68,7 +69,7 @@ export const Leaderboard = () => {
 					</ThemedView>
 				)}
 				<Pressable onPress={refreshLeaders}>
-					<Ionicons size={18} color="white" name="refresh" />
+					<Ionicons size={18} color={colors.iconColor} name="refresh" />
 				</Pressable>
 			</ThemedView>
 			{/* {isLoading ? (

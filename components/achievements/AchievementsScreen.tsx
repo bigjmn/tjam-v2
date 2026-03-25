@@ -640,6 +640,23 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		secret: [],
 	};
 
+	// Determine which achievements to show initially in NextGoalsBlock
+	// If an achievement was earned in this game, show that one (so it can be marked won and slide out)
+	// Otherwise, show the next goal
+	const earnedScoring = allAchievements.find(
+		(a) => nextGoalKeys.includes(a.key) && a.type === "scoring"
+	) as ScoringAchievement | undefined;
+	const earnedStreaking = allAchievements.find(
+		(a) => nextGoalKeys.includes(a.key) && a.type === "streaking"
+	) as StreakingAchievement | undefined;
+	const earnedNovelty = allAchievements.find(
+		(a) => nextGoalKeys.includes(a.key) && a.type === "novelty"
+	) as NoveltyAchievement | undefined;
+
+	const initialScoringAchievement = earnedScoring || nextAchievements?.scoring;
+	const initialStreakingAchievement = earnedStreaking || nextAchievements?.streaking;
+	const initialNoveltyAchievement = earnedNovelty || nextAchievements?.novelty;
+
 	// Get today's daily word achievement status
 	const datestring = moment(new Date()).format("M/DD/YYYY");
 	const dailyWordKey = `wordoftheday_${datestring}`;
@@ -655,6 +672,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		<ThemedView safe={true} style={styles.container}>
 			{/* Rank Progress - always at top */}
 			<RankProgress
+				variant="compact"
 				ref={rankProgressRef}
 				rank={currentRank}
 				totalStars={currentRank.starsToFill}
@@ -665,13 +683,13 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 			<ThemedView style={styles.blocksContainer}>
 				{/* All blocks positioned absolutely at same location */}
 				{/* ALWAYS render NextGoalsBlock, even if no achievements earned */}
-			{nextAchievements && (
+			{(initialScoringAchievement || initialStreakingAchievement || initialNoveltyAchievement) && (
 					<View style={styles.blockWrapperWithOffset}>
 						<NextGoalsBlock
 							ref={nextGoalsRef}
-							scoringAchievement={nextAchievements.scoring}
-							streakingAchievement={nextAchievements.streaking}
-							noveltyAchievement={nextAchievements.novelty}
+							scoringAchievement={initialScoringAchievement}
+							streakingAchievement={initialStreakingAchievement}
+							noveltyAchievement={initialNoveltyAchievement}
 							dailyWordAchievement={dailyWordAchievement}
 							dailyWordWon={dailyWordWon}
 							dailyWordAlreadyOwned={dailyWordAlreadyOwned}
@@ -748,14 +766,14 @@ const styles = StyleSheet.create({
 	},
 	blockWrapperWithOffset: {
 		position: "absolute",
-		top: "35%",
+		top: "32%",
 		left: 0,
 		right: 0,
 		zIndex: 1,
 	},
 	completeContainer: {
 		position: "absolute",
-		top: "25%",
+		top: "20%",
 		left: 0,
 		right: 0,
 		alignItems: "center",
@@ -765,14 +783,14 @@ const styles = StyleSheet.create({
 	},
 	buttonWrapper: {
 		alignItems: "center",
-		gap: 12,
+		gap: 6,
 		pointerEvents: "auto",
 	},
 	scoreText: {
 		marginBottom: 4,
 	},
 	bestText: {
-		marginBottom: 12,
+		marginBottom: 6,
 		opacity: 0.8,
 	},
 	completeButton: {

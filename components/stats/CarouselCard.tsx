@@ -132,11 +132,11 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 12,
 		paddingTop: 8,
 		paddingBottom: 8,
-		gap: 8,
+		gap: 6,
 		maxHeight: 60,
 	},
 	chip: {
-		paddingHorizontal: 16,
+		paddingHorizontal: 12,
 		paddingVertical: 10,
 		borderRadius: 12,
 		minWidth: 40,

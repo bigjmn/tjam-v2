@@ -468,7 +468,7 @@ export const allAchievements: Achievement[] = [
 ];
 export const ranksList: Rank[] = [
 	{ name: "Newbie", starsToFill: 3 },
-	{ name: "Rookie", starsToFill: 3 },
+	{ name: "The Rookie (starring Nathan Fillion)", starsToFill: 3 },
 	{ name: "Showing Promise", starsToFill: 4 },
 	{ name: "Not Half Brad", starsToFill: 4 },
 	{ name: "Semi-Pro (starring Will Ferrell)", starsToFill: 5 },

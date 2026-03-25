@@ -6,6 +6,7 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	View,
+	Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -88,6 +89,18 @@ export const VariantCards = () => {
 		return stats.getStats().level;
 	}, [stats]);
 
+	// Calculate card size to fit 3 cards in one row on any screen
+	const cardSize = useMemo(() => {
+		const screenWidth = Dimensions.get("window").width;
+		const horizontalPadding = 40; // Total padding (20px each side)
+		const gap = 12; // Gap between cards
+		const totalGaps = gap * 2; // 2 gaps between 3 cards
+		const availableWidth = screenWidth - horizontalPadding - totalGaps;
+		const size = Math.floor(availableWidth / 3);
+		// Cap at 120 for larger screens, minimum of 80 for very small screens
+		return Math.min(Math.max(size, 80), 120);
+	}, []);
+
 	const handlePlay = () => {
 		if (!selectedVariant) {
 			return;
@@ -110,7 +123,7 @@ export const VariantCards = () => {
 							onPress={() => setSelectedVariant(variant)}
 							activeOpacity={0.8}
 						>
-							<ThemedView style={styles.variantCard}>
+							<ThemedView style={[styles.variantCard, { width: cardSize, height: cardSize }]}>
 								<Image
 									source={imDict[variant.key][theme]}
 									contentFit="cover"
@@ -241,8 +254,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	variantCard: {
-		width: 120,
-		height: 120,
+		// width and height set dynamically based on screen size
 		borderRadius: 12,
 		overflow: "hidden",
 		position: "relative",

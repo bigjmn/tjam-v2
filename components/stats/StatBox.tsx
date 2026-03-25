@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
 	statItem: {
 		flex: 1,
 		alignItems: "center",
-		justifyContent: "center",
+		justifyContent: "flex-end",
 		paddingHorizontal: 4,
 	},
 	statValue: {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
 		marginBottom: 2,
 	},
 	statValueSmall: {
-		fontSize: 15,
+		fontSize: 14,
 		fontWeight: "500",
 		marginBottom: 2,
 	},

@@ -177,7 +177,7 @@ export const useGame = (vKey?: VariantKey) => {
 			}));
 
 			// Store the current word for the next turnInfo
-			setCurrentWord(word);
+			// setCurrentWord(word);
 
 			//filter out old tiles in words and remaining in home row
 			//and make moveable tiles unmovable, then add new tiles
@@ -191,11 +191,13 @@ export const useGame = (vKey?: VariantKey) => {
 					.map((tile) => ({ ...tile, canMove: false })),
 				...newTiles,
 			];
-			setTiles(newboard);
+			// setTiles(newboard);
 
 			if (newboard.length >= 11) {
 				endGame();
 			}
+			setCurrentWord(word);
+			setTiles(newboard);
 		}, 350); // Wait for exit animations to complete (280ms slide + 50ms exit delay + buffer)
 	};
 	const nextTurn = () => {
@@ -457,5 +459,6 @@ export const useGame = (vKey?: VariantKey) => {
 		flippingTileIds,
 		pinwheelingTileIds,
 		wordList,
+		gameActive
 	};
 };

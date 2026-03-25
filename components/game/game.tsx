@@ -359,6 +359,7 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 		flippingTileIds,
 		pinwheelingTileIds,
 		wordList,
+		gameActive
 	} = useGame(vKey);
 
 	const { playerStats, updatePlayerStats } = useUser();
@@ -462,7 +463,7 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 											tile.id != frozenHome
 											
 										}
-										noFlash={isAnimating}
+										noFlash={isAnimating || !gameActive}
 										isNew={tile.isNew}
 										isHomeRowExiting={tile.isHomeRowExiting}
 										shouldFlip={flippingTileIds.has(

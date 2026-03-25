@@ -479,12 +479,12 @@ export default function Game({ vKey }: { vKey?: VariantKey | undefined }) {
 					</ThemedView>
 					<View style={styles.scoreAndButton}>
 						<ThemedButton
-							disabled={!validBoard || !!inMotion || isAnimating}
+							disabled={!validBoard || !!inMotion || isAnimating || !gameActive}
 							style={[
 								styles.buttonStyle,
 								{
 									opacity:
-										!validBoard || !!inMotion || isAnimating
+										!validBoard || !!inMotion || isAnimating || !gameActive
 											? 0.3
 											: 1,
 								},

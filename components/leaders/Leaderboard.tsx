@@ -51,7 +51,7 @@ export const Leaderboard = () => {
 					/>
 				) : (
 					<FlatList
-						data={weeklyLeaders}
+						data={weeklyLeaders.filter((wr) => wr.weeklyRank <= 10 || wr.id === playerStats.id)}
 						keyExtractor={(item) => item.id}
 						renderItem={({ item }) => <ResultBar result={item} />}
 					/>

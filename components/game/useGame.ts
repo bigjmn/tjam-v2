@@ -10,7 +10,7 @@ import { useUser } from "../../hooks/useUser";
 import { useFirestore } from "../../hooks/useFirestore";
 import { useActiveGameTracking } from "../../hooks/useActiveGameTracking";
 import { Toast } from "toastify-react-native";
-import { achievementToast } from "../achievements/AchievementToast";
+import { achievementToast, dummyToast } from "../achievements/AchievementToast";
 import { achievementByKey } from "../../utils/achievements";
 const DEBUG_LIST_START:string[] = []
 export const useGame = (vKey?: VariantKey) => {
@@ -229,7 +229,11 @@ export const useGame = (vKey?: VariantKey) => {
 						validRows.includes(tile.sitOn),
 				)
 				.map((tile) => tile.letter);
+			if (clearedLets.includes("E")){
+				dummyToast()
 
+
+			}
 			// Capture the unused letter and its index from the frozen home tile
 			const frozenTile = frozenHome
 				? tiles.find((tile) => tile.id === frozenHome)
@@ -307,7 +311,7 @@ export const useGame = (vKey?: VariantKey) => {
 				setIsAnimating(false);
 				setFlippingTileIds(new Set());
 				setPinwheelingTileIds(new Set());
-			}, 400);
+			}, 550);
 		}, 950);
 	};
 
@@ -344,6 +348,7 @@ export const useGame = (vKey?: VariantKey) => {
 		const oldTopScore = playerStats?.topScore ?? 0;
 
 		// Update game stats immediately (but NOT achievements - those update after animations)
+		// Don't block navigation if Firestore update fails (user might be offline)
 		if (playerStats && updatePlayerStats) {
 			const gameScore = gameTurns.length;
 			const gameRecord: GameRecord = {
@@ -354,13 +359,19 @@ export const useGame = (vKey?: VariantKey) => {
 			const newGameHist = [...playerStats.gameHist, gameRecord];
 			const newTopScore = Math.max(playerStats.topScore, gameScore);
 
-			await updatePlayerStats({
-				gameHist: newGameHist,
-				topScore: newTopScore,
-				numGames: playerStats.numGames + 1,
-			});
-			if (firehook) {
-				firehook.addGame(gameTurns); // Fire-and-forget, don't block navigation
+			try {
+				await updatePlayerStats({
+					gameHist: newGameHist,
+					topScore: newTopScore,
+					numGames: playerStats.numGames + 1,
+				});
+				if (firehook) {
+					firehook.addGame(gameTurns); // Fire-and-forget, don't block navigation
+				}
+			} catch (error) {
+				console.error("[GAME] Failed to update player stats (possibly offline):", error);
+				// Local storage should still be updated by updatePlayerStats internally
+				// Continue to results screen anyway
 			}
 		}
 
@@ -381,6 +392,7 @@ export const useGame = (vKey?: VariantKey) => {
 		}
 
 		// Record the abandoned game
+		// Don't block navigation if Firestore update fails (user might be offline)
 		if (playerStats && updatePlayerStats && gameTurns.length > 0) {
 			const gameScore = gameTurns.length;
 			const gameRecord: GameRecord = {
@@ -390,11 +402,17 @@ export const useGame = (vKey?: VariantKey) => {
 			};
 			const newGameHist = [...playerStats.gameHist, gameRecord];
 
-			await updatePlayerStats({
-				gameHist: newGameHist,
-				numGames: playerStats.numGames + 1,
-				// Note: Don't update topScore for abandoned games
-			});
+			try {
+				await updatePlayerStats({
+					gameHist: newGameHist,
+					numGames: playerStats.numGames + 1,
+					// Note: Don't update topScore for abandoned games
+				});
+			} catch (error) {
+				console.error("[GAME] Failed to update player stats for abandoned game (possibly offline):", error);
+				// Local storage should still be updated by updatePlayerStats internally
+				// Continue to dashboard anyway
+			}
 		}
 
 		router.push("/(dashboard)");

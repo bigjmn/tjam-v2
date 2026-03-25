@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
         flexDirection:"row",
         marginTop:12,
         alignItems:"center",
-        gap:12
+        gap:12,
+        width:"60%"
     }
 })
 export function achievementToast(achKey:string){
@@ -50,4 +51,11 @@ export function achievementToast(achKey:string){
         ...tProps
     })
 	
+}
+export const dummyToast = () => {
+    const tProps:ToastProps = {text1:`New Achievemennt! Dummy test achievement`, text2: "A much longer explainer that I can use to test explainer overflow!"}
+    Toast.show({
+        type: "success",
+        ...tProps
+    })
 }

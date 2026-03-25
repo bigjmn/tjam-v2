@@ -347,8 +347,8 @@ export const useGame = (vKey?: VariantKey) => {
 		// Capture old top score before updating
 		const oldTopScore = playerStats?.topScore ?? 0;
 
-		// Update game stats immediately (but NOT achievements - those update after animations)
-		// Don't block navigation if Firestore update fails (user might be offline)
+		// Fire-and-forget: Update stats without blocking navigation
+		// This ensures game always ends even if user is offline
 		if (playerStats && updatePlayerStats) {
 			const gameScore = gameTurns.length;
 			const gameRecord: GameRecord = {
@@ -359,22 +359,21 @@ export const useGame = (vKey?: VariantKey) => {
 			const newGameHist = [...playerStats.gameHist, gameRecord];
 			const newTopScore = Math.max(playerStats.topScore, gameScore);
 
-			try {
-				await updatePlayerStats({
-					gameHist: newGameHist,
-					topScore: newTopScore,
-					numGames: playerStats.numGames + 1,
-				});
-				if (firehook) {
-					firehook.addGame(gameTurns); // Fire-and-forget, don't block navigation
-				}
-			} catch (error) {
+			// Don't await - let it run in background
+			updatePlayerStats({
+				gameHist: newGameHist,
+				topScore: newTopScore,
+				numGames: playerStats.numGames + 1,
+			}).catch((error) => {
 				console.error("[GAME] Failed to update player stats (possibly offline):", error);
-				// Local storage should still be updated by updatePlayerStats internally
-				// Continue to results screen anyway
+			});
+
+			if (firehook) {
+				firehook.addGame(gameTurns); // Fire-and-forget
 			}
 		}
 
+		// Navigate immediately without waiting for stats update
 		router.push({
 			pathname: "/results",
 			params: {
@@ -391,8 +390,7 @@ export const useGame = (vKey?: VariantKey) => {
 			await endTracking();
 		}
 
-		// Record the abandoned game
-		// Don't block navigation if Firestore update fails (user might be offline)
+		// Fire-and-forget: Update stats for abandoned game without blocking navigation
 		if (playerStats && updatePlayerStats && gameTurns.length > 0) {
 			const gameScore = gameTurns.length;
 			const gameRecord: GameRecord = {
@@ -402,19 +400,17 @@ export const useGame = (vKey?: VariantKey) => {
 			};
 			const newGameHist = [...playerStats.gameHist, gameRecord];
 
-			try {
-				await updatePlayerStats({
-					gameHist: newGameHist,
-					numGames: playerStats.numGames + 1,
-					// Note: Don't update topScore for abandoned games
-				});
-			} catch (error) {
+			// Don't await - let it run in background
+			updatePlayerStats({
+				gameHist: newGameHist,
+				numGames: playerStats.numGames + 1,
+				// Note: Don't update topScore for abandoned games
+			}).catch((error) => {
 				console.error("[GAME] Failed to update player stats for abandoned game (possibly offline):", error);
-				// Local storage should still be updated by updatePlayerStats internally
-				// Continue to dashboard anyway
-			}
+			});
 		}
 
+		// Navigate immediately without waiting for stats update
 		router.push("/(dashboard)");
 	};
 

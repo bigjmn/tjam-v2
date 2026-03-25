@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { View, StyleSheet, Pressable, ScrollView } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RankProgress, RankProgressHandle } from "./RankProgress";
 import { NextGoalsBlock, NextGoalsBlockHandle } from "./NextGoalsBlock";
@@ -60,6 +61,21 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 		return ranksList.findIndex((r) => r.name === initialRank.name);
 	});
 	const [starsInCurrentRank, setStarsInCurrentRank] = useState(initialStars);
+
+	// Animated value for buttons/score fade-in
+	const buttonsOpacity = useSharedValue(0);
+
+	// Fade in buttons when processing completes
+	useEffect(() => {
+		if (!isProcessing) {
+			buttonsOpacity.value = withDelay(300, withTiming(1, { duration: 600 }));
+		}
+	}, [isProcessing]);
+
+	// Animated style for buttons/score fade-in
+	const buttonsAnimatedStyle = useAnimatedStyle(() => ({
+		opacity: buttonsOpacity.value,
+	}));
 
 	// Build animation queue
 	const buildAnimationQueue = (): AchievementAnimationEvent[] => {
@@ -681,7 +697,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 
 		{/* Scores and action buttons - centered on screen */}
 		{!isProcessing && (
-			<ThemedView style={styles.completeContainer}>
+			<Animated.View style={[styles.completeContainer, buttonsAnimatedStyle]}>
 				<View style={styles.buttonWrapper}>
 					<ThemedText variant="header2" style={styles.scoreText}>
 						Score: {gameScore}
@@ -706,7 +722,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({
 						</ThemedText>
 					</ThemedButton>
 				</View>
-			</ThemedView>
+			</Animated.View>
 		)}
 
 			{/* Rank Up Modal */}

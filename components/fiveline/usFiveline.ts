@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import wordlist from "../../assets/wordlist";
+import fourlets from "../../assets/fourLetterWords";
+import { fiveLetters } from "../../assets/five_letter_words";
 import { shuffle, boardSquares } from "../../utils/helpers";
 import { useRouter } from "expo-router";
 import { useSfx } from "../../hooks/useSfx";
@@ -46,6 +48,25 @@ export const useFiveline = () => {
 		}
 		return false;
 	};
+	const checkNletter = (arr:string[]) => {
+		const nLetters = arr.length 
+		let rowword = ""
+		for (let i=0; i<nLetters; i++){
+			const squarecheck = arr[i];
+			const tilecheck = tiles.find((tile) => tile.sitOn === squarecheck);
+			if (!tilecheck) {
+				return false;
+			}
+			rowword += tilecheck.letter;
+
+		}
+		const checkList = nLetters === 3 ? wordlist : nLetters === 4 ? fourlets : nLetters === 5 ? fiveLetters : []
+		if (checkList.includes(rowword)){
+			return rowword
+		}
+		return false 
+	}
+
 
 	const checkValidRows = () => {
 		if (!wordList) {
@@ -58,10 +79,13 @@ export const useFiveline = () => {
 			["02", "12", "22"],
 			["12", "22", "32"],
 			["22", "32", "42"],
+			["02", "12", "22", "32"],
+			["12", "22", "32","42"],
+			["02", "12", "22", "32","42"],
 		];
 
 		for (let i = 0; i < rowList.length; i++) {
-			const madeWord = checkSquareArr(rowList[i]);
+			const madeWord = checkNletter(rowList[i]);
 			if (madeWord) {
 				valWords.push(madeWord);
 				valSquares.push(rowList[i]);

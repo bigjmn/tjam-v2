@@ -28,6 +28,7 @@ const foursDarkSrc = require("../../assets/foursdark.png");
 const fivelineSrc = require("../../assets/fiveline.png");
 const fivelineDarkSrc = require("../../assets/fivelinedark.png");
 
+const DEV_MODE=true
 const imDict = {
 	scrabble: {
 		dark: scrabbleDarkSrc,
@@ -116,7 +117,7 @@ export const VariantCards = () => {
 		<>
 			<View style={styles.wrapper}>
 				{VARIANTS.map((variant) => {
-					const isUnlocked = level >= variant.unlockLevel;
+					const isUnlocked = DEV_MODE ? true : level >= variant.unlockLevel;
 					return (
 						<TouchableOpacity
 							key={variant.key}
@@ -165,7 +166,7 @@ export const VariantCards = () => {
 					{selectedVariant &&
 						(() => {
 							const isUnlocked =
-								level >= selectedVariant.unlockLevel;
+								DEV_MODE ? true : level >= selectedVariant.unlockLevel;
 							return (
 								<Pressable
 									style={[

@@ -45,6 +45,8 @@ const AppContent = () => {
 				useModal={false}
 				showProgressBar={false}
 				config={toastConfig}
+				animationStyle='slide'
+				duration={400}
 			 />
 			</ThemedView>
 		</>

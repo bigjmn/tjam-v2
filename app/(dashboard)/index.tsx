@@ -8,7 +8,7 @@ import { VariantCards } from "../../components/home/VariantCards";
 import ThemedText from "../../components/ui/ThemedText";
 import Spacer from "../../components/ui/Spacer";
 import moment from "moment";
-
+import { ShareTrio } from "../../components/home/ShareTrio";
 const Home = () => {
 	const [refreshKey, setRefreshKey] = useState(0);
 
@@ -23,12 +23,13 @@ const Home = () => {
 
 	return (
 		<ThemedView safe={true} style={styles.container}>
-			<Spacer height={100} />
+			<Spacer height={50} />
 			<ThemedText variant="title">Trio Jam</ThemedText>
 			<ThemedText>A nice Little Word game</ThemedText>
 			<PlayCard key={refreshKey} />
 			<SectionHeader title="Variants" />
 			<VariantCards />
+			<ShareTrio />
 		</ThemedView>
 	);
 };

@@ -83,8 +83,7 @@ function Tile({
 				delay,
 				withTiming(targetX, {
 					duration: SLIDE_DURATION,
-					// easing: Easing.out(Easing.cubic),
-					easing: Easing.linear,
+					easing: Easing.out(Easing.cubic),
 				}),
 			);
 			// opacity.value = withDelay(delay, withTiming(1, { duration: 80 }));

@@ -306,12 +306,13 @@ export const useGame = (vKey?: VariantKey) => {
 			nextTurn();
 			console.log("NEXT TURN TRIGGERED");
 
-			// Wait for getNextBoard to update tiles (500ms) before clearing animation state
+			// Wait for entrance animation to complete before clearing animation state
+			// entrance = 350ms exit-wait + 20ms delay + 280ms slide = ~650ms after nextTurn
 			setTimeout(() => {
 				setIsAnimating(false);
 				setFlippingTileIds(new Set());
 				setPinwheelingTileIds(new Set());
-			}, 550);
+			}, 700);
 		}, 950);
 	};
 

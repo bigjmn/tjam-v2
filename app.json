@@ -3,7 +3,7 @@
 		"scheme": "triojamapp",
 		"name": "triojam",
 		"slug": "triojam",
-		"version": "3.1.0",
+		"version": "3.1.1",
 		"orientation": "portrait",
 		"icon": "./assets/trioicon.png",
 		"userInterfaceStyle": "dark",

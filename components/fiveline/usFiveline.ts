@@ -181,7 +181,7 @@ export const useFiveline = () => {
 			if (newboard.length >= 7) {
 				handleGameEnd();
 			}
-		}, 500);
+		}, 350);
 	};
 
 	const nextTurn = () => {
@@ -213,7 +213,7 @@ export const useFiveline = () => {
 				setIsAnimating(false);
 				setFlippingTileIds(new Set());
 				setPinwheelingTileIds(new Set());
-			}, 550);
+			}, 700);
 		}, 950);
 	};
 

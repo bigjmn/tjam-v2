@@ -8,7 +8,7 @@ const makeSquares = () => {
 	for (let i = 0; i < 3; i++) {
 		squarelist.push({
 			id: `${i}0`,
-			leftPos: 70 * i,
+			leftPos: 70 * i + 70,
 			topPos: 0,
 		});
 	}

@@ -44,31 +44,32 @@ function Tile({
 	const isPressed = useSharedValue(false);
 	const offsetX = useSharedValue(0);
 	const offsetY = useSharedValue(0);
-	const targetX = startx * 70 + 3;
+	const homeOffset = starty === 0 ? 70 : 0;
+	const targetX = startx * 70 + 3 + homeOffset;
 	const targetY = starty * 70 + 3;
 	const translateX = useSharedValue(isNew ? targetX + 380 : targetX);
 	const translateY = useSharedValue(targetY);
 	const sitsOn = useSharedValue(startx.toString() + starty.toString());
-	const { popSound, gearloadSound } = useSfx();
+	const { popSound } = useSfx();
 
 	const rotateY = useSharedValue(0);
 	const pinwheelRotate = useSharedValue(0);
 	const pinwheelScale = useSharedValue(1);
 
-	const SLIDE_DURATION = 520;
+	const SLIDE_DURATION = 280;
 	const FLIP_DURATION = 800;
 
 	const { colors } = useTheme();
 
 	useEffect(() => {
-		gearloadSound();
+		
 		if (isNew && starty === 0) {
-			const delay = 400;
+			const delay = 20;
 			translateX.value = withDelay(
 				delay,
 				withTiming(targetX, {
 					duration: SLIDE_DURATION,
-					easing: Easing.linear,
+					easing: Easing.out(Easing.cubic),
 				}),
 			);
 		}
@@ -350,8 +351,9 @@ export default function FivelineGame() {
 
 const toPosition = ({ x, y }: { x: number; y: number }) => {
 	"worklet";
-	const row = Math.round(x / 70);
 	const col = Math.round(y / 70);
+	const effectiveX = col === 0 ? x - 70 : x;
+	const row = Math.round(effectiveX / 70);
 	return row.toString() + col.toString();
 };
 
@@ -360,7 +362,7 @@ const toTranslation = (p: string) => {
 	const pos = p.split("");
 	const xp = parseInt(pos[0]);
 	const yp = parseInt(pos[1]);
-	return { x: xp * 70 + 3, y: yp * 70 + 3 };
+	return { x: xp * 70 + 3 + (yp === 0 ? 70 : 0), y: yp * 70 + 3 };
 };
 
 const allSquares = () => {

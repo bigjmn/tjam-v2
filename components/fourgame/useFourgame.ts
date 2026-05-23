@@ -187,7 +187,7 @@ export const useFourgame = () => {
 			if (newboard.length >= 18) {
 				handleGameEnd();
 			}
-		}, 500); // Wait for staggered exit animations to complete
+		}, 350); // Wait for exit animations to complete
 	};
 	const nextTurn = () => {
 		setWordNum((w) => (w === null ? 0 : w + 1));
@@ -226,7 +226,7 @@ export const useFourgame = () => {
 				setIsAnimating(false);
 				setFlippingTileIds(new Set());
 				setPinwheelingTileIds(new Set());
-			}, 550);
+			}, 700);
 		}, 950);
 	};
 

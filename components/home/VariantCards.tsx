@@ -28,7 +28,7 @@ const foursDarkSrc = require("../../assets/foursdark.png");
 const fivelineSrc = require("../../assets/fiveline.png");
 const fivelineDarkSrc = require("../../assets/fivelinedark.png");
 
-const DEV_MODE=true
+const DEV_MODE=false
 const imDict = {
 	scrabble: {
 		dark: scrabbleDarkSrc,
@@ -63,7 +63,7 @@ const VARIANTS: VariantCardConfig[] = [
 	{
 		key: "fiveline",
 		name: "1D-o Jam",
-		rules: "Same rules, fewer dimensions baby",
+		rules: "Same rules, fewer dimensions baby. 3, 4, 5 letter words accepted.",
 		unlockLevel: 7,
 		playPath: "/fiveline",
 	},

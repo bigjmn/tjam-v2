@@ -33,6 +33,10 @@ export const usernameNumberTail = (): string => {
 	return `${Math.floor(Math.random() * 1000)}`;
 };
 
+export const isDefaultUsername = (username: string): boolean => {
+	return /^player-[0-9a-z]{5}$/.test(username);
+};
+
 export const generateDefaultUsername = (): string => {
 	const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
 	let randomStr = '';

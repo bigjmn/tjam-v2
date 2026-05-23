@@ -104,6 +104,11 @@ export const useAchievements = () => {
 			if (["A", "E", "I", "O", "U"].every((l) => turnlets.includes(l))) {
 				allAchievements.push("vowelcrusher");
 			}
+			const hCount = turnlets.filter((l) => l === "H").length;
+			const oCount = turnlets.filter((l) => l === "O").length;
+			if (hCount >= 2 && oCount >= 1) {
+				allAchievements.push("addwater");
+			}
 		}
 		if (alphaList.every((l) => allLettersCleared.includes(l))) {
 			allAchievements.push("allmyletters");
@@ -135,6 +140,10 @@ export const useAchievements = () => {
 		}
 		if (adults(turns)){
 			allAchievements.push('adults')
+		}
+		const zCount = allLettersCleared.filter((l) => l === "Z").length;
+		if (zCount >= 3) {
+			allAchievements.push("sleepingsammy");
 		}
 
 		// Check daily word achievement

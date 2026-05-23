@@ -368,6 +368,13 @@ export const noveltyAchievements: NoveltyAchievement[] = [
 		type: "novelty",
 		reward: 6,
 	},
+	{
+		key: "sleepingsammy",
+		name: "Sleeping Sammy",
+		explainer: "Clear 3 Z's in one game",
+		type: "novelty",
+		reward: 6
+	}
 ];
 
 export const legendaryAchievements: LegendaryAchievement[] = [
@@ -435,17 +442,24 @@ export const secretAchievements: SecretAchievement[] = [
 	{
 		key: "papaya",
 		name: "No way, a papaya won!",
-		explainer: "Clear 10 palindromes",
+		explainer: "Clear ten palindromes",
 		type: "secret",
 		reward: 4,
 	},
 	{
 		key: "adults",
 		name: "Adults Only",
-		explainer: "Clear 3 X's in one game",
+		explainer: "Clear three X's in one game",
 		type: "secret",
 		reward: 5,
 	},
+	{
+		key: 'addwater',
+		name: "Just Add Water",
+		explainer: "Clear two H's and one O in one turn",
+		type: "secret",
+		reward: 4
+	}
 ];
 
 export const dailyWordAchievements: DailyWordAchievement[] = [
